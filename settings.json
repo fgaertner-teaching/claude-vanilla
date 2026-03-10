@@ -1,0 +1,85 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/.claude/**)",
+      "Glob(~/.claude/**)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git fetch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git branch *)",
+      "Bash(git stash *)",
+      "Bash(git remote *)",
+      "Bash(git config *)",
+      "Bash(git rm *)",
+      "Bash(wc *)",
+      "Bash(mkdir *)",
+      "Bash(ls *)",
+      "Bash(Rscript *)",
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(uv *)",
+      "Bash(gh *)",
+      "WebSearch(*)",
+      "WebFetch(*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(.netrc)",
+      "Read(*.netrc)",
+      "Read(~/.ssh/id_*)",
+      "Edit(.env)",
+      "Edit(.env.*)",
+      "Edit(*.pem)",
+      "Edit(*.key)",
+      "Edit(credentials*)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/hooks/commit_guard.sh",
+            "timeout": 10
+          }
+        ],
+        "description": "Prompts before git commit — prevents accidental commits"
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/scripts/hooks/pipeline_guard.sh",
+            "timeout": 10
+          }
+        ],
+        "description": "Prompts before editing analysis pipeline scripts directly"
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+# About {YOUR_NAME}
+
+**Git identity:** {your.email@university.edu}
+
+## Position & Institution
+
+<!-- e.g., PhD student at University of X, Post-doc at Y, Junior Professor at Z -->
+
+## Research Area
+
+<!-- Brief description of your research interests and home discipline -->
+<!-- e.g., "Behavioral economics with a focus on financial decision-making" -->
+
+## Methods
+
+<!-- What methods do you typically use? -->
+<!-- e.g., Lab experiments, online experiments (Prolific/MTurk), survey experiments -->
+<!-- e.g., Quasi-experimental methods (DiD, RDD), archival/observational data -->
+<!-- How comfortable are you with formal theory and equations? -->
+
+## Programming
+
+<!-- What languages do you use? R, Python, Stata, MATLAB? -->
+<!-- What's your comfort level? Beginner / intermediate / advanced? -->
+
+## Publication Targets
+
+<!-- What tier of journals are you targeting? -->
+<!-- e.g., "Top field journals in finance (JF, RFS, JFE)" -->
+<!-- e.g., "Good field journals, aiming to build toward top-field" -->
+
+## Co-Authors
+
+<!-- List regular co-authors if relevant for project setup -->
+<!-- e.g., "Dr. Jane Smith (University of Y) — shared projects use branches + PRs" -->

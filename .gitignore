@@ -1,0 +1,43 @@
+# Deny all by default, whitelist explicitly
+*
+
+# Core files
+!.gitignore
+!.gitattributes
+!CLAUDE.md
+!README.md
+!about-me.md.template
+!settings.json
+
+# Rules
+!rules/
+!rules/**/*.md
+
+# Commands
+!commands/
+!commands/**/*.md
+
+# Skills
+!skills/
+!skills/**/
+!skills/**/*.md
+
+# Reference
+!reference/
+!reference/**/*.md
+!reference/**/*.R
+
+# Scripts
+!scripts/
+!scripts/**/*.sh
+!scripts/**/*.py
+!scripts/hooks/
+!scripts/hooks/**/*.sh
+
+# Allow folders to be tracked
+!*/
+
+# Personal files — never commit
+about-me.md
+config_local.sh
+desktop.ini
