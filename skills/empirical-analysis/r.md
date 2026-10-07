@@ -15,9 +15,10 @@ R setup, toolkit and Windows traps for empirical work. Load alongside `SKILL.md`
 - **Run scripts from files, not long `Rscript -e '...'` one-liners.** On Windows a `|` anywhere in
   the `-e` expression, even inside an R string, breaks the call with a misleading "path not found"
   error, because the command line treats it as a pipe.
-- **A script must run top to bottom in a fresh R process** (`Rscript script.R`). Why: interactive
-  sessions carry objects from earlier runs, so a script can "work" only because something left over
-  in memory filled a gap.
+- **A script must run top to bottom in a fresh R process** (`Rscript script.R`, started from the
+  folder that holds `renv.lock`, so renv's `.Rprofile` switches the project library on). Why:
+  interactive sessions carry objects from earlier runs, so a script can "work" only because
+  something left over in memory filled a gap.
 
 ## Project setup with renv
 
@@ -82,8 +83,9 @@ rerun later, or on another computer, with the same results.
 For German Excel (semicolon delimiter, decimal comma):
 
 ```r
-readr::write_csv2(data_final_survey_main, here::here("3_clean_data", "survey_main.csv"))
-readr::write_excel_csv2(...)   # same, plus a byte-order mark: Excel then shows umlauts correctly
+readr::write_excel_csv2(data_final_survey_main, here::here("3_clean_data", "survey_main.csv"))
+                               # with a byte-order mark: Excel then shows umlauts correctly
+readr::write_csv2(...)         # the same without the mark, when only R reads the file
 readr::read_csv2(path)         # reading our own CSVs back
 ```
 

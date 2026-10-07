@@ -32,8 +32,11 @@ They are combined. `/permissions` shows the rules in force and where each comes 
   script passes a `Bash(rm *)` rule. That is why the instruction files say "ask before
   deleting" as well: the rule enforces the usual case, the line covers the rest.
 - **Locking a project folder:** in the project's `.claude/settings.json`,
-  `{"permissions": {"deny": ["Edit(./1_raw_data/**)"]}}` stops Claude's own edits there (not
-  scripts it runs). Check it worked: start a new session and ask Claude to change a file there.
+  `{"permissions": {"deny": ["Edit(./analysis/1_raw_data/**)"]}}` stops Claude's own edits there
+  (not scripts it runs). The path is relative to the folder Claude Code starts in and must match
+  the real folder (`analysis/1_raw_data/` is the `/newproject` layout). Check it worked: start a
+  new session and ask Claude to change a file there. Writing `.claude/settings.json` is itself a
+  protected write: in auto mode a reviewer model decides, so do it in Manual mode.
 
 **What this kit sets:** git and `uv` / `Rscript` commands allowed; deleting asks; reading
 secret files (`.env`, SSH keys), force-pushing, `git reset --hard` and `git clean` denied.

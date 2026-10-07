@@ -15,20 +15,29 @@ try {
     if ($hookInput.cwd) { $projectDir = $hookInput.cwd }
 } catch {}
 
-# Show at most this many lines per file, so a long file cannot flood the context.
+# Show at most this many lines per file, and keep the whole output short: Claude Code passes a
+# start hook's output whole only up to 10,000 characters (beyond that, Claude gets a short
+# preview). The files found share the character budget equally.
 $maxLines = 80
+$totalCharBudget = 8500
 
-# Prints a file's first lines under a heading. It returns nothing on purpose: in PowerShell
-# everything a function outputs becomes its return value, so a "return $true" here would
-# swallow the printed lines into the caller's variable instead of showing them.
-function Show-ProjectFile([string]$relativePath, [string]$heading) {
+# Prints a file's first lines under a heading, within its share of the budget. It returns
+# nothing on purpose: in PowerShell everything a function outputs becomes its return value, so
+# a "return $true" here would swallow the printed lines into the caller's variable.
+function Show-ProjectFile([string]$relativePath, [string]$heading, [int]$charBudget) {
     $path = Join-Path $projectDir $relativePath
-    if (-not (Test-Path -LiteralPath $path)) { return }
     $lines = @(Get-Content -LiteralPath $path -Encoding UTF8)
     Write-Output "=== $heading ($relativePath) ==="
-    $lines | Select-Object -First $maxLines | ForEach-Object { Write-Output $_ }
-    if ($lines.Count -gt $maxLines) {
-        Write-Output "[... $($lines.Count - $maxLines) more lines: read the file for the rest]"
+    $shown = 0
+    $charsLeft = $charBudget
+    foreach ($line in ($lines | Select-Object -First $maxLines)) {
+        if ($charsLeft - ($line.Length + 1) -lt 0) { break }
+        Write-Output $line
+        $charsLeft -= ($line.Length + 1)
+        $shown++
+    }
+    if ($shown -lt $lines.Count) {
+        Write-Output "[... $($lines.Count - $shown) more lines: read the file for the rest]"
     }
     Write-Output ""
 }
@@ -36,15 +45,27 @@ function Show-ProjectFile([string]$relativePath, [string]$heading) {
 Write-Output "Session start: $(Get-Date -Format 'yyyy-MM-dd HH:mm (dddd)'), folder: $projectDir"
 Write-Output ""
 
-# A panic dump means the last session ended abruptly: show it first.
-Show-ProjectFile 'claude\panic_dump.md' 'PANIC DUMP from an interrupted session - surface this to the user first'
-
-# next_steps.md, or one per co-author (next_steps_<initials>.md, reference/collaboration.md).
+# The files to show, in order. A panic dump means the last session ended abruptly, so it comes
+# first; then next_steps.md, or one per co-author (next_steps_<initials>.md,
+# reference/collaboration.md); then the open issues.
+$filesToShow = @()
+if (Test-Path -LiteralPath (Join-Path $projectDir 'claude\panic_dump.md')) {
+    $filesToShow += ,@('claude\panic_dump.md', 'PANIC DUMP from an interrupted session - surface this to the user first')
+}
 $nextStepsFiles = @(Get-ChildItem -LiteralPath (Join-Path $projectDir 'claude') -Filter 'next_steps*.md' -File)
 foreach ($nextStepsFile in $nextStepsFiles) {
-    Show-ProjectFile ('claude\' + $nextStepsFile.Name) 'Where the project stands'
+    $filesToShow += ,@(('claude\' + $nextStepsFile.Name), 'Where the project stands')
 }
-Show-ProjectFile 'claude\OPEN_ISSUES.md' 'Open issues'
+if (Test-Path -LiteralPath (Join-Path $projectDir 'claude\OPEN_ISSUES.md')) {
+    $filesToShow += ,@('claude\OPEN_ISSUES.md', 'Open issues')
+}
+
+if ($filesToShow.Count -gt 0) {
+    $charsPerFile = [math]::Floor($totalCharBudget / $filesToShow.Count)
+    foreach ($fileToShow in $filesToShow) {
+        Show-ProjectFile $fileToShow[0] $fileToShow[1] $charsPerFile
+    }
+}
 $hasNextSteps = $nextStepsFiles.Count -gt 0
 $hasIssues = Test-Path -LiteralPath (Join-Path $projectDir 'claude\OPEN_ISSUES.md')
 if (-not ($hasNextSteps -or $hasIssues)) {

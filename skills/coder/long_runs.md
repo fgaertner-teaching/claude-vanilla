@@ -101,7 +101,7 @@ detached, in its own process:
 
 ```powershell
 Start-Process -FilePath "C:/Program Files/R/R-4.5.1/bin/Rscript.exe" `
-  -ArgumentList "run_all.R" -WorkingDirectory "C:/Users/me/projects/my_study" `
+  -ArgumentList "run_all.R" -WorkingDirectory "C:/Users/me/projects/my_study/analysis" `
   -RedirectStandardOutput "run.log" -RedirectStandardError "run.err"
 ```
 

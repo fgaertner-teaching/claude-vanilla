@@ -34,9 +34,14 @@ Your `~/.claude` folder (on Windows `C:\Users\<you>\.claude`) already exists onc
 has run, and may already hold settings of yours. So do not copy the kit over it. Ask Claude to
 merge it in:
 
-1. Download the kit (on GitHub: Code → Download ZIP) and unzip it anywhere, for example into
+1. Get the kit as a folder: on GitHub, Code → Download ZIP (if you have access to the
+   repository), or the zip from whoever gave it to you. Unzip it anywhere, for example into
    `Downloads`.
-2. Open a terminal in the unzipped folder and start `claude`.
+2. Open a terminal in the unzipped folder and start `claude`. **Switch to Manual mode**
+   (`Shift+Tab` until the mode shown under the input box reads Manual, or `default`). *Why:*
+   `~/.claude` is a protected folder. In Manual mode Claude Code asks you before each write
+   there; in auto mode a reviewer model decides instead, and it may refuse changes to permission
+   settings, leaving the install half done.
 3. Paste this request:
 
    > Install this starter kit into my global Claude Code folder, ~/.claude. Copy CLAUDE.md,
@@ -47,12 +52,19 @@ merge it in:
    > before saving it. Do not copy README.md, .git or .gitignore. Then interview me, one
    > question at a time, to create ~/.claude/about-me.md from the template.
 
-4. Approve the file changes as Claude asks. Writing to `~/.claude` needs your approval.
-5. Close Claude Code and start it again in any folder. Check three things:
+4. Approve the file changes as Claude asks, and read the merged `settings.json` before you
+   approve it.
+5. Close Claude Code and start it again in any folder. Check five things:
    - Two lines under the input box show the folder, the model and how full the context is.
    - `/context` lists `CLAUDE.md`, `about-me.md` and `rules/rules.md`.
+   - `/permissions` lists the kit's rules: under Ask, `Bash(rm *)` and `PowerShell(Remove-Item *)`;
+     under Deny, the `git … --force` and `git … --hard` rules.
+   - `/hooks` lists one `SessionStart` hook.
    - Ask *"What do you know about me, and which skills and commands do you have?"* The answer
      should come from your profile and name the kit's skills.
+
+   If a check fails, ask Claude to compare `~/.claude/settings.json` with the kit's
+   `settings.json` and show you what is missing.
 
 **By hand instead:** copy the files listed in step 3 into `~/.claude` (merge folders, keep
 your own files), copy `about-me.md.template` to `about-me.md` and fill it in, and add the

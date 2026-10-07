@@ -9,9 +9,9 @@ Conventions for files, data, git, project tracking and code. Every project, ever
 - **Numbers come from scripts, never typed in by hand.** A number in a table, a paper or a
   slide must be produced by a script that runs from the raw data. *Why:* otherwise next year's
   update, or a referee's question, cannot be answered by re-running it.
-- **Ask before deleting anything.** The permission settings make Claude Code ask for every
-  delete command. Beyond that, never delete through a script or a roundabout command, and never
-  empty a file to get rid of it. *Why:* `/rewind` undoes Claude's file edits, not a deleted file, and
+- **Ask before deleting anything.** The permission settings make Claude Code ask before the usual
+  delete commands (`rm`, `Remove-Item` and its aliases). They match the command's text, so never
+  delete through a script, a roundabout command or by emptying a file: ask in words instead. *Why:* `/rewind` undoes Claude's file edits, not a deleted file, and
   outside git nothing brings it back.
 - **No git repository inside a cloud-synced folder** (OneDrive, Dropbox, Google Drive,
   Nextcloud). On Windows, `Documents` and `Desktop` are often synced to OneDrive. *Why:* the sync
@@ -53,14 +53,16 @@ Conventions for files, data, git, project tracking and code. Every project, ever
 - **Push at the end of a session** if the repository has a remote. *Why:* a commit only on this
   laptop dies with it.
 - **Explain each git command in plain words** the first time it comes up.
-- Force-pushing, `git reset --hard` and `git clean` are blocked in the settings. If one seems
-  necessary, explain why and let me run it.
+- Force-pushing, `git reset --hard` and `git clean` are blocked in the settings in their usual
+  forms. Never reach for another form: if one seems necessary, explain why and let me run it.
 
 ## Code (you write it, I check what it produces)
 
 - **Python through `uv`,** one environment per project (`uv init`, `uv add <package>`,
   `uv run script.py`). **R packages through `renv`;** run R scripts as `Rscript x.R` from the
-  project folder, so renv switches on the project's packages (`--vanilla` would skip that).
+  folder that holds `renv.lock` (`analysis/` in the `/newproject` layout). R reads renv's
+  `.Rprofile` only from the folder it starts in, so from anywhere else, or with `--vanilla`,
+  the script runs on the wrong packages. Check once: `.libPaths()` lists the project library first.
 - **Every script starts with a short header:** what it does, what it reads, what it writes.
 - **Check after every data step:** row counts after a merge, missing values in key columns,
   value ranges. Stop with a clear error rather than continue with a wrong result.

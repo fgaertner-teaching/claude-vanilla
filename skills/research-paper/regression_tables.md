@@ -32,9 +32,9 @@ modelsummary::modelsummary(
   notes    = "OLS. Standard errors clustered at the participant level in parentheses.",
   output   = "tinytable"
 ) |>
-  tinytable::save_tt("5_tables/tab_fund_choice.tex", overwrite = TRUE)
+  tinytable::save_tt(here::here("5_tables", "tab_fund_choice.tex"), overwrite = TRUE)
 
-finish_table("5_tables/tab_fund_choice.tex")   # label + width, see below
+finish_table(here::here("5_tables", "tab_fund_choice.tex"))   # label + width, see below
 ```
 
 ### The arguments that matter
@@ -88,7 +88,7 @@ finish_table("5_tables/tab_fund_choice.tex")   # label + width, see below
   ```r
   modelsummary::modelsummary(..., output = "tinytable") |>
     tinytable::group_tt(j = list("Saving" = 2:3, "Borrowing" = 4:5)) |>
-    tinytable::save_tt("5_tables/tab_name.tex", overwrite = TRUE)
+    tinytable::save_tt(here::here("5_tables", "tab_name.tex"), overwrite = TRUE)
   ```
 
 ### Post-processing: label and width

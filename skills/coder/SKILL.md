@@ -112,7 +112,7 @@ of macros that the paper `\input`s, so a re-run updates the paper:
 
 ```r
 writeLines(sprintf("\\newcommand{\\nobs}{%s}", format(n_obs, big.mark = ",")),
-           here::here("output", "numbers.tex"))
+           here::here("5_tables", "numbers.tex"))
 ```
 
 ## 3. Re-runnable from raw data
@@ -120,11 +120,12 @@ writeLines(sprintf("\\newcommand{\\nobs}{%s}", format(n_obs, big.mark = ",")),
 **The test:** in a fresh R or Python session, with only the raw data and the scripts, one command
 reproduces every table, figure and number. Anything else is a result nobody can re-create.
 
-- **One master script** runs the pipeline in order (`run_all.R` / `main.py`; template:
-  `reference/template_main_file.R`). Each script checks that its inputs exist and stops with a
-  clear message if not.
-- **Run it fresh**, from the project root — `Rscript run_all.R`, `uv run python main.py` — not in
-  the console session that already holds objects the script no longer creates.
+- **One main file** runs the pipeline in order (in R, from the template
+  `reference/template_main_file.R`; in Python, `main.py`). Each script checks that its inputs
+  exist and stops with a clear message if not.
+- **Run it fresh**, not in the console session that already holds objects the script no longer
+  creates: `Rscript <main file>` from the folder that holds `renv.lock` (`analysis/` in the
+  `/newproject` layout; see `windows.md`), `uv run python main.py` from the project root.
 - **Seed every random step** (bootstrap, simulation, sampling, train/test splits): `set.seed()`,
   `numpy.random.default_rng(seed)`.
 - **After a refactor, rerun and compare outputs** with the last good run. Reordering

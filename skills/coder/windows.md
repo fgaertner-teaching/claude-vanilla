@@ -94,7 +94,7 @@ path.write_bytes(raw.replace(old.encode("utf-8"), new.encode("utf-8")))
 - **The command carries its own target.** Use absolute paths and `git -C "<repo>" ...`, not
   `cd <repo> && ...`. *Why:* the working directory can be reset between calls, so a later command
   may run in another folder than you think; and `cd ... &&` compounds make Claude Code ask for
-  permission each time.
+  permission each time. (One exception: R in an renv project, below.)
 - **Quote every path.** Spaces and parentheses are common (`C:/Users/Jane Doe/...`).
 - **PowerShell's .NET calls ignore `Set-Location`:** `[IO.File]::ReadAllText("data.csv")` resolves
   against the folder the process started in, not the one you moved to. Pass absolute paths.
@@ -116,8 +116,11 @@ Setup and toolkits: `empirical-analysis/python.md` and `r.md`. What they do not 
   guessing the version; several versions can sit side by side.
 - **`Rscript --vanilla` skips the project's `.Rprofile`** — and in an renv project, `.Rprofile` is
   what switches renv on. A `--vanilla` run then uses whatever packages are installed system-wide,
-  not the project's recorded versions. In an renv project, run `Rscript script.R` from the project
-  root.
+  not the project's recorded versions. R reads `.Rprofile` only from the folder it starts in, so in
+  an renv project run `Rscript script.R` from the folder that holds `renv.lock` (`analysis/` in
+  the `/newproject` layout). This is the one exception to "the command carries its own target":
+  change into that folder first and approve the prompt it may bring. Check once that
+  `Rscript -e ".libPaths()"` run from there lists the project library first.
 - **R's `system2()` quotes the command itself.** Quote only the arguments (`shQuote()`); quoting
   the command too fails with doubled quotes.
 - **Write code into a script file and run it** — no long `python -c "..."`, `Rscript -e '...'` or

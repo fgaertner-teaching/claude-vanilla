@@ -145,8 +145,8 @@ sync_to_paper <- function(source_dir, dest_subdir) {
 }
 
 # at the end of the table and figure export scripts:
-sync_to_paper("5_tables", "tables")
-sync_to_paper("6_plots",  "figures")
+sync_to_paper(here::here("5_tables"), "tables")
+sync_to_paper(here::here("6_plots"),  "figures")
 ```
 
 The Dropbox folder's location can also be read from Dropbox's own settings file
