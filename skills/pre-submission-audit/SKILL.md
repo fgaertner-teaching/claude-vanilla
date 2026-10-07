@@ -1,128 +1,171 @@
-# Pre-Submission Audit Skill
+---
+name: pre-submission-audit
+description: "Final quality-control audit of a complete submission package before it goes to a journal: cross-references, table and figure numbers, sample sizes, variable names, citations, paper versus appendix versus response letter, a last language pass, the files to upload, and anonymisation for blind review; plus a check against a named journal's author guidelines when the user supplies them. ALWAYS use this skill when the user is about to submit or resubmit a manuscript, or is closing the last items before a submission deadline; do not call a package ready to submit without offering it. Not for a draft still being written (use auditor for structure, author for prose) and not a judgment of the science."
+effort: max
+---
 
-**Load when:** Preparing to submit or resubmit a manuscript to a journal — run this audit on the full submission package (paper, online appendix, response letter).
-**Skip when:** Working on analysis, writing, or code — this is a final quality-control step, not a mid-project tool.
+# Skill: Pre-Submission Audit
+
+**Purpose:** Be the last line of defence before a manuscript leaves: find every inconsistency,
+dangling reference, missing file and identity leak while it can still be fixed.
+**Load when:** a paper, appendix and (for a revision) response letter are about to be submitted.
+**Skip when:** the text is still being drafted or restructured; this is a final step.
+**Modifies behavior:** exhaustive, section-by-section checking with every category explicitly
+confirmed; nothing passes silently.
+
+**What this checks, and what it does not.** It checks the package **against itself**:
+consistency, completeness, production quality. It needs no outside input. It does not judge
+whether the science is good (use `auditor` or a colleague), it does not rewrite prose (findings
+about wording go to `author`), and it does not know a journal's rules unless the user supplies
+them (§ 3).
 
 ---
 
-## How to use
+## How to run it
 
-Attach all documents (main paper, online appendix, response letter if applicable) and send the prompt below. Works best with a large-context model (Claude Opus or equivalent). Expect 5–15 minutes for a full package.
+1. **Collect the package:** main paper, online appendix, response letter and cover letter (for a
+   revision), and the analysis code if available. Prefer the source files (`.tex`, `.bib`) plus
+   the compiled PDFs: the PDF shows what reviewers see, the source shows what the PDF hides.
+2. **Run the consistency audit (§ 1)**, ideally in a fresh subagent given only the package and
+   the prompt below. *Why:* a context that helped write the paper reads what it meant, not what
+   is on the page. Expect it to take a while for a full package; that is the point.
+3. **Run the language pass (§ 2).**
+4. **If a target journal is named, run the guidelines check (§ 3).**
+5. **Assemble the upload (§ 4)**, including the anonymisation check for blind review.
+6. **Report** one list sorted by severity, and let the user decide what to fix. Re-check every
+   fix in the compiled PDF.
 
-This audits the *manuscript* (cross-references, consistency, production quality). If you also have a code audit workflow, run both before submission.
+## § 1 The consistency audit (prompt)
 
----
+> You are a meticulous referee, technical editor and production manager combined. Audit all
+> attached documents (main paper, online appendix, response letter, if provided) line by line
+> as one interconnected submission package.
+>
+> Do not summarise the paper. Do not assume correctness. Do not skip any section, table,
+> figure, footnote or appendix. Work page by page. For each issue, quote the exact text or
+> element, give its location (page, section, table, column, row) and say precisely why it is a
+> problem. Mark severity: 🔴 Major (factual errors, contradictions, wrong references, missing
+> elements), 🟡 Medium (ambiguities, inconsistencies that could confuse), 🟢 Minor (typos,
+> formatting). Where you are unsure, write "Needs author verification" instead of passing over
+> it. When a category is fully checked and clean, write "Checked — no issues detected", so
+> nothing is silently skipped. Process the main paper, then the appendix, then the response
+> letter, then check across documents.
+>
+> **1. Cross-references and citations.** Every table, figure, equation, section and appendix
+> referenced in the text exists and is described correctly (column, sign, magnitude,
+> significance). Every table and figure is referenced at least once. Flag vague references ("the
+> table above"). Every citation is in the reference list and every listed reference is cited;
+> formatting is consistent (et al., "and" versus "&"); flag "forthcoming" or working-paper
+> entries that may now be published.
+>
+> **2. Tables (all of them).** Plausible values (shares 0–100, correlations −1 to 1, R² 0 to 1,
+> N a positive integer). N consistent within and across tables and with the text. Stars defined
+> and identical across tables. Standard errors or t-statistics labelled consistently. Consistent
+> decimals. Sequential numbering, consistent appendix scheme, tables in order of first
+> reference. Notes explain every symbol and abbreviation and do not contradict the text.
+>
+> **3. Figures (all of them).** Sequential numbering; captions match content; axis labels and
+> legends present and correct; text claims about figures match what they show.
+>
+> **4. Variables.** List every variable mentioned anywhere, where it is defined and where it is
+> used. Flag undefined or unused variables, renaming between sections, notation drift ("ROA"
+> versus "Roa"), and an abbreviation used before it is introduced. If there is a variable
+> definitions table, check it covers every variable in the regression tables.
+>
+> **5. Sample and data.** Sample period, sample size, subsamples (do they add up?), data sources
+> and filters described the same way everywhere.
+>
+> **6. Methods.** The model in the text matches the equation; controls, fixed effects ("Firm FE:
+> Yes") and clustering in the text match the tables and their notes; every robustness test
+> described in the text appears in a table, and vice versa.
+>
+> **7. Structure and formatting.** Section numbering sequential; the roadmap paragraph matches
+> the actual sections; footnotes sequential and not contradicting the text, with no critical
+> information hidden in a footnote; consistent number formats, abbreviations ("e.g.," versus
+> "for example"), fonts; all brackets and quotation marks closed.
+>
+> **8. Across documents.** Paper ↔ appendix: every reference points to an existing element,
+> every appendix element is referenced, definitions and results agree. Paper ↔ response letter:
+> every promised change is actually in the paper, with correct table, figure and section
+> numbers; new analyses are numbered, referenced and explained. Appendix ↔ response letter:
+> every new appendix item mentioned exists.
+>
+> **9. Code ↔ output (if code is attached).** Reported coefficients, standard errors and
+> significance match what the code produces; variable names and sample construction (filters,
+> exclusions, dates) match the paper; flag any number in the paper that no code output produces.
+>
+> **10. Common slips.** Table references off by one after reordering; a paragraph describing
+> Table 3 copied from Table 2's and not updated; stars in the text that differ from the table;
+> rounding that differs between text and table; an unstated dependent variable; "Table A3" in the
+> text but "Table A.3" in the appendix.
+>
+> **Output:** findings grouped under the ten headings above, then a summary table (Issue #,
+> Location, Category, Severity, Description) sorted by severity. Work slowly; completeness matters
+> more than speed. When in doubt, flag it.
 
-## Prompt
+*(Adapted from a prompt shared publicly by a researcher, 2026.)*
 
-You are acting as a meticulous academic referee, technical editor, and production manager combined. Your task is to perform an exhaustive, line-by-line consistency and accuracy audit of all attached documents (the main paper, the response letter to the editor/reviewers, and the online appendix, if provided). These documents form a single submission package and must be treated as an interconnected whole.
+## § 2 The language pass
 
-Do not summarize the paper. Do not assume correctness. Do not skip any section, table, figure, footnote, or appendix. Treat this as a formal, pre-submission quality-control review as if you were the last line of defense before the manuscript goes to the journal. Proceed systematically and explicitly document every issue you find, no matter how minor.
+Walk the whole text once more for language, as one would for a purely human-written manuscript:
+load `author`, read its `diagnostics.md`, and run the full catalogue over the complete document
+(this is the one time the whole document, not only the changed parts, gets read). Report the
+findings as a separate group: wording is the authors' call, and a flagged pattern can be
+legitimate (see the false alarms in `diagnostics.md` § 7). Also check: no `\claude{}` wrappers,
+`\todo` notes, comments-as-notes or draft markers left in the rendered PDF.
 
-### General instructions
+## § 3 Checking against a journal's author guidelines
 
-- Work through each document page by page, paragraph by paragraph.
-- When you find an issue, quote the exact text or element and state precisely why it is problematic.
-- Distinguish between: 🔴 Major issues (factual errors, contradictions, wrong references, missing elements), 🟡 Medium issues (ambiguities, inconsistencies that could confuse readers), 🟢 Minor issues (typos, formatting inconsistencies, stylistic irregularities).
-- If a category has been fully checked and no problems were found, explicitly confirm this so I know nothing was skipped.
-- If you are uncertain about something, flag it as "Needs author verification" rather than silently passing over it.
-- Process all documents in sequence: first the main paper, then the online appendix, then the response letter — and finally perform cross-document consistency checks.
+Only with the guidelines in hand. **Never state a journal's requirement from memory**: limits and
+styles change, differ between journals of one publisher and between article types, and a
+plausible half-remembered rule ("abstracts are capped at 250 words") reads exactly like a
+checked one.
 
-### 1. Cross-reference and citation audit
+- **Inputs:** the guidelines text (pasted, saved, a PDF, or a page Claude can actually fetch),
+  the article type (research article, short paper, registered report), and the stage (first
+  submission or revision; many journals accept any format at first submission).
+- **Every rule checked is quoted from the guidelines** next to the finding.
+- **Silence is reported as silence:** if the guidelines say nothing about, say, a funding
+  statement, report `not specified`, not a violation.
+- If the guidelines cannot be obtained, do not run this part; say what is needed.
+- Conformance predicts nothing about acceptance; never imply it does.
 
-**1a. Tables** — Verify every table referenced in the text exists and is correctly described (correct column, sign, magnitude, significance). Every table must be referenced at least once. Flag vague references (e.g., "as shown in the table above").
+```
+# WRONG — sounds checked, is not
+Abstract is 261 words; most journals cap abstracts at 250.
+# RIGHT — quoted and traceable
+Abstract is 261 words; limit is 200: "The abstract should not exceed 200 words." (Guide for Authors, 2.3)
+```
 
-**1b. Figures** — Same checks as tables. Verify axis labels, legends, and visual content match what the text claims.
+## § 4 Assembling the upload
 
-**1c. Equations** — Verify every equation number referenced exists. Check that text descriptions match actual equation content.
+**Bibliography.** If the journal takes LaTeX source, upload the `.bib` **and** the `.bbl` from
+the same compile that produced the submitted PDF. The `.bbl` is the reference list as rendered
+and proofread; the `.bib` lets the publisher's system recompile. A `.bbl` older than its `.tex`
+is stale and must not ship. Check that the name in `\bibliography{}` / `\addbibresource{}`
+matches the uploaded file name. Strip private fields (`abstract`, `keywords`, `comment`, file
+paths) from the shipped `.bib`; uncited entries are harmless.
 
-**1d. Sections, appendices, supplementary materials** — Verify all cross-references to sections, appendices, and footnotes are accurate.
+**Blind review: check every file that ships, not only the PDF.**
 
-**1e. Bibliographic references** — Every citation must appear in the reference list and vice versa. Flag orphan references. Check formatting consistency (author names, year, et al. rules, ampersand vs. "and"). Flag "forthcoming" or "working paper" entries that may now be published.
+- **The `.tex` source:** authors often keep the author block, affiliations, e-mails and the
+  funding acknowledgement **commented out** for later. Comments do not render, so a check of the
+  PDF says nothing about them, and source uploads carry them to the reviewers. Remove them from
+  the **shipping copy only**; the working file needs them back at acceptance.
+- **The PDF's metadata** (author and title fields set by `hyperref`'s `pdfauthor`, or by the
+  editor that produced it) and file names.
+- **The text:** self-citations written in the first person ("as we show in Smith 2024"),
+  acknowledgements, funder and grant numbers, pre-registration links that name the authors,
+  institution names.
+- **The `.bib`:** entries for the authors' own pre-registration or working papers that identify
+  them.
+- Search every shipped file for each author's surname, given name, institution, e-mail domain
+  and funder, in plain and accented spellings (`Müller`, `M{\"u}ller`, `Mueller`).
 
-### 2. Table audit (all tables without exception)
+**Last checks.** Journal name, editor name and manuscript number are right in the letters; the
+files are named as the journal asks; the uploaded PDF is the one just compiled.
 
-For every table in the main paper and online appendix:
+## Improving this skill
 
-**2a. Internal consistency** — Check that numbers are plausible (percentages 0–100, correlations –1 to 1, N is a positive integer, R² between 0 and 1). Verify N is consistent within and across tables and with what the text states. Check that significance stars are defined and consistent across all tables. Verify standard errors / t-statistics / z-statistics are consistently formatted and labeled. Check decimal place consistency.
-
-**2b. Numbering and ordering** — Sequential, unique, no gaps. Appendix tables follow a consistent scheme. Tables appear in order of first reference.
-
-**2c. Table notes** — Every symbol, abbreviation, and notation explained. Notes do not contradict text or other tables. Sample, time period, and methodology descriptions consistent with text.
-
-**2d. Alignment with text** — Verify every claim about a table: correct sign, magnitude, significance level, column, panel.
-
-### 3. Figure audit (all figures without exception)
-
-Sequential numbering. Every figure has a caption that accurately describes content. Axis labels present and correct. Legends match data series. Text claims about figures are visually consistent.
-
-### 4. Variable definitions and labels
-
-**4a. Variable inventory** — Compile a complete list of all variables mentioned anywhere (text, tables, figures, appendices, footnotes). Record where each is defined and all locations where it appears.
-
-**4b. Consistency** — Every variable defined at least once. Names, abbreviations, and labels identical across all sections — no silent renaming, no notation drift (e.g., "ROA" vs. "Roa"), no switching between full name and abbreviation without establishing equivalence. Flag undefined variables and defined-but-unused variables. If a variable definitions table exists, verify it covers all variables used in regression tables.
-
-### 5. Sample and data consistency
-
-Verify the stated sample period is used consistently throughout. Check that stated sample size is consistent across text, tables, and notes. Verify subsample descriptions and sizes are consistent. Check data source descriptions for consistency. Verify sample filters are described consistently and resulting sample sizes make sense.
-
-### 6. Methodology and econometric consistency
-
-Verify the empirical model in the text matches what is shown in equation form. Check that control variables in the text match those in the tables. Verify fixed effects described in the text match what is reported in table rows (e.g., "Industry FE: Yes"). Check that standard error clustering is stated consistently in all relevant table notes. Verify robustness tests described in the text appear in the tables and vice versa.
-
-### 7. Structural and formatting checks
-
-**7a. Section structure** — Sequential numbering, no gaps or duplicates. "Roadmap" paragraph matches actual section structure.
-
-**7b. Footnotes** — Sequential, unique. Flag footnotes containing critical information that should be in the main text. Footnotes do not contradict main text.
-
-**7c. Formatting** — Consistent fonts, bold, italics in tables and text. Consistent number formatting (thousands separator, decimal separator). Consistent abbreviations (e.g., "e.g.," vs. "for example"). All parenthetical asides, quotation marks, and brackets properly closed.
-
-### 8. Cross-document consistency (critical)
-
-**8a. Main paper ↔ Online appendix** — Every reference from the main paper to the appendix points to an element that exists. Every appendix element is referenced from the main paper. Variable definitions, sample descriptions, and methodology are consistent. Results discussed in both documents are consistent.
-
-**8b. Main paper ↔ Response letter** — Every change promised in the response letter is reflected in the paper. Every table/figure/section reference in the response letter is correct. Flag unimplemented promises. Check that new analyses added in response to reviewers are properly integrated (numbered, referenced, noted).
-
-**8c. Online appendix ↔ Response letter** — Every new appendix item referenced in the response letter exists in the appendix.
-
-### 9. Code-to-output consistency (if analysis code is provided)
-
-If Python or R scripts are provided alongside the manuscript:
-
-- Verify that reported coefficients, standard errors, and significance levels in the tables match what the code actually produces.
-- Check that variable names in the code match those defined and used in the paper.
-- Verify that sample construction in the code (filters, exclusions, date ranges) matches the description in the paper.
-- Check that any manually reported summary statistics match what the code would produce.
-- Flag any hardcoded numbers in the paper that cannot be traced to a code output.
-
-### 10. Common pitfalls checklist
-
-Specifically check for:
-
-- Table references off by one (very common after reordering tables during revision)
-- Copy-paste errors where a paragraph describes Table 3 but was copied from the description of Table 2 and not updated
-- Significance levels in text that don't match the stars in the table
-- Sample sizes that don't add up (subsamples should sum to full sample)
-- Control variables listed in text that don't appear in the table, or vice versa
-- Inconsistent rounding (e.g., "0.034" in text but "0.0341" in table)
-- Orphan references (cited but missing from reference list, or in list but never cited)
-- Tables where the dependent variable is not clearly stated
-- Appendix items referenced with wrong numbering scheme (e.g., "Table A3" in text but "Table A.3" in appendix)
-- "Forthcoming" references that are now published
-
-### Output format
-
-Organize findings into clearly labeled sections following the structure above (Sections 1–10). Within each section:
-- Quote or precisely describe the problematic element with its exact location (page, section, table, column, row).
-- Explain why it is an issue.
-- Mark severity: 🔴 Major / 🟡 Medium / 🟢 Minor.
-- If no issue is found in a category, explicitly state: "Checked — no issues detected."
-
-At the end, provide a summary table with columns: Issue #, Location, Category, Severity, Description. Sort by severity (major first).
-
-Work slowly and carefully. Precision and completeness are more important than speed. When in doubt, flag it.
-
----
-
-*Prompt source: [LinkedIn post](https://www.linkedin.com/posts/activity-10-prompt-for-consistency-checks-before-journal-re-submissions) by an anonymous researcher, shared Feb 2026. Adapted for this workflow: STATA references replaced with Python/R; Section 9 reframed for code-to-output consistency.*
+When something slips through to the journal or a referee report, add the check that would have
+caught it to the right section here.

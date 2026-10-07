@@ -27,8 +27,13 @@
 !reference/**/*.md
 !reference/**/*.R
 
-# Scripts
+# Agents
+!agents/
+!agents/**/*.md
+
+# Scripts (the hook and status line are PowerShell)
 !scripts/
+!scripts/**/*.ps1
 !scripts/**/*.sh
 !scripts/**/*.py
 !scripts/hooks/

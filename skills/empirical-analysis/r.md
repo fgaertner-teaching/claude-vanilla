@@ -1,62 +1,144 @@
-# Sub-skill: R (Empirical Analysis)
+# R for Empirical Analysis
 
-**Load when:** managing R packages, setting up renv, or debugging R environment issues.
-**Skip when:** the R environment is already configured and the task is analysis or output.
+**Load when:** writing or running R code, setting up or restoring `renv`, a package will not install or compile, or exporting results from R.
+**Skip when:** the task is in Python, or is pure interpretation with no R code to write or run.
 
-R-specific setup and toolkit for empirical work. Load alongside `empirical-analysis/SKILL.md`.
-
----
-
-## Project Setup
-
-- Use `renv` for dependency management — on a **new project**, run `update.packages(ask = FALSE)` before `renv::init()` so the lock file captures current package versions. Then `renv::init()` at project start, `renv::snapshot()` after installing packages.
-- Commit `renv.lock` and `renv/activate.R`; never commit `renv/library/`
-- **Before suggesting code that uses a package, check `renv.lock` to verify it is recorded.** If it is missing, flag this explicitly and suggest `renv::install("package")` + `renv::snapshot()` before the user runs the code. Do not assume a package is available just because it is installed globally.
-- Avoid deprecated packages: prefer `dplyr` over `plyr`, `readr` over `read.csv`, `tidyr` over `reshape2`
-- When an existing project loads a deprecated package, namespace-qualify calls to avoid conflicts
+R setup, toolkit and Windows traps for empirical work. Load alongside `SKILL.md`.
 
 ---
 
-## Working Directory and Output Paths
+## Running R from Claude Code on Windows
 
-- **Never use bare relative paths for output saves.** Paths like `"5_tables/tab.tex"` resolve relative to the current WD — which can change during pipeline execution (e.g. an orchestrator script temporarily `setwd()`s into a subdirectory so `source()` calls resolve). After WD is restored, bare paths silently point to the wrong location.
-- **Use `here::here()` for all output paths.** It anchors to the `.here` sentinel file (placed in the project root or analysis root) and always returns an absolute path regardless of WD. Example: `here::here("study_1", "pilot", "5_tables", "tab.tex")`.
-- **Wrap in a phase-level helper** to avoid repeating the root prefix everywhere:
-  ```r
-  pilot_path <- function(...) here::here("study_1", "pilot", ...)
-  ```
-  Define this helper in both the orchestrator script (e.g. `run_pilot.R`) and the phase setup scripts (e.g. `4_0_Tables_Setup.R`, `5_0_Plots_Setup.R`). The orchestrator definition covers pipeline runs; the setup-script definitions cover standalone script execution (Mode 3 / interactive re-runs).
-- **`source()` calls are different** — they do need WD to be in the right place, since R resolves `source("4_scripts/script.R")` relative to WD. Keep the WD switch for sourcing; use `here::here()` for everything else.
+- **`Rscript` is usually not on PATH.** The R installer does not add it. Find the installed
+  version under `C:\Program Files\R\` and call `"C:/Program Files/R/R-<version>/bin/Rscript.exe"`
+  by full path, or ask the user to add that `bin` folder to PATH once.
+- **Run scripts from files, not long `Rscript -e '...'` one-liners.** On Windows a `|` anywhere in
+  the `-e` expression, even inside an R string, breaks the call with a misleading "path not found"
+  error, because the command line treats it as a pipe.
+- **A script must run top to bottom in a fresh R process** (`Rscript script.R`). Why: interactive
+  sessions carry objects from earlier runs, so a script can "work" only because something left over
+  in memory filled a gap.
+
+## Project setup with renv
+
+`renv` records the exact package versions a project uses (in `renv.lock`), so the analysis can be
+rerun later, or on another computer, with the same results.
+
+1. **Windows needs Rtools** (cran.r-project.org/bin/windows/Rtools/, the version matching the R
+   version). Without it, any package that must be compiled from source fails to install.
+2. On a new project: `update.packages(ask = FALSE)`, then `renv::init()`, so the lockfile starts
+   from current versions.
+3. After installing a package: `renv::install("pkg")`, then `renv::snapshot()`.
+4. After cloning or pulling a changed lockfile: `renv::restore()`.
+5. **Commit** `renv.lock`, `.Rprofile`, `renv/activate.R`, `renv/settings.json`. **Never commit**
+   `renv/library/` (it is the installed packages themselves, large and machine-specific).
+
+- **Before writing code that uses a package, check that `renv.lock` records it.** If it is
+  missing, say so and suggest `renv::install()` + `renv::snapshot()` first. Why: a package
+  installed globally on this machine makes the code run here and fail for anyone else.
+- Avoid superseded packages: `dplyr` over `plyr`, `tidyr` over `reshape2`, `readr` over
+  `read.csv`. Where old code loads one, namespace-qualify calls (`dplyr::filter()`) to avoid clashes.
+
+### renv traps
+
+- **Load the project before installing or updating.** `renv::update(project = path)` without
+  `renv::load(path)` first installs into the user library, not the project library; the `project =`
+  argument only redirects where the lockfile is read. Use `renv::load(path); renv::update(prompt = FALSE)`.
+- **`renv::snapshot()` records what is in the project library.** If that library is nearly empty
+  (packages were installed elsewhere), snapshot strips the lockfile down to the few packages it
+  sees. If `renv.lock` suddenly shrinks, restore it from git immediately, run `renv::restore()`,
+  and snapshot again.
+- **A lockfile is bound to its R version, not only its packages.** A minor R upgrade (e.g. 4.5 →
+  4.6) can make old locked package sources impossible to compile (R 4.6 removed C entry points
+  that older `dplyr` versions use), and no compiler flag fixes that. If `renv.lock`'s R version
+  differs from the installed R, install the recorded R version side by side (Windows allows several)
+  rather than forcing the restore.
+- **Windows binaries exist only for current package versions.** Restoring an older lockfile means
+  compiling from source, which needs Rtools. Budget time for it, or update the lockfile deliberately
+  (see below).
+- **Repository mismatch noise.** `renv::status()` may flag `[repo: RSPM != CRAN]` when a binary came
+  from Posit's package manager; versions still match, and `renv::restore()` cleans it up.
+- **`set.seed()` makes a simulation reproducible within one environment, not across them.** A
+  package update can change the number or order of random draws, so a bootstrap or simulation
+  table moves slightly, and a significance star can cross a threshold. Verify reproducibility by
+  rerunning twice with any result cache disabled; never trust the `set.seed()` line alone.
+
+---
+
+## Paths: use `here::here()` for every file read and write
+
+- **Never use bare relative paths for outputs** (`"5_tables/tab.tex"`). They resolve against the
+  current working directory, which changes when a script calls `setwd()` or is run from elsewhere,
+  and the file then lands silently in the wrong place.
+- `here::here("5_tables", "tab.tex")` anchors to the project root (marked by a `.here` file or the
+  `.Rproj` / git root) and returns an absolute path, wherever the script runs from.
+- For a multi-study project, wrap the prefix once:
+  `study1_path <- function(...) here::here("study_1", ...)`.
+- Never hardcode a machine-specific path (`C:/Users/...`) in a script; put it in a gitignored
+  `config_local.R` that the script sources if present.
+
+## CSV output: European style
+
+For German Excel (semicolon delimiter, decimal comma):
+
+```r
+readr::write_csv2(data_final_survey_main, here::here("3_clean_data", "survey_main.csv"))
+readr::write_excel_csv2(...)   # same, plus a byte-order mark: Excel then shows umlauts correctly
+readr::read_csv2(path)         # reading our own CSVs back
+```
+
+Use `write_csv2`/`write_excel_csv2`, not `write_csv(delim = ";")`, which keeps the decimal point.
+Third-party CSVs (downloads, exports from other tools) are read with their own format, usually
+`readr::read_csv()`.
 
 ---
 
 ## Toolkit
 
-| Package | When to use |
+| Package | Use for |
 |---|---|
-| `fixest` | Panel FE, multi-way FE, clustered SEs, IV — fast and flexible |
-| `lme4` / `lmerTest` | Mixed models, crossed random effects, variance components |
-| `afex` | Factorial ANOVA, repeated measures — correct Type III SS + GG |
-| `emmeans` | Post-hoc comparisons, estimated marginal means, contrasts |
-| `car` | Type III SS (Anova), VIF, Levene's test |
-| `modelsummary` | Publication-quality regression/summary tables |
-| `tinytable` | Default modelsummary backend (preferred over kableExtra for LaTeX output) |
-| `kableExtra` | Table styling and column group headers for LaTeX/HTML output |
-| `sandwich` / `estimatr` | Robust SEs (HC0-HC3), clustered SEs outside fixest |
-| `marginaleffects` | Marginal effects, predictions, interaction effects in nonlinear models |
-| `mediation` | Causal mediation analysis (Imai et al. framework) |
-| `MatchIt` / `cobalt` | Propensity score matching, covariate balance diagnostics |
-| `rdrobust` | RD estimation + inference, bandwidth selection |
-| `fwildclusterboot` | Wild cluster bootstrap (few clusters) |
-| `effectsize` | Cohen's d, eta-squared, standardized coefficients |
-| `sensemakr` | Sensitivity analysis for omitted variable bias (Cinelli & Hazlett 2020) |
+| `fixest` | panel FE, multi-way FE, clustered SEs, IV, `sunab()` event studies |
+| `did` / `did2s` | staggered difference-in-differences |
+| `lme4` / `lmerTest` | mixed models, crossed random effects |
+| `afex` | factorial and repeated-measures ANOVA |
+| `emmeans` | estimated marginal means, post-hoc contrasts |
+| `car` | Type III tests, VIF |
+| `sandwich` / `estimatr` | robust and clustered SEs outside `fixest` |
+| `fwildclusterboot` | wild cluster bootstrap (few clusters) |
+| `marginaleffects` | predictions, AMEs, interactions (see `marginaleffects.md`) |
+| `rdrobust` | regression discontinuity |
+| `MatchIt` / `cobalt` | matching and balance diagnostics |
+| `mediation` | causal mediation (Imai et al.) |
+| `sensemakr` | omitted-variable-bias sensitivity |
+| `effectsize` | Cohen's d, η², standardized coefficients |
+| `modelsummary` + `tinytable` | regression and summary tables to LaTeX |
+
+### Package traps
+
+- `lme4` convergence failures: `control = lmerControl(optimizer = "bobyqa")`, center and scale predictors.
+- `fixest` clustering: `vcov = ~cluster_var` (the old `se = "cluster"` syntax is outdated).
+- `afex`: set contrasts before fitting; `aov_ez()` needs factors, not numeric codes.
+- **`modelsummary` output backend:** loading `kableExtra` (the tidyverse can pull it in) silently
+  switches `modelsummary`'s backend. Load `library(tinytable)` **and** set
+  `options(modelsummary_factory_default = "tinytable")` in the setup script, after the tidyverse.
+- **`<` in a table note** renders as `¡` in LaTeX under the default font encoding. Replace it with
+  `$<$` before saving (`modelsummary` writes the significance legend into the note).
 
 ---
 
-## Package Gotchas
+## Updating packages deliberately
 
-- `lme4`: convergence failures — try `control = lmerControl(optimizer = "bobyqa")`, center/scale predictors
-- `fixest`: cluster SE syntax changed in v0.10 — use `vcov = ~cluster_var` not `se = "cluster"`
-- `afex`: set `contrasts` before fitting; `aov_ez()` requires factors as character/factor, not numeric
-- `modelsummary` + `kableExtra` override: `tidyverse` loads `kableExtra`, which silently overrides `modelsummary`'s default backend. Fix: add `library(tinytable)` **and** `options(modelsummary_factory_default = "tinytable")` in `0_Setup.R` (after `library(tidyverse)`). Setting the option alone is not enough — tinytable must be explicitly loaded.
-- `tinytable` S4 notes slot: `modelsummary()` auto-generates a significance legend as `tab@notes[[1]]`. Post-process with `gsub("<", "$<$", tab@notes[[1]])` before saving — the bare `<` renders as `¡` in LaTeX under OT1 encoding.
+Lockfiles drift; letting them drift for years ends in a restore that compiles dozens of packages.
+Update at milestones, not on a calendar: before submitting a paper or replication package, before
+a new analysis phase, after upgrading R.
+
+1. `renv::update(check = TRUE)` lists what is outdated without changing anything.
+2. Update in batches, lowest risk first: utilities (`cli`, `rlang`), then output packages
+   (`modelsummary`, `tinytable`), then estimation packages (`fixest`, `lme4`, `sandwich`) last,
+   because those can change results.
+3. After each batch, rerun the whole pipeline. After an estimation-package update, compare
+   coefficients, SEs and p-values with the previous run: tiny floating-point differences are fine;
+   anything substantive needs explaining before the update is kept.
+4. `renv::snapshot()`, and commit `renv.lock` on its own: `chore: update renv lockfile (<batch>)`.
+
+With co-authors, one person updates at a time; the others run `renv::restore()` after pulling.

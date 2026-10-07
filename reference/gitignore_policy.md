@@ -1,138 +1,152 @@
-# .gitignore Policy: Best Practices for Academic Research Projects
+# .gitignore Policy for Research Projects
 
-**Load when:** setting up a new project's `.gitignore` or auditing an existing one.
-**Skip when:** `.gitignore` is already in place and working.
+**Load when:** setting up a project's `.gitignore`, auditing one, or deciding whether a new kind
+of file belongs in git.
+**Skip when:** the `.gitignore` is in place and the file in question is plainly code or notes.
 
-Covers R and Python projects. Use the template below as a starting point; adapt to your project structure.
-
----
-
-## Core principles
-
-1. **Depth-independent patterns** — omit leading `/` so patterns match at any directory depth. Use `data/` not `/data/`, so `analysis/data/` is caught automatically.
-2. **Commit renv/uv infrastructure, ignore the library** — activation scripts, lock files, and `.Rprofile` must be committed for reproducibility. Only the installed package library goes in `.gitignore`.
-3. **Whitelist literature** — commit only `.md` and `.txt` summaries; raw PDFs and other files are ignored.
-4. **Never commit data or outputs** — raw data, clean data, tables, plots, serialized objects, interim files.
-5. **Secrets never go in git** — `.env` and any credential files, always ignored.
-6. **Machine-specific files stay local** — `.vscode/`, `.claude/`, editor backup files.
+Covers R and Python projects with a LaTeX paper. Start from the template below and adapt it to
+the project's folders.
 
 ---
 
-## Template — copy and adapt for new projects
+## Principles
+
+1. **Never commit data or generated outputs.** Raw, interim and clean data, tables, figures,
+   saved objects, compiled PDFs. *Why:* data may be personal or licensed, and git history cannot
+   be taken back once pushed; generated files change on every run, so each commit stores a full
+   new copy forever, and they can be rebuilt from the scripts anyway.
+2. **Inputs are not outputs.** A codebook, a questionnaire, a stimulus, a crosswalk typed by
+   hand: written once by a person, read by the scripts, produced by no script. Commit them, even
+   when binary, unless they contain personal data. The test is not the file type or the name:
+   **ask what reads the file and what writes it.** If a script reads it and no script writes it,
+   it is an input. (`export_2024.csv` sounds like an output; if the provider wrote it and your
+   code only reads it, it is raw data.)
+3. **Secrets never go in git:** `.env`, API keys, `config_local.*`, `.Renviron`.
+4. **Commit the environment's recipe, ignore its installation.** `renv.lock`, `.Rprofile`,
+   `renv/activate.R`, `renv/settings.json`, `pyproject.toml`, `uv.lock` are committed; the
+   installed libraries (`renv/library/`, `.venv/`) are not. *Why:* the recipe lets anyone rebuild
+   the same environment; the installation is large and machine-specific.
+5. **Patterns without a leading `/`** match at any depth: `**/1_raw_data/**` catches
+   `analysis/1_raw_data/` and `analysis/study_1/main/1_raw_data/` alike.
+6. **Local settings stay local,** except the shared project rules: `.claude/settings.json` (it
+   holds the raw-data lock) is committed; the rest of `.claude/` and `CLAUDE.local.md` are not.
+7. **A new kind of file gets a line here before it is first staged.** `.gitignore` does not
+   affect files git already tracks.
+
+---
+
+## Template
 
 ```gitignore
 # === DATA AND OUTPUTS (never commit) ===
-# Depth-independent: matches analysis/1_raw_data/, data/, etc. at any level
 **/1_raw_data/**
 **/2_interim_data_steps/**
 **/3_clean_data/**
 **/5_tables/**
 **/6_plots/**
 **/7_r_objects/**
-**/8_raw_data_backup/**
-# Re-include .gitkeep files so empty folder structure is visible on GitHub
-# Note: use **/folder/** (not folder/) — folder/ excludes the directory itself,
-# preventing the !**/.gitkeep negation from working.
+**/7_objects/**
+# Keep the empty folder structure: re-include sub-folders (e.g. appendix/),
+# then the .gitkeep files. Use **/folder/** above, not folder/ : folder/ would
+# exclude the directory itself and the .gitkeep negation could not work.
+!**/5_tables/**/
+!**/6_plots/**/
 !**/.gitkeep
 
-# === LITERATURE (whitelist: track only .md and .txt summaries) ===
+# === LITERATURE (track only .md and .txt notes; PDFs stay out) ===
 literature/**
 !literature/**/
 !literature/**/*.md
 !literature/**/*.txt
 
-# === SECRETS / LOCAL CONFIG ===
+# === SECRETS AND MACHINE-SPECIFIC CONFIG ===
 .env
 .env.*
-.htpasswd
 config_local.R
+config_local.py
+.Renviron
+.httr-oauth
 
-# === EDITOR ===
-.vscode/
-.idea/
-
-# === R: RENV ===
-# Commit: renv/activate.R, renv/settings.json, renv.lock, .Rprofile
-# Ignore: installed package library only
+# === R ===
+# Commit: renv.lock, .Rprofile, renv/activate.R, renv/settings.json
 renv/library/
 renv/sandbox/
 renv/staging/
-
-# === R: GENERATED FILES ===
 .Rhistory
 .Rapp.history
 .RData
 .RDataTmp
 .Ruserdata
-*-Ex.R
-*.tar.gz
-*.Rcheck/
 .Rproj.user/
-vignettes/*.html
-vignettes/*.pdf
-.httr-oauth
 *_cache/
 *.utf8.md
 *.knit.md
-.Renviron
-docs/
-po/*~
 rsconnect/
 
-# === PYTHON (include if project uses Python) ===
-# Commit: pyproject.toml, uv.lock (or requirements.txt)
-# Ignore: virtual environments and compiled artifacts
+# === PYTHON ===
+# Commit: pyproject.toml, uv.lock
 .venv/
-.uv/
 __pycache__/
 *.py[cod]
 *.egg-info/
-dist/
-build/
 .pytest_cache/
 .ipynb_checkpoints/
 
-# === SYSTEM ===
+# === LATEX BUILD FILES (if the paper is compiled in this repository) ===
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+# the compiled paper, by name (not *.pdf: a questionnaire PDF is an input)
+# paper/main.pdf
+
+# === EDITORS AND SYSTEM ===
+.vscode/
+.idea/
 desktop.ini
 .DS_Store
 Thumbs.db
 
 # === CLAUDE CODE ===
-# Machine-specific local settings — not shared across PCs
-.claude/
+# Use .claude/* (not .claude/) so the negation below can work
+.claude/*
+!.claude/settings.json
 CLAUDE.local.md
 
-# === WORKTREES ===
-# Local worktree working copies — never committed
-.worktrees/
-
-# === TEMP / BACKUP ===
+# === TEMP AND BACKUP ===
 *.log
 *~
 *.bak
 *.orig
-temp.R
-temp output.txt
 ```
 
 ---
 
-## Checklist after applying the template
+## After applying it
 
-- [ ] Data folder names match project structure (rename/remove entries as needed)
-- [ ] Remove the `# === PYTHON ===` section if the project is R-only (and vice versa)
-- [ ] `renv/activate.R`, `renv/settings.json`, `renv.lock`, `.Rprofile` are **not** in `.gitignore` → will be committed
-- [ ] `literature/` section present only if the folder exists
-- [ ] `.worktrees/` is present (worktree protocol)
-- [ ] `CLAUDE.local.md` is present (machine-specific Claude context)
-- [ ] Run `git status` after applying — verify no data, PDFs, or secrets are staged
-
----
+- [ ] The data folder names match the project's folders; rename or remove entries as needed.
+- [ ] Remove the R or the Python section if the project uses only one language.
+- [ ] `renv.lock`, `.Rprofile`, `renv/activate.R`, `renv/settings.json` are NOT ignored.
+- [ ] `.claude/settings.json` is NOT ignored (`git check-ignore -v .claude/settings.json` prints
+      the `!.claude/settings.json` line, or nothing).
+- [ ] Before the first commit, `git status` lists no data, PDFs or secrets.
 
 ## Notes
 
-**renv's own `.gitignore`:** renv auto-creates `renv/.gitignore` ignoring `library/` etc. Our explicit entries are redundant but make intent visible without relying on renv's internal behavior.
-
-**Forcing a tracked file inside an ignored folder:** use `git add -f path/to/file`. Avoid doing this for data or secrets.
-
-**Why not a global `~/.gitignore_global`?** It's used only for machine-specific noise (`desktop.ini`, `.DS_Store`). Project rules belong in the project's `.gitignore` so they're version-controlled and visible to collaborators.
+- **Test a path:** `git check-ignore -v <path>` prints the line that decides it. A printed
+  pattern starting with `!` means the file is NOT ignored, although the command succeeds.
+- **A file that was committed before it was ignored** stays tracked. `git rm --cached <file>`
+  stops tracking it and keeps it on disk; its old versions stay in the history. If it held
+  personal data and was pushed, tell the user: removing it from the history is a separate job.
+- **A deliberate exception** inside an ignored folder (a small, non-personal example dataset for
+  a replication package): `git add -f <file>`, and say why in the commit message.
+- **renv writes its own `renv/.gitignore`.** The R entries above repeat it on purpose, so the
+  intent is visible without knowing renv's internals.
+- **Project rules belong in the project's `.gitignore`,** not in a global git ignore file: there
+  they are versioned and the same for every collaborator.

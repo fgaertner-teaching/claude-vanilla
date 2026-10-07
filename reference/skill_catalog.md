@@ -1,33 +1,64 @@
-# Skill Catalog
+# What is in this setup
 
-**Load when:** looking for available skills or deciding which skill to load.
-**Skip when:** you already know which skill file to read.
+**Load when:** looking for the right skill, command or agent; adding, renaming or removing one
+(update this file in the same step); unsure which file owns a convention.
+**Skip when:** you already know which file to use.
 
-Overview of all included skills with their triggers and descriptions.
+## Skills (`skills/<name>/SKILL.md`, loaded by their description)
 
----
+| Skill | For | Sub-files |
+|---|---|---|
+| `empirical-analysis` | estimation, identification, diagnostics, interpretation | `r.md`, `python.md`, `plotting.md`, `marginaleffects.md`, `causal_reasoning.md`, `research_integrity.md` |
+| `analysis-plan` | pre-registrations, analysis plans, power, success criteria | |
+| `research-paper` | LaTeX tables and figures, the Overleaf project | `regression_tables.md` |
+| `author` | prose that others read: papers, proposals, referee replies | `diagnostics.md`, `sections.md` |
+| `pre-submission-audit` | the last check before submitting a paper | |
+| `project-organizer` | script pipelines, folder layout, outputs mapped to the paper | |
+| `coder` | writing and debugging R and Python | `windows.md`, `long_runs.md`, `debugging.md` |
+| `auditor` | independent review of a document, plan, code or setup | |
+| `skill-builder` | writing a new skill | |
 
-| Skill | File | Trigger | Behavior |
-|-------|------|---------|----------|
-| Empirical Analysis | `skills/empirical-analysis/SKILL.md` | Academic-research projects | Auto-loaded |
-| R Setup | `skills/empirical-analysis/r.md` | R package management, renv | Suggest and ask |
-| Python Setup | `skills/empirical-analysis/python.md` | Python, uv | Suggest and ask |
-| Plotting | `skills/empirical-analysis/plotting.md` | Creating/modifying plots | Read proactively |
-| marginaleffects | `skills/empirical-analysis/marginaleffects.md` | Model interpretation | Suggest and ask |
-| Research Paper | `skills/research-paper/SKILL.md` | Tables, figures, LaTeX | Read proactively |
-| Analysis Plan | `skills/analysis-plan/SKILL.md` | Pre-registration, PAP | Suggest and ask |
-| Project Organizer | `skills/project-organizer/SKILL.md` | Pipeline structure | Suggest and ask |
-| Auditor | `skills/auditor/SKILL.md` | Quality review, audit | Suggest and ask |
-| Pre-Submission Audit | `skills/pre-submission-audit/SKILL.md` | Final manuscript check | Suggest and ask |
+## Commands (`commands/<name>.md`, typed as `/<name>`)
 
-## Not included (advanced features)
+| Command | Does |
+|---|---|
+| `/startup` | shows where the project stands (when the start hook did not) |
+| `/session-end` | updates `next_steps.md` and `OPEN_ISSUES.md`, records decisions, commits, pushes |
+| `/newproject` | sets up a new project |
+| `/what-slipped` | a fresh subagent critiques the work just done |
+| `/explain` | explains the last thing in plain terms |
+| `/panic` | saves everything to `claude/panic_dump.md` when the session is about to end |
 
-These skills exist in the full setup but are excluded from this starter kit:
+## Agents (`agents/<name>.md`)
 
-- **Career Management** — periodic self-assessment and career radar
-- **German Academia** — German professorial career path specifics
-- **Research Proposals** — automated idea-to-proposal pipeline with custom agents
-- **Agenda Planner** — portfolio-level research programme assessment
-- **Author** — turning outlines into written prose
-- **Teacher** — course and workshop design
-- **Software Developer** — software project conventions
+| Agent | Does |
+|---|---|
+| `literature-scout` | searches the web for existing work on a question; every reference copied from a page it opened |
+| `verifier` | read-only pass/fail check that a task was done |
+
+## Where each convention lives
+
+| What | File |
+|---|---|
+| How Claude talks, plans, checks, handles sessions | `CLAUDE.md` |
+| Files and data, project tracking, git, code, quality | `rules/rules.md` |
+| Who you are, your language and field | `about-me.md` |
+| Permissions, the start hook, the status line | `settings.json`, `scripts/` |
+| Settings explained | `reference/claude_code_settings.md` |
+| Setting up a project | `reference/new_project.md` (used by `/newproject`) |
+| `.gitignore` patterns | `reference/gitignore_policy.md` |
+| Working with co-authors | `reference/collaboration.md` |
+| Overleaf | `reference/overleaf_conventions.md` |
+| Defaults for academic projects | `reference/academic_conventions.md` |
+| Before committing | `reference/checklist.md` |
+| A main R script to start from | `reference/template_main_file.R` |
+
+## In each project
+
+| File | Holds |
+|---|---|
+| `CLAUDE.md` | what Claude needs to know about the project |
+| `claude/next_steps.md` | where the project stands; overwritten at each session end |
+| `claude/OPEN_ISSUES.md` | what is still open; resolved items deleted |
+| `claude/decision_<topic>.md` | a decision, its options and its reasons |
+| `.claude/settings.json` | the project's own permissions, e.g. the raw-data lock |

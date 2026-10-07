@@ -1,75 +1,97 @@
-# Claude Code: Configuration & Security Reference
+# Claude Code settings: what this kit sets, and how to change it
 
-**Load when:** configuring Claude Code settings, permissions, hooks, or security.
-**Skip when:** normal project work with no configuration changes.
+**Load when:** changing settings, permissions, hooks or the status line; something in the
+setup does not work as expected.
+**Skip when:** normal project work.
 
-Key settings and security notes. Sources: Backslash Security article (Sep 2025),
-Boris Cherny creator tips (Feb 2026).
+Last verified: 2026-10-07, against code.claude.com/docs (settings, permissions, hooks, memory,
+skills). Claude Code changes quickly: check the docs when something here does not match.
 
----
+## Where settings live
 
-## Settings File Hierarchy
+| File | Applies to |
+|---|---|
+| `~/.claude/settings.json` | every project (this kit's file) |
+| `<project>/.claude/settings.json` | one project; committed with it |
+| `<project>/.claude/settings.local.json` | one project, only you; not committed |
 
-Claude Code merges settings from multiple files in priority order (highest last):
+They are combined. `/permissions` shows the rules in force and where each comes from;
+`/doctor` reports settings it could not read.
 
-| File | Scope | Typical use |
-|------|-------|-------------|
-| `/Library/Application Support/ClaudeCode/managed-settings.json` (macOS) | Enterprise-wide | IT admins — enforces policy across all users |
-| `~/.claude/settings.json` | User-wide | Personal defaults, permissions, hooks |
-| `.claude/settings.json` (project root) | Project | Project-specific overrides, check into git |
+## Permissions
 
-On Windows, `managed-settings.json` lives in the equivalent system path (not yet documented by Anthropic).
+- **Three lists:** `allow` (runs without asking), `ask` (always asks, even in auto mode),
+  `deny` (never runs). They are checked in the order deny, ask, allow; the first match wins.
+- **Rule shapes:** `Bash(git commit *)`, `PowerShell(Remove-Item *)`, `Edit(./data/raw/**)`,
+  `Read(.env)`. `*` matches anything. PowerShell rules also match a command's aliases, so
+  `PowerShell(Remove-Item *)` covers `rm`, `del` and `rmdir` typed in PowerShell.
+- **Which shell:** on Windows, Claude Code runs commands through Git Bash if Git for Windows is
+  installed, and through PowerShell otherwise. The screen shows `Bash(...)` or
+  `PowerShell(...)`; this kit writes each rule for both.
+- **Rules match the text Claude writes, not what a program does.** A delete inside a Python
+  script passes a `Bash(rm *)` rule. That is why the instruction files say "ask before
+  deleting" as well: the rule enforces the usual case, the line covers the rest.
+- **Locking a project folder:** in the project's `.claude/settings.json`,
+  `{"permissions": {"deny": ["Edit(./1_raw_data/**)"]}}` stops Claude's own edits there (not
+  scripts it runs). Check it worked: start a new session and ask Claude to change a file there.
 
----
+**What this kit sets:** git and `uv` / `Rscript` commands allowed; deleting asks; reading
+secret files (`.env`, SSH keys), force-pushing, `git reset --hard` and `git clean` denied.
 
-## Security-Relevant Settings (`settings.json` or `managed-settings.json`)
+## Permission modes
 
-| Setting | Recommended value | Notes |
-|---------|------------------|-------|
-| `cleanupPeriodDays` | `7` | Days before chat transcripts are deleted locally. Keep low (7–14) if working with sensitive data. |
-| `disableAllHooks` | (leave unset for normal use) | When `true`, disables all hooks. An enterprise lockdown option. |
-| `env` | Avoid secrets here | Sets env vars for all sessions. Use for non-secret config. Don't put credentials here. |
-| `statusLine` | Read-only scripts only | If using a command-based status line, only run safe read-only scripts. |
+`Shift+Tab` cycles through them: **Manual** (asks for every edit and most commands), **Accept
+edits** (file edits run, commands ask), **Auto** (a reviewer model decides; `ask` and `deny`
+rules still apply), **Plan** (reads and plans, changes nothing).
 
-**MCP servers:** Use an explicit allowlist. Never set `enableAllProjectMcpServers: true` — this auto-enables any MCP server defined in a project's config, which is a prompt injection / supply chain risk.
+## Hooks
 
-**Permissions:** Prefer an allowlist + denylist. The `"allow"` list pre-approves tool calls without prompting; the `"deny"` list blocks them outright. Wildcard syntax is supported: `"Bash(bun run *)"`, `"Edit(/docs/**)"`
+A hook is a command Claude Code runs on an event, not something Claude decides to do. This kit
+has one: at session start (`SessionStart`), `scripts/session-start.ps1` prints the project's
+`claude/next_steps.md`, `claude/OPEN_ISSUES.md` and any panic dump, plus the git state; Claude
+Code adds what it prints to the session.
 
----
+- On Windows a hook command runs in Git Bash, or in PowerShell when Git Bash is not installed.
+  The kit's command, `powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME/.claude/..."`,
+  works from both.
+- **On a Mac,** Windows PowerShell does not exist. Either install PowerShell
+  (`brew install powershell`) and change `powershell` to `pwsh` in `settings.json` (both
+  places), or remove the hook and the status line and run `/startup` at the start instead.
+- `/hooks` lists the hooks in force. A hook that fails shows an error and the session goes on.
 
-## Custom Agents (`.claude/agents/`)
+## Status line
 
-Drop `.md` files in `~/.claude/agents/` (global) or `.claude/agents/` (project) to define custom subagents.
-Each agent file can specify: custom name, color, tool set, pre-allowed/pre-disallowed tools, permission mode, model.
+`scripts/statusline.ps1` shows the folder, git branch and session name, then the model and how
+full the context is. The context figure is what the "wrap up at about half full" rule reads.
 
-To set the default agent for the main conversation, add `"agent": "agent-name"` to `settings.json` or use the `--agent` flag.
+## Instruction files
 
-Run `/agents` to manage agents via the UI.
+- `~/.claude/CLAUDE.md` and every file in `~/.claude/rules/` load in every session. A project's
+  `CLAUDE.md` (and its `.claude/rules/`) loads in sessions started in that project.
+  `CLAUDE.local.md` beside a project's `CLAUDE.md` is for you only (keep it out of git).
+- `@path` inside a `CLAUDE.md` pulls in another file; this kit uses it for `about-me.md`.
+- `/context` shows what loaded and how much room it takes; `/memory` opens the files.
+- Keep each file short (the docs suggest under about 200 lines): every line costs room in every
+  turn, and long files are followed less reliably.
 
----
+## Skills, commands, agents
 
-## Output Styles
+- **Skills:** `~/.claude/skills/<name>/SKILL.md`. Claude loads one when its `description`
+  matches the task; you can also call it as `/<name>`. Without `name` and `description` in
+  its frontmatter a skill is poorly found. The `skill-builder` skill explains how to write one.
+- **Commands:** `~/.claude/commands/<name>.md`, run as `/<name>`. A name Claude Code already
+  uses for its own command (e.g. `/review`) does not run yours: pick another.
+- **Agents:** `~/.claude/agents/<name>.md` (frontmatter `name`, `description`; optional
+  `tools`, `model`). Claude hands them a task in their own fresh context.
 
-Run `/config` to set an output style:
-- **Explanatory** — Claude explains frameworks and patterns as it works. Useful when exploring a new codebase.
-- **Learning** — Claude coaches you through making changes yourself.
-- Custom styles can also be defined.
+## Memory
 
----
+Auto memory is on by default: Claude Code keeps notes per project under
+`~/.claude/projects/<project>/memory/`. It is a convenience, not a guarantee; what must hold in
+every session belongs in a `CLAUDE.md`.
 
-## Other Configuration Features (Quick Reference)
+## Data and privacy
 
-| Feature | How to access | Notes |
-|---------|--------------|-------|
-| Theme, notifications | `/config` | Light/dark, colorblind modes, ANSI-only |
-| Newline in terminal | `/terminal-setup` | Enables Shift+Enter for newlines in supported terminals |
-| Vim mode | `/vim` | |
-| Effort level | `/model` | Low / Medium / High; creator recommends High |
-| Plugins / MCPs / Skills | `/plugin` | Official Anthropic marketplace + custom |
-| Sandbox | `/sandbox` | File + network isolation. **Windows support not yet available (as of Feb 2026).** |
-| Keybindings | `/keybindings` | Every key binding customizable; settings live-reload |
-| Hooks | `settings.json` → `"hooks"` key | PreToolUse, PostToolUse, PreCompact, etc. |
-| Spinner verbs | Ask Claude or edit `settings.json` | Customize the "thinking" verb text |
-| Env vars without wrapper scripts | `"env"` field in `settings.json` | 84 supported env vars as of Feb 2026 |
-
-37 named settings and 84 env vars supported as of Feb 2026 — see official docs for full list.
+What you send goes to Anthropic. Whether it may be used for model training is a setting of
+your account: claude.ai/settings/data-privacy-controls. Check it before working with personal
+data, and check what your data's licence or consent allows.

@@ -1,173 +1,134 @@
-# Claude Code Starter Kit for Academic Researchers
+# Claude Code starter kit for researchers
 
-A ready-to-use `~/.claude/` configuration for Claude Code, designed for researchers doing empirical work in economics, finance, and social sciences. Copy it, fill in your details, and start working.
+A ready-made global setup for Claude Code, for empirical researchers in economics, business and
+the social sciences. It gives Claude standing instructions for every project, a way to pick up
+each project where the last session stopped, and skills for analysis, LaTeX papers and review.
+Claude writes R, Python and LaTeX for you, and the kit is set up so you can check results
+without reading code.
 
-## Prerequisites
+Last updated: 2026-10-07. Written for Windows first (for a Mac, see § On a Mac).
 
-- **Anthropic account** with a Max or Team subscription (Claude Code requires a paid plan)
-- **Node.js** (version 18+) — Claude Code runs on Node.js. Download from [nodejs.org](https://nodejs.org/)
-- **A terminal** — on Windows, use Git Bash, PowerShell, or Windows Terminal. On Mac, use Terminal.
+## What you get
 
-## Quick Start
+| Part | What it does |
+|---|---|
+| `CLAUDE.md`, `rules/rules.md` | Instructions Claude reads in every session |
+| `about-me.md` | Your profile: field, language, tools (you fill it in) |
+| `settings.json` | Asks before deleting, blocks risky git commands, status line, start hook |
+| `commands/` | `/startup`, `/session-end`, `/newproject`, `/what-slipped`, `/explain`, `/panic` |
+| `skills/` | Analysis, analysis plans, LaTeX papers, writing, code, review |
+| `agents/` | A literature scout and a verifier |
+| `reference/` | Background files the skills and commands point to |
 
-### 1. Install Claude Code
+## Before you start
 
-Follow [the official guide](https://docs.anthropic.com/en/docs/claude-code/overview). After installation, verify it works by typing `claude` in your terminal.
+- Claude Code is installed and you are logged in (`claude` in a terminal opens it).
+- Recommended: Git for Windows (git-scm.com). Without it Claude Code uses PowerShell, which
+  works too, but you want git for your projects anyway.
+- Check your privacy setting at claude.ai/settings/data-privacy-controls, especially before
+  working with personal data.
 
-### 2. Copy this folder to `~/.claude/`
+## Install: let Claude do it
 
-> **What is `~/.claude/`?** The `~` symbol means your home folder. On Windows, that's `C:\Users\YourName\`. On Mac, it's `/Users/YourName/`. The `.claude` folder is where Claude Code looks for its configuration. Folders starting with `.` are hidden by default — you may need to enable "Show hidden files" in your file explorer to see it.
+Your `~/.claude` folder (on Windows `C:\Users\<you>\.claude`) already exists once Claude Code
+has run, and may already hold settings of yours. So do not copy the kit over it. Ask Claude to
+merge it in:
 
-**If you have git:**
-```bash
-git clone <your-repo-url> ~/.claude
-```
+1. Download the kit (on GitHub: Code → Download ZIP) and unzip it anywhere, for example into
+   `Downloads`.
+2. Open a terminal in the unzipped folder and start `claude`.
+3. Paste this request:
 
-**If you don't have git:**
-1. Click the green "Code" button on the GitHub page, then "Download ZIP"
-2. Unzip the downloaded file
-3. Rename the unzipped folder to `.claude` (note the dot at the start)
-4. Move it to your home folder (`C:\Users\YourName\` on Windows, `/Users/YourName/` on Mac)
+   > Install this starter kit into my global Claude Code folder, ~/.claude. Copy CLAUDE.md,
+   > about-me.md.template and the folders rules, skills, commands, agents, reference and
+   > scripts. Where a file already exists in ~/.claude, show me the difference and ask before
+   > changing it. Merge settings.json into my existing ~/.claude/settings.json: keep my own
+   > settings, add the kit's permissions, hook and status line, and show me the merged file
+   > before saving it. Do not copy README.md, .git or .gitignore. Then interview me, one
+   > question at a time, to create ~/.claude/about-me.md from the template.
 
-### 3. Set up your profile
+4. Approve the file changes as Claude asks. Writing to `~/.claude` needs your approval.
+5. Close Claude Code and start it again in any folder. Check three things:
+   - Two lines under the input box show the folder, the model and how full the context is.
+   - `/context` lists `CLAUDE.md`, `about-me.md` and `rules/rules.md`.
+   - Ask *"What do you know about me, and which skills and commands do you have?"* The answer
+     should come from your profile and name the kit's skills.
 
-- Inside `~/.claude/`, copy `about-me.md.template` to `about-me.md`
-- Open `about-me.md` in any text editor and fill in the placeholders (name, institution, research area, methods)
+**By hand instead:** copy the files listed in step 3 into `~/.claude` (merge folders, keep
+your own files), copy `about-me.md.template` to `about-me.md` and fill it in, and add the
+`permissions`, `hooks` and `statusLine` parts of `settings.json` to your own settings file.
 
-### 4. Review permissions
+## A working day with it
 
-- `settings.json` (already inside `~/.claude/`) pre-approves safe operations: reading files, running R/Python scripts, and git commands
-- You don't need to change anything to get started
+1. **Start Claude Code in the project's folder.** The start hook shows Claude the project's
+   `claude/next_steps.md` and `claude/OPEN_ISSUES.md`, so it knows where things stand. If the hook
+   is missing, type `/startup`.
+2. **Work.** Claude says what "done" will look like before bigger tasks, explains technical
+   terms the first time, and asks before deleting anything.
+3. **When the status line shows the context about half full, or you stop:** `/session-end`.
+   Claude updates the two files, commits and pushes. Then `/clear`, and the next session starts
+   fresh with everything it needs on disk.
 
-### 5. Verify setup
+## Starting a project
 
-Open a terminal, navigate to any folder, and run `claude`. Ask: "What skills do you have available?" Claude should list the skills from this kit (Empirical Analysis, Plotting, etc.). If it doesn't, the `~/.claude/` folder may not be in the right place.
+In an empty folder (outside OneDrive, Dropbox and similar synced folders), type `/newproject`.
+Claude asks what the project is and sets up its `CLAUDE.md`, the `claude/` tracking files, the
+folders, git, and a lock on the raw-data folder.
 
-### 6. Start your first project
+## Commands
 
-- Create a new folder for your project
-- Open Claude Code in that folder: `cd your-project-folder && claude`
-- Type `/newproject` — Claude will walk you through setting up the project step by step
-- When asked about project type, choose `academic-research` and `work`
-- When asked about git, choose yes if you use git, or no to skip it
+| Command | Use it to |
+|---|---|
+| `/startup` | see where the project stands (when the hook did not show it) |
+| `/session-end` | save the state, commit, push, before you stop |
+| `/newproject` | set up a new project |
+| `/what-slipped` | have a fresh reviewer check the work just done |
+| `/explain` | get the last thing explained in plain terms |
+| `/panic` | save everything to one file when the session is about to die |
 
-## What This Does
+Claude Code's own commands matter as much: `/context` (how full), `/rewind` (back to an
+earlier point), `/compact`, `/clear`, `/rename`, `/usage`, `/btw`.
 
-### The problem it solves
+## Skills
 
-Without instructions, Claude Code starts every session with no memory of your field, your methods, or your project conventions. You end up repeating the same context ("I'm an economist", "use renv", "don't commit data files") every time.
+Claude loads a skill when the task matches its description, and says which one it loaded. You
+can also call one directly, for example `/auditor`.
 
-This starter kit gives Claude persistent knowledge about:
-- How empirical research projects are structured
-- What econometric methods and packages you use
-- How to format tables and figures for journals
-- How to track what happened in each session so the next one can pick up seamlessly
+| Skill | For |
+|---|---|
+| `empirical-analysis` | estimation, identification, diagnostics, R and Python setup, plots |
+| `analysis-plan` | pre-registrations and analysis plans, power, success criteria |
+| `research-paper` | LaTeX tables and figures, the Overleaf project |
+| `author` | prose others will read: papers, proposals, referee replies |
+| `pre-submission-audit` | the last check before submitting a paper |
+| `project-organizer` | script pipelines and folder layout |
+| `coder` | writing and debugging R and Python |
+| `auditor` | an independent review of any document, plan or code |
+| `skill-builder` | writing a skill of your own |
 
-### How it works
+## Making it yours
 
-Claude Code reads `CLAUDE.md` and `rules/rules.md` at the start of every session. These contain universal instructions: how to track issues, naming conventions, session protocols.
+- **After Claude makes a mistake, keep the fix.** Claude proposes a line for the right file, and
+  you decide whether it goes in. Over months this is what makes the setup fit you.
+- **Keep the always-loaded files short.** Everything in `CLAUDE.md`, `rules/` and `about-me.md`
+  takes room in every session. Rarely needed knowledge belongs in a skill or a `reference/` file.
+- **A new skill:** ask Claude to write one with the `skill-builder` skill.
+- **Settings, permissions, hooks:** `reference/claude_code_settings.md`.
 
-**Skills** in `skills/` are loaded only when relevant. For example, the plotting skill loads when you create a figure, the R skill loads when you manage packages. This keeps Claude focused on what you're doing right now.
+## On a Mac
 
-### Session protocol
+The start hook and the status line run Windows PowerShell. Either install PowerShell
+(`brew install powershell`) and change `powershell` to `pwsh` in the two commands in
+`settings.json`, or delete the `hooks` and `statusLine` parts and type `/startup` at the
+start of each session.
 
-Sessions follow a simple cycle:
+## Updating the kit
 
-1. **Start:** Claude reads your `next_steps.md` and `OPEN_ISSUES.md` to pick up where you left off
-2. **Work:** You work together on your project
-3. **End:** Type `/session-end` — Claude updates tracking files so the next session continues seamlessly. If you use git, it also commits and pushes.
+Download the new version and run the install request again. Claude shows each difference
+before changing anything, so your own additions and your `about-me.md` stay.
 
-### Tracking files (in each project)
+## Not included
 
-| File | What it does |
-|------|-------------|
-| `claude/next_steps.md` | Session handoff — what was done, what to do next |
-| `claude/OPEN_ISSUES.md` | Open bugs, questions, to-dos |
-| `claude/SUPERSEDED_IDEAS.md` | Approaches that were considered and rejected, with reasoning |
-
-These files live inside your project, not in `~/.claude/`. Claude creates them when you run `/newproject`.
-
-## Do I Need Git?
-
-**No.** Git is recommended but not required. The starter kit works without it:
-
-- Without git, the session-start hook won't run (no sync checks). That's fine — just type `/startup` manually when you start a session.
-- `/session-end` will update your tracking files but skip the commit/push step.
-- You lose version history, which means you can't undo mistakes as easily. Consider learning git basics when you're ready — it's worth it.
-
-If you do use git, this kit pre-approves common git commands so Claude won't ask for permission on every `git status` or `git commit`.
-
-## Included Skills
-
-| Skill | When it loads | What it helps with |
-|-------|--------------|-------------------|
-| **Empirical Analysis** | Academic-research projects | Econometrics, identification, causal inference, diagnostics |
-| **R** | R package management | renv setup, package hygiene |
-| **Python** | Python package management | uv setup, virtual environments |
-| **Plotting** | Creating figures | ggplot2 themes, export settings, colorblind-friendly palettes |
-| **marginaleffects** | Model interpretation | Predictions, comparisons, slopes, average treatment effects |
-| **Research Paper** | Tables and figures | LaTeX formatting, booktabs, Overleaf-friendly output |
-| **Analysis Plan** | Pre-registration | Hypothesis architecture, power analysis, specification design |
-| **Project Organizer** | Pipeline structure | Script numbering, folder layout, output-to-paper mapping |
-| **Auditor** | Quality review | Structured 2+1 review protocol for any artifact |
-| **Pre-Submission Audit** | Before submission | Cross-reference check, consistency, production quality |
-
-## Slash Commands
-
-| Command | What it does |
-|---------|-------------|
-| `/startup` | Pick up where you left off (reads next_steps, open issues) |
-| `/session-end` | Save progress, update tracking files, commit if using git |
-| `/newproject` | Set up a new research project (walks you through it) |
-| `/panic` | Emergency dump if session is about to crash (saves everything to one file) |
-
-## Customization
-
-### Adding your own skills
-
-Create a new file at `skills/<skill-name>/SKILL.md`. Start with:
-
-```markdown
-# Skill Name
-
-**Load when:** [when should Claude load this skill]
-**Skip when:** [when is this skill irrelevant]
-
-[Your domain knowledge, conventions, and instructions here]
-```
-
-Then add a trigger entry to the skill table in `CLAUDE.md`.
-
-### Modifying conventions
-
-All conventions live in `rules/rules.md`. Edit it directly. If it grows too large, split into separate files under `rules/` and update the file list in `CLAUDE.md`.
-
-## What's NOT Included
-
-This is a starter kit — intentionally simpler than a fully customized setup. Features you might want to add later as you get comfortable:
-
-- **Custom agents** — specialized subagents for literature search, idea evaluation, proposal writing
-- **Multi-PC sync** — automatic repo synchronization if you work on multiple machines
-- **Research proposal pipeline** — automated idea-to-proposal workflow with literature scouts
-- **Career management** — periodic self-assessment and career planning tools
-
-## File Structure
-
-```
-~/.claude/
-  CLAUDE.md                    # Main instructions for Claude
-  about-me.md                  # Your profile (you fill this in)
-  settings.json                # Permissions and hooks
-  rules/
-    rules.md                   # All conventions in one file
-  commands/                    # Slash commands (/startup, /session-end, etc.)
-  skills/                      # Domain knowledge (loaded when needed)
-    empirical-analysis/        # Econometrics and methods
-    research-paper/            # LaTeX and formatting
-    analysis-plan/             # Pre-registration
-    project-organizer/         # Pipeline structure
-    auditor/                   # Quality review
-    pre-submission-audit/      # Manuscript check
-  reference/                   # Setup protocols and templates
-  scripts/                     # Hooks that run automatically
-```
+Things that pay off only in a larger setup: syncing several computers, running several sessions
+in parallel on one repository, literature databases connected as tools, and automated
+multi-step research pipelines.

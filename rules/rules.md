@@ -1,115 +1,98 @@
 # Rules
 
-Consolidated conventions for session protocol, workflow, and technical standards.
+Conventions for files, data, git, project tracking and code. Every project, every session.
 
-## Session Start
+## Files and data
 
-If the SessionStart hook runs (requires git), parse its structured output for sync status. Otherwise, when the user types `/startup`, read the project's tracking files directly.
+- **Raw data is never changed.** Every cleaning or coding step reads the raw files and writes a
+  new file. *Why:* a mistake in a step can then always be undone by re-running it.
+- **Numbers come from scripts, never typed in by hand.** A number in a table, a paper or a
+  slide must be produced by a script that runs from the raw data. *Why:* otherwise next year's
+  update, or a referee's question, cannot be answered by re-running it.
+- **Ask before deleting anything.** The permission settings make Claude Code ask for every
+  delete command. Beyond that, never delete through a script or a roundabout command, and never
+  empty a file to get rid of it. *Why:* `/rewind` undoes Claude's file edits, not a deleted file, and
+  outside git nothing brings it back.
+- **No git repository inside a cloud-synced folder** (OneDrive, Dropbox, Google Drive,
+  Nextcloud). On Windows, `Documents` and `Desktop` are often synced to OneDrive. *Why:* the sync
+  client and git fight over the same files and corrupt the repository. Check the path before
+  `git init`; keep projects in something like `C:\Users\<name>\projects\`.
+- **Personal data, licensed data and secrets** (passwords, API keys) are never committed, never
+  pasted into a public place, and only sent to a service I have approved. When unsure whether a
+  file counts, ask.
+- **CSV files for German Excel:** semicolon as separator, comma as decimal sign, UTF-8 with a
+  byte-order mark (`readr::write_excel_csv2()` in R; in pandas
+  `df.to_csv(path, sep=";", decimal=",", encoding="utf-8-sig")`). *Why:* Excel with German
+  settings then opens them with a double-click, umlauts intact; without the byte-order mark it
+  garbles them. Reading someone else's CSV, use their format.
+- **Write text files as UTF-8** and say so explicitly in code (`encoding="utf-8"`). Windows
+  otherwise picks an older encoding and umlauts break.
 
-**If the hook runs:**
+## Project tracking (`claude/` in each project)
 
-- `STATUS: UP_TO_DATE` → proceed.
-- `STATUS: BEHIND` → tell the user and ask whether to pull.
-- `STATUS: FETCH_FAILED` or `STATUS: NOT_A_REPO` → proceed with local state.
-- Do NOT read context files until any pulls are complete.
+- **`claude/next_steps.md` is the handover:** where the project stands, what was done last, what
+  comes next. It is overwritten at every session end: a snapshot, not a diary.
+- **`claude/OPEN_ISSUES.md` holds only what is still open:** bugs, questions, to-dos, each with
+  what would close it. A resolved item is deleted, not ticked off. It is resolved when it has been
+  checked, not when a fix was attempted.
+- **Decisions get a short discussion file** in `claude/` (`decision_<topic>.md`): the question,
+  the options, what we chose and why, and what we rejected. *Why:* a year later the reason is
+  what you need, and nobody remembers it.
+- **Keep them current as we go,** not reconstructed at the end of the session.
+- **The project's `CLAUDE.md` says what you need to know about the project** in every session:
+  its goal, its data, its folder layout, its rules. Keep it short, with details in files it
+  points to.
 
-**Always (with or without hook):**
+## Git
 
-1. Check if `claude/panic_dump.md` exists — if so, read it and surface it (previous session ended abruptly)
-2. Read `claude/OPEN_ISSUES.md` and `claude/next_steps.md` — surface open issues and next steps
-3. Verify the project's `CLAUDE.md` has `project-type` and `project-context`. If missing, ask.
+- **The main branch is `main`.** New repositories: `git init -b main`.
+- **Commit after each working step,** with a message that says what changed and why. State the
+  message before committing, so I can stop it. Stage only the files this step touched.
+- **Never commit data, generated outputs (tables, figures, PDFs) or secrets.** The project's
+  `.gitignore` keeps them out; a new kind of file gets a line there first.
+- **Push at the end of a session** if the repository has a remote. *Why:* a commit only on this
+  laptop dies with it.
+- **Explain each git command in plain words** the first time it comes up.
+- Force-pushing, `git reset --hard` and `git clean` are blocked in the settings. If one seems
+  necessary, explain why and let me run it.
 
-## Session End
+## Code (you write it, I check what it produces)
 
-When the user signals session end, prompt them to run `/session-end`. The command handles:
-1. Update `claude/next_steps.md` — what was accomplished, where we left off, priorities for next session
-2. Update `claude/OPEN_ISSUES.md` — any new issues, delete resolved ones
-3. If using git: commit and push
+- **Python through `uv`,** one environment per project (`uv init`, `uv add <package>`,
+  `uv run script.py`). **R packages through `renv`;** run R scripts as `Rscript x.R` from the
+  project folder, so renv switches on the project's packages (`--vanilla` would skip that).
+- **Every script starts with a short header:** what it does, what it reads, what it writes.
+- **Check after every data step:** row counts after a merge, missing values in key columns,
+  value ranges. Stop with a clear error rather than continue with a wrong result.
+- **Show me results I can check against the source:** a few rows next to the page or cell they
+  came from, a count I can compare. Do not ask me to read code to trust a number.
+- **Long runs:** estimate the time first (time one unit), run them in the background, and do not
+  edit a script while it runs.
+- **Inspect data files with code** (R, Python), never by reading them as text: wide tables are
+  easy to misread by eye.
+- Load the `coder` skill before writing or debugging code; it has the details.
 
-`next_steps.md` is a **current-state snapshot**, not a log. Overwrite it at every session end.
+## Writing
 
-## Issue Tracking
+LaTeX tables, figures and the Overleaf project: the `research-paper` skill. Prose that other
+people will read (papers, proposals, replies to referees): the `author` skill.
 
-- Maintain `claude/OPEN_ISSUES.md` per project — all open issues, bugs, design questions, and to-dos.
-- `OPEN_ISSUES.md` is a current-state snapshot. Only genuinely open items live here. Resolved items are deleted.
-- When presenting multiple issues, reorder by dependency (prerequisites first).
-- When a change incidentally resolves an open issue, flag this to the user explicitly.
+## Quality
 
-## Documentation
+- **When something goes wrong, find out why before trying again.** A second attempt at the same
+  thing without a reason is guessing.
+- **When you fix one instance of a problem, check the others.** The same mistake usually sits
+  in the sibling files too.
+- **A claim like "nothing else uses this" or "all files are updated" needs the command that
+  shows it,** with its output.
+- **Facts that change over time** (versions, prices, deadlines, rules) carry the date you checked
+  them. Older than about three months: say "as of <date>, check again".
+- **Re-read anything substantial before presenting it,** looking for contradictions and broken
+  references.
 
-- When a decision requires weighing multiple factors, create a discussion file in `claude/` before resolving it.
-- When a problem surfaces and gets resolved with a new convention, document it in a discussion file — what went wrong, what was decided, and why.
+## Reading efficiently
 
-## Quality & Self-Correction
-
-- Treat errors with rigor. When something goes wrong, investigate why before moving on.
-- When the user fixes something, read their actual fix before updating instructions.
-- After any correction from the user, identify the pattern and update the relevant file immediately — don't defer to session end.
-- When the user starts a side-topic during a focused task, suggest deferring unless it's small or a prerequisite.
-
-## Git & Commits
-
-**Git is optional.** If the project is not a git repo, skip all git-related steps. If the user wants to start using git, offer to set it up.
-
-When git is in use:
-
-- **Main branch is always `main`, never `master`.** Initialize new repos with `git init -b main`.
-- **Never commit without explicit user instruction.** After completing changes, summarise what would go into the commit and ask whether to proceed.
-- Before committing, read `reference/checklist.md` and verify applicable obligations.
-- Stage specific files — never `git add -A` blindly.
-- Never commit data, outputs, tables, plots, or generated artifacts.
-- Push when: ~5 commits accumulated, session ending, or user asks.
-
-## New File Creation
-
-- **Never create a new file without the user's greenlight.** Show the full draft content first, wait for approval, then write.
-- Edits to existing files are fine — the user sees the diff.
-
-## Technical Conventions
-
-### Naming & Style
-
-- Prefer `lower_snake_case` for all variable, function, and file names.
-
-### Project Placement
-
-**If using git:** project folders must live in a local (non-cloud-synced) folder. Cloud storage (Google Drive, OneDrive, Nextcloud) creates hidden files inside `.git/` and causes errors.
-
-**If not using git:** projects can live anywhere, including cloud-synced folders.
-
-### Machine-Specific Paths
-
-Never hardcode machine-specific paths in code you intend to share. Two strategies:
-
-1. **Auto-detect from the tool's own config** — e.g., Dropbox writes its path to a known JSON file; read it at runtime.
-2. **`config_local.R`** — define machine-specific variables there; code sources it with `if (file.exists("config_local.R")) source("config_local.R")` and provides safe defaults. If using git, add `config_local.R` to `.gitignore`.
-
-### Reproducibility
-
-- For R projects, suggest loading `empirical-analysis/r.md`; for Python, suggest `empirical-analysis/python.md`.
-- If using git: only commit code files. Ensure `.gitignore` covers everything that isn't code.
-- If not using git: keep data and code in separate folders so the project can be version-controlled later.
-
-### MCP Servers
-
-Register at user level (`claude mcp add -s user`), not in a project `.mcp.json`.
-
-### Project Notes
-
-Keep cross-session working files in `claude/` inside the project. The auto-loaded `memory/MEMORY.md` should stay minimal.
-
-### Context Management
-
-- Single file at a known path → `Read` directly, never use a subagent.
-- Long file, only part needed → Grep for structure first, then `Read` with offset + limit.
-- 3+ files or cross-file synthesis → use a subagent (Explore agent).
-- PDFs → always use the `pages` parameter (max 20 pages per call).
-- Suggest `/compact` when the session has accumulated a lot of context.
-
-### Data File Inspection
-
-Never use subagents to inspect structured data files (CSV, JSON). Use Bash + Python's `csv` module or Rscript for accurate results.
-
-## Written Summaries
-
-When the user asks for a written summary, save it as a file in `claude/` — not just in the chat. Use `.tex` when it contains LaTeX, `.md` otherwise.
+- One known file: read it directly. A long file: search it first, then read the part you need.
+- Three or more files, or a question across a whole folder: use a subagent and report its
+  conclusion.
+- PDFs: read only the pages you need.

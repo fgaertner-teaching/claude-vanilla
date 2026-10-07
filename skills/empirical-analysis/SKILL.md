@@ -1,216 +1,235 @@
+---
+name: empirical-analysis
+description: "Empirical research methods in R or Python: identification, estimation, standard errors, diagnostics, robustness, data validation, and interpreting and reporting results. ALWAYS use this skill when designing a study, running or interpreting a regression or any other statistical model, choosing standard errors or clustering, arguing identification (RCT, DiD, IV, RDD, panel fixed effects, matching), validating a dataset before analysis, checking a number before it goes into a paper, talk or proposal, or writing up results. Sub-files cover R (renv), Python (uv), plotting, marginaleffects, causal reasoning and research integrity. Not for LaTeX table formatting (research-paper), prose (author), writing a pre-registration or power analysis (analysis-plan), or project setup with no analysis."
+---
+
 # Skill: Empirical Analysis
 
-**Load when:** running regressions, causal analysis, or any econometric task.
-**Skip when:** the task is table formatting, paper writing, or project organisation with no new analysis.
+**Purpose:** Identification-first empirical work: pick the design from the variation, estimate it correctly, check it, and claim only what the data support.
+**Load when:** running or interpreting any statistical analysis, or deciding anything about identification, standard errors, samples or robustness.
+**Skip when:** the task is pure table formatting, prose, or project organization with no analysis.
+**Modifies behavior:** look at the data and assert its shape before modeling; run diagnostics before interpreting; tie every number to a script; match causal language to the design.
 
-Domain expertise for empirical economic analysis — identification, estimation, diagnostics. For general principles see global `CLAUDE.md`. For project setup and output formatting see `reference/academic_conventions.md`. For language-specific tooling load `r.md` (R) or `python.md` (Python) as needed.
+Project setup and the analysis-plan process: `reference/academic_conventions.md`. Writing the plan
+itself (hypotheses, power, success criteria): the `analysis-plan` skill.
 
----
+## Sub-files: load the one the task needs
 
-## Data Object Naming
+| File | Load when |
+|---|---|
+| `r.md` | writing or running R; renv; a package will not install |
+| `python.md` | writing or running Python; uv; encoding errors |
+| `plotting.md` | any figure for a paper, talk or report |
+| `marginaleffects.md` | interpreting model output: predictions, AMEs, interactions |
+| `causal_reasoning.md` | the task IS causal reasoning (see below) |
+| `research_integrity.md` | a number may enter a paper, talk, proposal or pre-registration; an LLM produces or codes data |
 
-Final analysis-ready datasets must be named `data_final_{study}_{phase}`, e.g.:
-- `data_final_experiment1_pilot`
-- `data_final_experiment1_main`
-- `data_final_experiment2_pilot`
-
-**Never** use generic names like `df`, `df_long`, `data`, or `data_clean`. Generic names cause silent collisions when multiple studies or phases are loaded in the same environment.
-
-The same logic applies to intermediate objects: use `data_interim_{study}_{phase}_{step}` for anything saved to `2_interim_data_steps/`. Objects saved to `3_clean_data/` are always `data_final_*`.
-
-For sub-datasets derived from the final dataset (e.g. a final-round dataset), suffix with the scope: `data_final_experiment1_pilot_finalround`.
-
----
-
-## EDA Workflow
-
-**Always start with exploratory plots before any quantitative analysis.**
-
-Before running regressions, produce at minimum:
-1. Outcome distributions by treatment arm
-2. Key predictor distributions — check for outliers, clumping, ceiling/floor effects
-3. Raw Y–X scatter plots for the central relationships
-4. Panel trends or time series if applicable
-
-EDA plots are for the researcher, not the paper. They belong in a dedicated `2_3_EDA_Plots.R` script (or equivalent) that runs *before* stage 3 (formal analysis), so there is a paper trail of what the data look like before any modeling assumptions are imposed.
+`causal_reasoning.md` is for auditing an identification argument, challenging a causal claim,
+drawing a DAG, or checking causal wording in a draft. A passing mention of causation is not enough.
 
 ---
 
-## Data Validation
+## Data object naming
 
-**Run programmatic checks on every dataset before analysis — not just visual EDA.**
+Final analysis-ready datasets are `data_final_{study}_{phase}` (`data_final_survey_pilot`,
+`data_final_survey_main`); intermediate ones `data_interim_{study}_{phase}_{step}`; subsets get a
+suffix (`data_final_survey_main_wave2`). **Never** `df`, `data`, `data_clean`.
+Why: generic names collide silently when two studies or phases are loaded in one session, and the
+wrong dataset gets analyzed without any error. (Folder layout: `reference/new_project.md`.)
 
-After data cleaning and before formal analysis, include a validation step that checks:
-1. **Completeness** — missing values per variable, unexpected NAs in required fields
-2. **Type integrity** — numeric columns are numeric, factors have expected levels, dates parse correctly
-3. **Range plausibility** — values within expected bounds (e.g., Likert 1–7, ages 18–99, probabilities 0–1)
-4. **Uniqueness constraints** — one row per subject (or per subject-round), no duplicate IDs
-5. **Treatment assignment** — expected group sizes, no unassigned observations
+## Describe a derived variable by what was measured
 
-Implement as assertions that **stop the pipeline** on failure, not warnings that scroll past. In R: `stopifnot()` or `assertthat::assert_that()`. In Python: plain `assert` or `pandas` `.pipe()` with validation functions.
-
-Place validation in the cleaning script (stage 2), after the final dataset is assembled but before it's saved as `data_final_*`. This catches issues at the source, not downstream when a regression produces weird results.
-
----
-
-## Identification & Causal Inference
-
-**Design selection:** What variation identifies the causal effect? → Choose strategy accordingly.
-
-**RCT** (Gerber & Green 2012)
-- Assumptions: random assignment, SUTVA, no attrition bias
-- Diagnostics: balance tables, attrition analysis, compliance rates
-- Fails when: differential attrition, non-compliance, spillovers
-
-**Difference-in-Differences** (Roth et al. 2023)
-- Assumptions: parallel trends, no anticipation, stable composition
-- Diagnostics: pre-trend plots, event study, placebo tests
-- Fails when: time-varying confounders, compositional changes
-
-**Instrumental Variables** (Angrist & Pischke 2009; Imbens & Angrist 1994)
-- Assumptions: relevance, exclusion restriction, monotonicity (LATE)
-- Diagnostics: tF procedure (Lee et al. 2022 AER) — F-dependent adjusted critical values; F>10 with cv=1.96 is anti-conservative. Also: reduced form, overid tests
-- Fails when: weak instruments, exclusion violation
-
-**Regression Discontinuity** (Cattaneo et al. 2020)
-- Assumptions: continuity of potential outcomes at cutoff, no manipulation
-- Diagnostics: McCrary density test, covariate smoothness, bandwidth sensitivity
-- Fails when: manipulation/sorting, discrete running variable
-
-**Panel Fixed Effects** (Wooldridge 2010, ch. 10)
-- Assumptions: strict exogeneity (no feedback), time-invariant unobservables
-- Diagnostics: Hausman test, within-R², pre-treatment falsification
-- Fails when: time-varying unobservables, Nickell bias (short T)
-
-**Matching/IPW** (Imbens 2004; Ho et al. 2007)
-- Assumptions: CIA/unconfoundedness, common support
-- Diagnostics: propensity score overlap, balance after matching, sensitivity analysis (Rosenbaum bounds)
-- Fails when: unobserved confounders
-
-For experiments (primary domain): always report ITT. Report LATE/TOT only with clear first-stage and exclusion-restriction argument.
-
----
-
-## Statistical Methods & Estimation
-
-### ANOVA & Factorial Designs
-- Use `afex::aov_ez()` or `afex::aov_car()` for factorial and repeated-measures ANOVA — handles sphericity (GG correction) and Type III SS correctly by default
-- Contrast coding: set contrasts explicitly (`contr.sum` for Type III SS); document the coding scheme
-- Report partial eta-squared (η²_p) for effect sizes; use `effectsize::eta_squared()`
-- ANOVA is a special case of regression — switch to regression when covariates, unbalanced designs, or continuous moderators are needed
-- For post-hoc comparisons: `emmeans` with Tukey or Holm adjustment
-
-### Mixed / Multilevel Models
-- Use `lme4::lmer()` when: repeated measures, nested/clustered data, crossed random effects, interest in variance components
-- Always specify the maximal random-effects structure justified by design (Barr et al. 2013), then simplify if convergence fails
-- Report fixed effects, random effects SDs, ICC; use `lmerTest` for p-values (Satterthwaite)
-- Convergence issues: try `bobyqa` optimizer, scale predictors, simplify random slopes
-
-### Fixed Effects (Panel)
-- Use `fixest::feols()` for panel FE — fast, flexible, built-in clustering
-- Prefer FE over RE when unobserved heterogeneity likely correlates with regressors (Hausman test)
-- Cluster SEs at the level of treatment assignment (Abadie et al. 2023)
-- `fixest` syntax: `feols(y ~ x | fe1 + fe2, cluster = ~cluster_var, data = df)`
-
-### Robust Standard Errors & Clustering
-- Default: cluster at treatment assignment level; if only one level of clustering, use `sandwich::vcovCL` or `fixest` built-in
-- For few clusters (<50): use wild cluster bootstrap (`fwildclusterboot`)
-- HC1 (Stata default) vs HC2/HC3: prefer HC2 for small samples (`estimatr::lm_robust`)
-
-### Multiple Hypothesis Testing
-- Pre-specify primary vs. secondary/exploratory outcomes
-- Bonferroni-Holm (FWER control): `p.adjust(p, method = "holm")` — default choice
-- Benjamini-Hochberg (FDR control): when many outcomes, exploratory context
-- Romano-Wolf (randomization-based FWER): `rwolf` package, accounts for dependence across outcomes
-
-### Effect Sizes
-- Cohen's d: `effectsize::cohens_d()` — between-group standardized difference
-- Partial eta-squared: ANOVA effect sizes
-- Standardized regression coefficients: scale variables or use `effectsize::standardize_parameters()`
-- Marginal effects for nonlinear models: `marginaleffects::avg_slopes()`
-
-### Mediation Analysis
-- Use the Imai et al. (2010) framework (`mediation` package) — allows nonlinear models, provides sensitivity analysis
-- Baron & Kenny (1986) approach: outdated, low power, no inference on indirect effect — avoid
-- Always report ACME + sensitivity analysis (ρ at which ACME = 0)
-- Sequential ignorability is strong and untestable — state this explicitly
-
----
-
-## Diagnostics Checklist
-
-### Pre-Analysis
-- [ ] Descriptive statistics (distributions, outliers, missingness patterns)
-- [ ] Balance checks across treatment arms (normalized differences, not just p-values)
-- [ ] Attrition analysis (differential by treatment?)
-- [ ] Power analysis (ex ante or minimum detectable effect)
-
-### Model Diagnostics
-- [ ] Residual plots (linearity, homoscedasticity, normality for small samples)
-- [ ] Multicollinearity: VIF > 10 is a flag (`car::vif()`)
-- [ ] Influential observations: Cook's distance, DFBETAS
-- [ ] For ANOVA: sphericity (handled by `afex`), normality of residuals
-
-### Post-Analysis Robustness
-- [ ] Alternative specifications (add/drop controls, different FEs)
-- [ ] Alternative DVs (transformations, alternative measures)
-- [ ] Alternative samples (drop outliers, subgroups, winsorize at 1%/99%)
-- [ ] Different SEs (robust, clustered at different levels, bootstrap)
-- [ ] Specification curve analysis (Simonsohn et al. 2020) for comprehensive robustness
-
----
-
-## Verification Rules
-
-**Never trust numbers alone. Always request a figure.**
-
-A table that says "ATT = -0.73" is easy to accept uncritically. A visualization showing the wrong pattern is immediately obvious. Request plots proactively — not just for publication, but to understand what the code is computing.
-
-- For treatment effects: plot raw distributions, event-study figures, or binned scatter plots alongside point estimates
-- For regressions: plot residuals, leverage, and the key relationship visually
-- For panel/DiD: plot raw group trends, not just the estimated treatment effect
-- "Almost right" is never good enough — if a number is close but not exact to what's expected, stop and investigate. In research, unlike software, a subtle bug produces a wrong conclusion in a published paper.
-
----
-
-## Common Pitfalls
-
-- **Bad controls:** Don't control for post-treatment variables or mediators (Angrist & Pischke 2009, ch. 3.2.3)
-- **Interpreting interactions:** The coefficient on X₁×X₂ is NOT the interaction effect in nonlinear models (Ai & Norton 2003); use `marginaleffects` for correct marginal interaction effects
-- **p-hacking / researcher degrees of freedom:** Pre-register, report all specifications, use specification curves
-- **Ecological fallacy:** Group-level correlations ≠ individual-level effects — match analysis level to theory
-- **Measurement error:** Classical error in X → attenuation bias; error in DV → inflated SEs but no bias (under OLS)
-- **Collider bias:** Conditioning on a collider (common effect of treatment and outcome) induces spurious association
-- **Multiple comparisons in subgroup analyses:** Always adjust or frame as exploratory
-
----
-
-## Standard References
-
-**Causal inference & econometrics:**
-Angrist & Pischke (2009) *Mostly Harmless Econometrics*; Angrist & Pischke (2014) *Mastering 'Metrics*; Wooldridge (2010) *Econometric Analysis of Cross Section and Panel Data*; Imbens & Angrist (1994, Econometrica) — LATE framework; Cameron & Trivedi (2005) *Microeconometrics*
-
-**Experiments:**
-Gerber & Green (2012) *Field Experiments*; Athey & Imbens (2017) ch. 3 in *Handbook of Economic Field Experiments*
-
-**Specific methods:**
-Roth et al. (2023, JoE) — DiD review; Cattaneo et al. (2020, CUP) — RD; Lee et al. (2022, AER) — valid IV inference, tF procedure; Imai et al. (2010, Psych Methods) — causal mediation; Barr et al. (2013, JML) — random effects structure; Abadie et al. (2023, QJE) — when to cluster
-
-**Robustness & reporting:**
-Simonsohn et al. (2020, Nature Human Behaviour) — specification curve; Cinelli & Hazlett (2020, JRSS-B) — omitted variable bias sensitivity
-
-## Research Follow-Up Ideas
-
-When discussing substantive findings — after presenting results, after a robustness check reveals something unexpected, or after discussing implications — proactively suggest follow-up research questions if they arise naturally. Frame as "here's something that might be interesting to explore" rather than a recommendation.
-
-Save ideas to `claude/research_ideas.md` in the project. Format:
+- **"Imputed" means missing values were estimated.** Never use it for a deterministic recode (a
+  qualification mapped to years of schooling, a rescaled Likert item). It claims numbers were made
+  up, and a referee will ask which. Say *translates to / corresponds to / on the standard mapping*.
+- **Lead with what the instrument recorded; let the derived number be the gloss.**
 
 ```
-## [Short idea title]
-- **Date:** YYYY-MM-DD
-- **Prompted by:** [which finding or discussion]
-- **Idea:** [1–3 sentences]
-- **Feasibility:** [one-line assessment — data availability, method complexity, scope]
+# WRONG
+"Participants completed an average of 16 years of formal education."
+# RIGHT
+"The median participant holds a bachelor's degree, which the standard mapping translates into 16 years."
 ```
 
-Do this only at natural pause points, not after every minor output. The user decides whether to keep, develop, or discard each idea.
+Why: prose in the derived units inherits every objection to those units (16 years in a classroom?),
+and the data cannot settle them.
+
+---
+
+## Before any model: look, then assert
+
+**Exploratory plots first.** Before any regression, plot outcome distributions by treatment arm, key
+predictors (outliers, clumping, floor and ceiling effects), raw Y–X scatters for the central
+relationships, and group trends for panel data. Keep them in their own script that runs before the
+analysis stage (e.g. `2_3_eda_plots.R`), so there is a record of what the data looked like before
+any model assumption was imposed. These plots are for the researcher, not the paper.
+
+**Validate with assertions that stop the run.** After cleaning, before saving `data_final_*`:
+
+1. Completeness: missing values per variable; none in required fields
+2. Types: numerics are numeric, factor levels as expected, dates parse
+3. Ranges: Likert 1–7, ages 18–99, shares 0–1
+4. Uniqueness: one row per unit (or unit-period); no duplicate IDs
+5. Assignment: expected group sizes; no unassigned units
+6. Sample size: N matches the source, and every dropped row is accounted for
+
+R: `stopifnot()`; Python: `assert`. Why: a warning scrolls past; a stopped pipeline gets fixed at the
+source instead of surfacing weeks later as a strange coefficient.
+
+---
+
+## Identification: what variation identifies the effect?
+
+| Design | Key assumptions | Diagnostics | Breaks when |
+|---|---|---|---|
+| RCT | random assignment, SUTVA | balance, attrition, compliance | spillovers, differential attrition |
+| DiD | parallel trends, no anticipation | event study, pre-trends, placebo | time-varying confounders |
+| IV | relevance, exclusion, monotonicity | first stage, tF, reduced form | weak instrument, exclusion fails |
+| RDD | continuity at cutoff | density test, covariate smoothness | sorting, discrete running variable |
+| Panel FE | strict exogeneity | within-R², pre-period placebo | time-varying unobservables, short T |
+| Matching / IPW | unconfoundedness, overlap | overlap, post-match balance | unobserved confounders |
+
+- **Experiments: always report ITT.** LATE/TOT only with a clear first stage and exclusion argument.
+- **Balance by normalized differences, not p-values.** A p-value on balance mostly reports N.
+- **IV:** F > 10 with a 1.96 critical value is anti-conservative; use the tF procedure (Lee et al. 2022).
+- **Staggered DiD:** never vanilla TWFE as the primary estimator (negative weights). Use Callaway &
+  Sant'Anna (`did`), Sun & Abraham (`fixest::sunab()`) or Borusyak et al. (`did2s`).
+- Partial controls, colliders, mechanism vs confounder: `causal_reasoning.md`.
+
+---
+
+## Estimation defaults
+
+**Standard errors**
+- Cluster at the level of treatment assignment (Abadie et al. 2023). Why: that is where the
+  correlated shocks come from; clustering lower overstates precision.
+- Fewer than ~50 clusters: wild cluster bootstrap (R `fwildclusterboot`).
+- Small samples without clustering: HC2 over HC1 (`estimatr::lm_robust`).
+- A single time series: textbook Newey–West (short lag, normal critical values) over-rejects under
+  persistence. Use fixed-b inference: Newey–West with lag ≈ 1.3·√T and fixed-b critical values, or
+  the equal-weighted cosine estimator (Lazarus, Lewis, Stock & Watson 2018). For near-unit-root
+  series (ρ ≳ 0.9) even these over-reject: use a longer series or local-to-unity corrections.
+
+**Panel fixed effects:** `fixest::feols(y ~ x | unit + year, cluster = ~unit, data = ...)`. Prefer
+FE over RE when unobserved heterogeneity plausibly correlates with the regressors.
+
+**ANOVA and factorial designs:** `afex::aov_ez()` / `aov_car()` (sphericity correction; Type III
+sums of squares with `contr.sum`, set explicitly). Partial η² via `effectsize::eta_squared()`;
+post-hoc via `emmeans` with Holm or Tukey. ANOVA is a regression: switch to one when you need
+covariates, unbalanced cells or continuous moderators.
+
+**Mixed models:** `lme4::lmer()` for repeated measures, nesting or crossed random effects. Start
+from the maximal random-effects structure the design justifies, simplify only on non-convergence
+(Barr et al. 2013); p-values via `lmerTest`. Convergence: `bobyqa` optimizer, scale predictors,
+drop random slopes last.
+
+**Multiple testing:** pre-specify the families. Holm (FWER) by default; Benjamini–Hochberg (FDR)
+for many exploratory outcomes; Romano–Wolf when outcomes are correlated.
+
+**Effect sizes:** report in the outcome's own units first; standardized (Cohen's d,
+`effectsize::cohens_d()`) as a supplement. Nonlinear models: average marginal effects
+(`marginaleffects.md`).
+
+**Mediation:** Imai et al. (2010), R `mediation`: report the ACME plus its sensitivity (the ρ at
+which it reaches zero), and state that sequential ignorability is strong and untestable. Not Baron &
+Kenny: low power and no inference on the indirect effect.
+
+---
+
+## Diagnostics checklist
+
+- **Before:** descriptives and missingness; balance by arm; attrition by arm; power or MDE
+- **Model:** residual plots; VIF > 10 as a flag (`car::vif()`); influence (Cook's distance, DFBETAS)
+- **Robustness:** add/drop controls and FEs; alternative outcome measures; alternative samples
+  (outliers, subgroups, winsorizing at 1/99); alternative SEs; a specification curve (Simonsohn et
+  al. 2020) when the space of reasonable choices is large
+
+---
+
+## Reading and reporting results
+
+For each analysis, hand over a short interpretation block before any prose is written:
+
+1. **Estimated:** which hypothesis or plan item
+2. **Specification:** model, controls, fixed effects, clustering, N
+3. **Key results:** by condition or group, with effect sizes in real units
+4. **Benchmark:** how the result compares with the theoretical or rational prediction
+5. **Pattern:** what the results look like across conditions taken together
+6. **Surprises:** reversals, non-linearities, nulls where effects were expected
+7. **Connections:** how it bears on the other analyses in the paper
+8. **Limitations:** caveats specific to this analysis
+
+Why: without fields 5–7 the write-up reports numbers mechanically and the argument goes missing.
+
+- **Compare pooled with per-condition results.** A pooled coefficient can hide a sign reversal.
+- **Interpret from the formatted table the reader will see**, not raw console output: it catches
+  wrong rounding and missing stars.
+- **Never name a derived variable after one of its inputs** (`wtp_diff_benchmark`, not
+  `wtp_rational`): the abbreviation confuses input and output in code, headers and axis labels.
+- **Separate statistical from economic significance**; interpret coefficients in real units.
+- **Own every number in the table.** If someone points at any number and asks "what is going on
+  here?", have an answer or know how to get one. Two always matter: the sample size (a surprising N
+  is almost never random: a merge, an implicit restriction, missing-data handling) and the pattern
+  of coefficients across columns (controls that flip sign, estimates that move when a variable enters).
+- **A falsification test is not a box to tick.** State which alternative story it tests, what
+  estimate would be worrying, and what you expected. A noisy null is not evidence of validity unless
+  the imprecision was expected.
+
+---
+
+## Verifying a result
+
+- **Ask for a figure, not only a number.** "ATT = −0.73" is easy to accept; a plot of the wrong
+  pattern is obvious. Raw group trends for DiD, binned scatters, residuals.
+- **"Almost right" is wrong.** A number close to but not exactly what you expected means stop and
+  find out why. In research a subtle bug does not crash; it becomes a published conclusion.
+- **An internally consistent table is not a verified one.** A row that sums to its own N proves
+  nothing when the N was computed from that row: the check compares a number with its own inputs.
+  Recount every row against the data, not only the rows that look wrong. A table that is *almost*
+  in the right order is the dangerous one: the first columns check out by eye and the errors sit in
+  the displaced cells.
+- **Generate tables by script; never transcribe them.** Order categories by an explicit level
+  order, so a missing level counts 0 instead of shifting every later cell. (Classic failure: Likert
+  categories sorted as text, so the labelled endpoint "1 = not at all" lands after "5".)
+- **Get a check from outside the session.** After a self-contained analysis, run `/what-slipped`, or ask
+  a fresh session to reproduce the headline number from the raw data and the plan alone. The full
+  check for anything publication-bound is in `research_integrity.md`.
+
+---
+
+## Common pitfalls
+
+- **Bad controls:** never control for post-treatment variables or mediators (Angrist & Pischke 2009, 3.2.3).
+- **Interactions in nonlinear models:** the coefficient on X₁×X₂ is not the interaction effect
+  (Ai & Norton 2003); compute it with `marginaleffects`.
+- **Collider bias:** conditioning on a common effect of treatment and outcome creates an association.
+- **Partial confounder control can increase bias.** Biases carry signs and partly cancel: with two
+  confounders biasing by +5 and −2 the net bias is +3; control for the −2 one and it becomes +5. So
+  "we control for what we observe" does not mean "closer to the truth", and a coefficient that moves
+  as control blocks are added is not converging. Sign the biases before claiming a direction.
+- **Measurement error:** classical error in X attenuates; in Y it inflates SEs without bias (OLS).
+- **Ecological fallacy:** group-level correlations are not individual effects.
+- **Subgroups:** adjust for multiple comparisons or label them exploratory.
+- **Forking paths:** Claude makes "one more specification" effortless. Pre-specify, report every
+  specification run (or a specification curve), and log each deviation from the plan with its reason.
+
+---
+
+## Standard references
+
+- **Econometrics:** Angrist & Pischke (2009) *Mostly Harmless Econometrics*; Wooldridge (2010)
+  *Econometric Analysis of Cross Section and Panel Data*; Cameron & Trivedi (2005) *Microeconometrics*
+- **Experiments:** Gerber & Green (2012) *Field Experiments*; Athey & Imbens (2017), *Handbook of
+  Economic Field Experiments*, ch. 3
+- **Methods:** Roth et al. (2023, JoE) DiD; Cattaneo, Idrobo & Titiunik (2020) RDD; Lee et al.
+  (2022, AER) IV inference; Imbens & Angrist (1994) LATE; Imai et al. (2010) mediation; Barr et al.
+  (2013) random effects; Abadie et al. (2023, QJE) clustering
+- **Robustness:** Simonsohn et al. (2020) specification curve; Cinelli & Hazlett (2020) omitted-variable sensitivity
+
+If you recommend a method and cannot name its standard reference, say the suggestion needs checking.
+
+## Follow-up ideas
+
+When a finding suggests a new research question, offer it in one line at a natural pause, not after
+every output. If the user wants to keep it, append it to `claude/research_ideas.md` with title,
+date, what prompted it, the idea (1–3 sentences) and a one-line feasibility note.

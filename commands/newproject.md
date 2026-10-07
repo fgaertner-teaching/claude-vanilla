@@ -1,36 +1,53 @@
-Set up a new project or migrate a legacy project to current conventions.
+---
+description: Set up a new research project (folder-location check, CLAUDE.md, claude/ tracking files, folder structure, .gitignore, raw-data lock, git) or bring an existing project up to these conventions.
+---
 
-Read `~/.claude/reference/new_project.md` and walk through it interactively. At each step, ask the user for decisions before proceeding.
+Set up this project with the user by walking through `~/.claude/reference/new_project.md`.
+Read that file first; it holds the templates and the reasons. This command says how to run it.
 
-## Mode detection
+## 1. Which mode
 
-Check the current working directory:
-- **Empty folder** → new project setup
-- **Existing folder with files** → migration checklist
+Look at the current folder:
 
-Ask the user to confirm the mode before proceeding.
+- **Empty, or nearly** (no scripts, no data): a **new project**, steps 1 to 9 of the reference.
+- **An existing project with files:** **bring it up to the conventions**, the reference's last
+  section. Audit first, report what conforms and what does not, then fix one group at a time.
 
-## New project flow
+Say which mode you see and let the user confirm before changing anything.
 
-Walk through each step in order. Key decision points where you must ask:
+## 2. Ask, one question at a time
 
-1. **Project identity** — ask for `project-type` and `project-context`
-2. **Folder structure** — ask whether `programming/` is needed, then ask: **single-study or multi-study?**
-   - **Single-study** (recommended for most projects): flat `analysis/` structure. `Claude_suggestions.R` in `analysis/` root.
-   - **Multi-study:** ask how many studies and whether there's a pilot. Create `study_N/phase/` nesting.
-3. **Git** — ask: "Do you want to use git for version control? (Recommended but not required.)" If yes, run `git init -b main` and set up `.gitignore`. If no, skip git setup — the project still works, just without version history.
-4. **Analysis plan** — ask the user to describe the research question, hypotheses, and planned analyses. Draft `claude/analysis_plan.md` from their answers.
-5. **Cloud storage and Overleaf** — ask whether there's an Overleaf document or shared data folder
-6. **Co-authors** — ask whether the project will have co-authors (if yes, suggest setting up git)
+1. **Where:** run the folder-location check (reference step 1) and report the result. If the
+   folder is inside a cloud-synced folder, stop until the user has chosen a new place.
+2. **What the project is:** name, `project-type`, and two or three sentences on question, data
+   and method. This becomes the project `CLAUDE.md`.
+3. **Language:** R, Python, or both.
+4. **Studies:** one study, or several (or a pilot plus a main wave).
+5. **Generated data:** does the project create its own data (experiment, simulation, scraping)?
+   If yes, it also gets `programming/`.
+6. **Raw data:** where it comes from, and where the untouched original stays.
+7. **GitHub:** a private remote now, or later?
+8. **Co-authors** working in the same code? If yes, read `~/.claude/reference/collaboration.md`
+   before the first commit.
+9. **A paper on Overleaf?** If yes, note it in `CLAUDE.md`; its layout is in
+   `~/.claude/reference/overleaf_conventions.md`.
 
-When creating `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`, use `~/.claude/reference/template_main_file.R` as the starting point.
+Then say what "done" will look like for this project (the list at the top of the reference,
+adapted to the answers) and wait for the user's OK.
 
-If using git: create all files first, then commit everything in a single initial commit.
+## 3. Build
 
-## Migration flow
+- Follow the reference's steps in order; report each in one line as it is done.
+- **The user copies the raw data in** (Explorer or Finder), and keeps the original where it was.
+  Claude does not move or copy data into `1_raw_data/` on its own.
+- **Existing projects:** never move, rename or delete a file without asking. Moving breaks every
+  path that points to it.
+- **Test the raw-data lock** as the reference describes, and report the result.
 
-For existing projects, audit and fix:
+## 4. Finish
 
-1. **Structure** — are folders organized? Are tracking files in `claude/`?
-2. **Tracking files** — does `CLAUDE.md` exist with project identity? Are `next_steps.md` and `OPEN_ISSUES.md` in place?
-3. **Git** (if applicable) — is `.gitignore` correct? Are data files excluded?
+1. Run `git status` and read the list: no data, PDFs or secrets. State the commit message, then
+   make one commit with the whole setup. Push if a remote exists.
+2. Tell the user in a few lines what was created, what was checked (folder location, lock test,
+   staged files), and the next step from `claude/next_steps.md`.
+3. Offer `/rename <project-name>` so the session can be found again.

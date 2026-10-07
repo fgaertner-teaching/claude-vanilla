@@ -1,113 +1,108 @@
-# Sub-skill: marginaleffects (Empirical Analysis)
+# Interpreting Models with marginaleffects
 
-**Load when:** computing predictions, comparisons, slopes, marginal effects, ATE/ATT/CATE, hypothesis tests on model output, or using `marginaleffects` functions.
-**Skip when:** the task is model estimation (not interpretation), or the user is not using the marginaleffects package.
+**Load when:** turning a fitted model into interpretable quantities: predictions, comparisons, average marginal effects, ATE/ATT/CATE, interaction effects in nonlinear models, hypothesis or equivalence tests on such quantities, in R or Python.
+**Skip when:** the task is fitting the model (not interpreting it), or a linear model whose coefficients already answer the question.
 
-R and Python package for interpreting statistical models. Load alongside `empirical-analysis/SKILL.md`.
-
-**Primary reference:** https://marginaleffects.com (free book, case studies, vignettes)
-**Book:** Arel-Bundock (2026), *Model to Meaning: How to Interpret Statistical Models in R and Python*, CRC Press.
-
----
-
-## Core framework: Five questions for every interpretation task
-
-1. **Quantity**: What estimand? (predictions, comparisons, slopes, or tests)
-2. **Predictors (Grid)**: Where to evaluate? (observed values, counterfactual scenarios, balanced grids via `datagrid()`)
-3. **Aggregation**: Over whom? (unit-level, group means with `by=`, weighted averages)
-4. **Uncertainty**: Which inference method? (delta method, robust SE, bootstrap, Bayesian via `vcov`/`inferences()`)
-5. **Test**: What hypothesis? (null tests, equivalence, pairwise contrasts via `hypothesis`/`equivalence` arguments)
-
-Apply this framework to structure every interpretation response.
+`marginaleffects` works the same way in R and Python. Load alongside `SKILL.md`.
+Reference: marginaleffects.com (free book, vignettes, case studies); Arel-Bundock, *Model to
+Meaning: How to Interpret Statistical Models in R and Python* (CRC Press).
 
 ---
 
-## Request classification
+## Five questions for every interpretation
 
-- **Conceptual** (which estimand? how to interpret?) → explain using the five-question framework
-- **Implementation** (function syntax, arguments) → provide code with the correct function
-- **Mixed** → start with conceptual framing, then provide code
+Answer them in this order, explicitly, before writing code:
 
----
+1. **Quantity:** what estimand? A prediction, a comparison (difference, ratio), a slope, or a test.
+2. **Grid:** evaluated where? The observed data, a counterfactual scenario, or a constructed grid (`datagrid()`).
+3. **Aggregation:** over whom? Each unit, groups (`by =`), or a weighted average.
+4. **Uncertainty:** delta method (default), robust or clustered (`vcov =`), or bootstrap (`inferences()`).
+5. **Test:** against what? Zero, another estimate (`hypothesis =`), or an equivalence range (`equivalence =`).
 
-## Core functions (R)
+Why: most misreadings of nonlinear models come from an unstated answer to 2 or 3 (an effect "at
+the mean" reported as if it were the average effect).
 
-| Function | Purpose | Avg variant |
-|----------|---------|-------------|
-| `predictions()` | Predicted values / expected outcomes at specific points | `avg_predictions()` |
-| `comparisons()` | Counterfactual comparisons, ATE, risk ratios, odds ratios | `avg_comparisons()` |
-| `slopes()` | Marginal effects / partial derivatives | `avg_slopes()` |
-| `hypotheses()` | Hypothesis tests and equivalence tests on any quantity | — |
-| `datagrid()` | Construct prediction grids (typical, counterfactual, balanced) | — |
-| `plot_predictions()` | Plot predicted values | — |
-| `plot_comparisons()` | Plot comparisons | — |
-| `plot_slopes()` | Plot marginal effects | — |
-| `inferences()` | Alternative inference: bootstrap, simulation, conformal | — |
-
-Python equivalents use the same names via `import marginaleffects as me`.
+For a conceptual question (which estimand fits?), answer with the five questions; for a syntax
+question, give the code; for both, framing first, then code.
 
 ---
 
-## Common patterns
+## Core functions
 
-### Average marginal effects
+| Function | Returns | Averaged version |
+|---|---|---|
+| `predictions()` | predicted outcomes at given values | `avg_predictions()` |
+| `comparisons()` | differences, ratios, odds ratios between counterfactuals | `avg_comparisons()` |
+| `slopes()` | partial derivatives (marginal effects) | `avg_slopes()` |
+| `hypotheses()` | tests on any of the above, or on coefficients | — |
+| `datagrid()` | a grid of values to evaluate at | — |
+| `plot_predictions()`, `plot_comparisons()`, `plot_slopes()` | the matching plots | — |
+| `inferences()` | bootstrap or simulation-based intervals | — |
+
+## Common patterns (R)
+
 ```r
-mod <- glm(y ~ x1 + x2, data = df, family = binomial)
-avg_slopes(mod)  # AME on probability scale
+mod <- glm(employed ~ treatment * female + age, data = data_final_survey_main, family = binomial)
+
+avg_slopes(mod)                                              # AMEs on the probability scale
+avg_comparisons(mod, variables = "treatment")                # ATE (risk difference)
+avg_comparisons(mod, variables = "treatment", comparison = "ratio")   # risk ratio
+avg_comparisons(mod, variables = "treatment", by = "female") # effect by group (CATE)
+predictions(mod, newdata = datagrid(treatment = c(0, 1), age = 40))   # at chosen values
+
+cmp <- avg_comparisons(mod, variables = "treatment", by = "female")
+hypotheses(cmp, "b1 = b2")                                   # do the two group effects differ?
+
+avg_slopes(mod, equivalence = c(-0.05, 0.05))                # equivalence test
+avg_slopes(mod, vcov = ~school_id)                           # clustered SEs
+avg_slopes(mod, vcov = "HC3")                                # robust SEs
 ```
 
-### Predicted probabilities at specific values
-```r
-predictions(mod, newdata = datagrid(x1 = c(0, 1), x2 = median))
-```
+## Python
 
-### Average treatment effect (comparison)
-```r
-avg_comparisons(mod, variables = list(treatment = c(0, 1)))
-```
+```python
+import statsmodels.formula.api as smf
+from marginaleffects import avg_slopes, avg_comparisons
 
-### Risk ratio
-```r
-avg_comparisons(mod, variables = list(treatment = c(0, 1)), comparison = "ratio")
-```
-
-### Conditional effects (interactions)
-```r
-# Effect of x1 at different levels of x2
-slopes(mod, variables = "x1", by = "x2")
-```
-
-### Hypothesis testing on quantities
-```r
-# Test whether two group effects differ
-cmp <- avg_comparisons(mod, variables = "treatment", by = "group")
-hypotheses(cmp, "b1 = b2")
-```
-
-### Equivalence test
-```r
-avg_slopes(mod, equivalence = c(-0.1, 0.1))
-```
-
-### Clustered / robust standard errors
-```r
-avg_slopes(mod, vcov = ~cluster_id)          # clustered
-avg_slopes(mod, vcov = "HC3")                # robust
+mod = smf.logit("employed ~ treatment * female + age", data=df).fit()
+avg_slopes(mod)
+avg_comparisons(mod, variables="treatment", by="female")
 ```
 
 ---
 
 ## Key concepts
 
-- **Comparisons** generalise treatment effects: ATE (`avg_comparisons`), ATT (with `wts`), CATE (with `by`), risk differences, risk ratios, odds ratios — all from the same function.
-- **G-computation** for causal inference: fit model → `avg_comparisons()` with counterfactual grid → delta method or bootstrap CI. See `experiments` and `gcomputation` chapters at marginaleffects.com.
-- **Interactions**: never interpret interaction coefficients directly. Use `predictions()`, `comparisons()`, or `slopes()` with `by=` to get interpretable quantities.
-- **`datagrid()`** controls the grid: `datagrid(x1 = c(0, 1))` sets x1 to specific values, other variables at mean/mode. Use `grid_type = "balanced"` for factorial designs.
+- **Interactions: never read the interaction coefficient directly** in a nonlinear model; it is not
+  the interaction effect (Ai & Norton 2003). Compute comparisons or slopes `by =` the moderator.
+- **One function, many treatment effects.** ATE (`avg_comparisons`), ATT (restrict to the treated
+  or use `wts =`), CATE (`by =`), risk differences, risk ratios, odds ratios.
+- **G-computation:** fit the outcome model, then `avg_comparisons()` over the counterfactual grid,
+  with delta-method or bootstrap intervals (see the "G-computation" chapter on marginaleffects.com).
+- **`datagrid()`** sets the named variables and holds the rest at their mean or mode;
+  `grid_type = "balanced"` gives every combination of factor levels, which suits factorial designs.
+
+## Mixed models: `re.form` is a substantive choice
+
+With `lme4`/`glmer` models, `marginaleffects` warns that it accounts only for uncertainty in the
+fixed effects. **Do not silence the warning by switching `re.form` without deciding what you
+want to estimate.** For nonlinear mixed models (logit, Poisson) the two settings give materially
+different average effects:
+
+- `re.form = NULL` (default): **cluster-specific** effects, conditional on each cluster's random
+  effect, then averaged. Answers "the effect within a typical cluster". Usually smaller.
+- `re.form = NA`: **population-averaged** effects, integrating over the random-effect
+  distribution. Answers "the effect on the population probability". Usually larger.
+
+Both are valid; they answer different questions. Choose the estimand, pass `re.form` explicitly,
+and rerun every downstream test after a switch: SEs and significance can change too. A switch made
+"just to silence the warning" can move published effects by several percentage points.
 
 ---
 
-## When to consult marginaleffects.com
+## When to look things up
 
-- Specific chapter topics: framework, predictions, comparisons, slopes, hypothesis testing, interactions, categorical predictors, experimental designs, G-computation, uncertainty quantification, MRP, machine learning models
-- Full function reference with all arguments
-- Case studies with worked examples
+The function reference on marginaleffects.com lists every argument; the book's chapters cover
+predictions, comparisons, slopes, hypothesis tests, interactions, categorical predictors,
+experiments, G-computation, uncertainty, and machine-learning models. Check the documentation
+before using an argument you are not certain of: the interface has changed across versions.

@@ -1,172 +1,225 @@
-# Auditor
+---
+name: auditor
+description: "Independent quality review of an artifact (a paper or proposal draft, an analysis plan or pre-registration, a script pipeline, a project setup, a skill or CLAUDE.md) by fresh subagents that did not write it, with every finding ranked by severity and checked against the source before anything changes. ALWAYS use this skill when the user asks to audit, review, critique or quality-check an artifact, and offer it before a draft, an analysis or a setup goes to co-authors, a journal or a funder. Do not review such an artifact yourself in the session without offering it first. Not for critiquing the work just done in this session (that is the /what-slipped command), for confirming that a task was completed (the verifier agent), for the final check of a submission package (pre-submission-audit), or for a single targeted fix."
+---
 
-**Load when:** reviewing any artifact — a file, system, pipeline, convention setup, or project structure — for quality and coherence.
-**Skip when:** making a single targeted change or doing a quick lookup.
+# Skill: Auditor
 
-## Purpose
+**Purpose:** Review an artifact with reviewers that did not write it, so its blind spots surface as findings instead of as agreement.
+**Load when:** reviewing a finished or near-finished artifact for quality, coherence or errors: a draft, an analysis plan, code, a project setup, a skill.
+**Skip when:** critiquing the work just done in this session (`/what-slipped`), checking that a task is complete (`verifier`), or making one targeted change.
+**Modifies behavior:** the review runs in fresh subagents on named dimensions; each finding carries a severity, a harm and a check; each is verified against the source before it is acted on, and ends as fix, file or drop.
 
-General-purpose review skill for evaluating artifacts of any size: a single CLAUDE.md, a code pipeline, a convention setup, an agent design, a project structure. Uses a three-agent protocol to produce a rigorous, bias-resistant audit report.
+## Why reviewers that did not write it
 
-## Review dimensions
+The context that wrote an artifact reads what it meant, not what it wrote, and defends the framing
+it built. A fresh subagent sees only the artifact and its surroundings, so it finds the
+assumptions the author never noticed making. **So you do not review the artifact yourself: you
+set the scope, brief the reviewers, and act on what they find.**
 
-Every audit works through these 7 dimensions. Write "N/A — [reason]" for dimensions that genuinely do not apply. Never skip a dimension without stating why.
+Asking for an audit is asking for its subagents. Never swap in a single pass of your own without
+saying so.
 
-1. **Hidden assumptions** — what does this artifact take for granted about its inputs, environment, or users? What could go wrong if those assumptions break?
+## 1. Scope and size
 
-2. **Missing pieces** — what is absent that should be present? Are there gaps in documentation, error handling, edge cases, or user guidance?
+State in one line what is under review (files, a folder, the rendered PDF) and the question the
+audit answers ("does the analysis code match the pre-registration?", "general quality"). Then
+size it:
 
-3. **Redundancies** — is the same thing done in two places? Do components duplicate each other's work? Could anything be consolidated without loss?
+| Artifact | Reviewers | Then |
+|---|---|---|
+| Small: one file, one question, cheap to get wrong | 1 | you verify its findings (step 6) |
+| Big: several files or a pipeline; or it goes to co-authors, a journal or a funder; or it changes data | 2, in parallel | a consolidator merges them (step 5) |
+| A paper or proposal where one kind of reader decides | 2 + a persona reviewer | consolidator; persona quotes spot-checked |
 
-4. **Interface problems** — does information flow correctly between components? Is anything lost, ambiguous, or misformatted in handoffs? Are dependencies explicit?
+*Why two:* reviewers that cannot see each other's reports routinely find different defects.
+Agreement between them is strong evidence; a finding only one of them made is not a sign of a
+false alarm, since one may simply have looked where the other did not.
 
-5. **Inconsistencies** — do components agree on terminology, structure, naming, and shared knowledge? Are there contradictions between files?
+**If subagents are genuinely unavailable,** work through the dimensions yourself and call the
+result a "single-session audit". Its findings are real, but its silences are weak evidence: one
+perspective cannot disagree with itself.
 
-6. **Over-engineering** — is any of this unnecessary? Would a simpler version work equally well? Is the complexity justified by a concrete benefit, or is it speculative/defensive?
+## 2. Choose the dimensions
 
-7. **Scope creep** — has the artifact grown beyond what was actually needed? Are there features, options, or abstractions that serve no current use case?
+Reviewers work through named dimensions so that nothing is skipped because it seemed fine. For
+general quality use all eight; for a narrow question use 2–4 that fit it, and say which and why.
 
-## Severity scale
+**The general eight:**
 
-Each finding gets one of these ratings:
+1. **Hidden assumptions:** what does it take for granted about its inputs, environment or
+   reader, and what breaks if that is false?
+2. **Missing pieces:** what should be there and is not (a definition, a robustness check, an
+   error case, a step)?
+3. **Redundancies:** the same thing done or said in two places, which will drift apart.
+4. **Interface problems:** does information pass correctly between parts (script to script,
+   table to text, section to section)?
+5. **Inconsistencies:** terms, numbers, names or claims that disagree between places.
+6. **Over-engineering:** complexity without a concrete benefit. Would a simpler version do?
+7. **Scope creep:** parts that serve no current purpose.
+8. **Silent failure:** how does it behave when it is wrong? Can an empty result be told apart
+   from a clean run (a filter that matched nothing, a merge that dropped rows)? Can a missing
+   value mean two different things? Who would notice first, and when?
 
-- **Must fix** — correctness error, contradiction, will cause wrong behavior
-- **Should fix** — meaningful improvement, clear benefit, low cost
-- **Consider** — genuine trade-off, reasonable people could disagree
-- **Note** — observation, no concrete harm if left as-is
+**Narrower sets for common research artifacts:**
 
-The test: state the concrete harm if left as-is. If you can't articulate harm, downgrade severity.
+- **Paper or proposal draft:** claims vs evidence (does each claim follow from the result it
+  cites?); numbers in the text vs the tables and figures; argument (does each section deliver
+  what the introduction promises?); reader (where would a referee get lost or object?).
+- **Analysis code or pipeline:** correctness (does it compute what the paper says?); data
+  handling (merges, missing values, sample restrictions, row counts at each step);
+  reproducibility (does it run from raw data with one command; seeds, paths, package versions?);
+  silent failure.
+- **Analysis plan or pre-registration:** identification (what would make the estimate wrong?);
+  measurement (does each variable measure its construct?); pre-specification (could a reader
+  later tell which analyses were planned?); power.
 
-## Protocol
+## 3. Severity, harm and check
 
-Three agents, launched by the main session. The main session defines the scope and orchestrates; it does not review the artifact itself.
+Every finding gets one severity:
 
-### Phase 1: Two independent reviewers (parallel)
+- **Must fix:** a wrong result, a contradiction, or something that will break.
+- **Should fix:** a clear improvement at low cost.
+- **Consider:** a genuine trade-off; reasonable people could disagree.
+- **Note:** an observation with no concrete harm.
 
-Launch two Opus agents in parallel, each with identical instructions. Each reviewer works independently — they do not know about each other.
+And every finding passes two tests, which fail on different findings:
 
-**Reviewer instructions:**
-
-> You are an independent auditor. Review the artifact(s) specified in the scope below for quality and coherence.
->
-> **Process:**
->
-> 1. Read all in-scope material first. Then read the surrounding environment — other files in the same directory, files referenced by the artifact, and any conventions/rules that apply. Understand the broader context before judging anything.
-> 2. Work through all 7 review dimensions sequentially (listed below). For each dimension, write "N/A — [reason]" if it genuinely does not apply.
-> 3. For each finding:
->    - Describe the issue concretely — what specifically is wrong or suboptimal, with file/line reference where applicable
->    - Assess severity: **must fix**, **should fix**, **consider**, or **note** (see scale below)
->    - State the concrete harm if left as-is — if you can't articulate harm, downgrade severity
->    - Propose solution(s) — one if the fix is obvious, multiple if genuinely distinct approaches exist with different trade-offs. Do not manufacture alternatives to fill a quota.
-> 4. After completing all dimensions, step back: "What did I miss? What would someone with a completely different perspective flag?" Add any additional findings.
->
-> **Review dimensions:**
-> [Include all 7 dimensions from this skill file]
->
-> **Severity scale:**
-> [Include the severity scale from this skill file]
->
-> **Honesty guards:**
-> - Report exactly what you find. Do not pad to a round number, do not truncate to fit one.
-> - If a dimension is clean, say so. "No issues found" is a valid result.
-> - Severity reflects actual impact, not effort of discovery.
-> - Do not soften findings to be diplomatic.
-> - Something that looks odd in isolation may make sense in broader context. If you checked the context and it's justified, don't flag it. If you couldn't find justification, flag it but note the uncertainty.
->
-> **Output:** Write findings to `[path provided by caller]`.
-
-### Phase 2: Consolidator (after both reviewers complete)
-
-Launch one Opus agent after both Phase 1 agents return.
-
-**Consolidator instructions:**
-
-> You are a consolidation reviewer. Two independent auditors have reviewed the same artifact. You receive both their findings reports. Your job is to produce a single, definitive audit report.
->
-> **Important: Do not read the original artifact or its surrounding environment.** Your job is to adjudicate the reviewers' findings, not to form your own opinion of the artifact. If you cannot adjudicate a finding without seeing the source material, flag it in your report as "unresolvable without source review" — do not go read it yourself.
->
-> **Process:**
->
-> 1. Read both review reports fully before writing anything.
-> 2. For each finding that appears in both reports (convergent): confirm it. Check whether severity assessments agree; if not, pick the better-justified one. Take the stronger solution from either reviewer, or synthesize an improved one.
-> 3. For each finding that appears in only one report (divergent): evaluate based on the evidence the reviewer provided. Is the reasoning concrete and convincing? If yes, include it. If the evidence is thin or the finding is speculative, downgrade or flag as uncertain.
-> 4. **Account for every reviewer finding.** Every finding from both reviewers must appear in the consolidated report — either as an included finding (any severity) or in a "Findings excluded" list with a one-line reason per item. Silent drops are not acceptable; the consolidated report must be a complete audit trail.
-> 5. Challenge all findings:
->    - Does the finding describe a concrete problem that could actually occur, or is it a theoretical edge case?
->    - Is the severity justified by the stated harm, or inflated?
->    - Are any findings nitpicking — technically correct but not worth acting on?
-> 6. Review proposed solutions: are any worse than the problem? Can any be improved? Do the two reviewers' solutions for the same finding suggest a better third option?
->
-> **Calibration:**
->
-> - Uncertainty is allowed. If you genuinely can't tell whether a finding is valid from the reports alone, say so — don't force a verdict.
-> - Do not remove findings just to appear decisive. A "consider" rating is better than a false dismissal.
-> - Do not keep findings just because they might matter in some edge case. The test is concrete, plausible harm.
-> - Convergence is strong evidence but not proof — two reviewers can share the same bias.
-> - Divergence is not evidence of a false positive — one reviewer may simply have seen something the other didn't.
->
-> **Honesty guards:**
->
-> - No rounding, no padding, no softening.
-> - Do not defer to the reviewers' authority. Evaluate their reasoning, not their confidence.
->
-> **Output:** Write the final consolidated report to `[path provided by caller]`. Use the output format below. Add a "Reviewer agreement" section noting which findings were convergent, divergent, or unresolvable.
-
-## Output format
-
-All reports (reviewer and consolidated) use this structure:
+- **Harm:** state what goes wrong if it is left as is. No harm you can name, lower the severity.
+- **Check:** a `Settles it:` line naming one concrete check that would show whether the finding
+  is true: a command to run, a file to read, a number to recount. Harm is easy to narrate; a
+  check is not. A finding that cannot name its own check is unease, not a finding: drop it or
+  mark it note.
 
 ```
-# Audit: [scope description]
-_Date: YYYY-MM-DD_
+# WRONG
+3.1 The robustness section may be incomplete. (should fix)
+
+# RIGHT
+3.1 The text says the result holds "in all specifications"; Table A4 col. 3 drops firm fixed
+    effects and the coefficient halves. Harm: a referee finds it first.
+    Settles it: compare Table A4 col. 3 with the sentence on p. 14. (must fix)
+```
+
+## 4. Brief the reviewers
+
+Launch each reviewer as a fresh general-purpose subagent; launch parallel reviewers in one
+message. Fill in the brackets:
+
+> You are an independent reviewer. You did not write the artifact below and owe it nothing.
+> **Scope:** [files / folder / PDF]. **Question:** [what the audit answers].
+> 1. Read everything in scope, then its surroundings: files it references, the project's
+>    `CLAUDE.md`, the other files in its folder. Something odd in isolation may be justified by
+>    context; check that before flagging it, and say so if you could not.
+> 2. Work through these dimensions in order: [the chosen list, with one-line definitions]. For a
+>    dimension with nothing to report, write "No issues found" or "N/A: [reason]".
+> 3. For each finding give: an ID `<dimension>.<n>` (e.g. `4.2`); what exactly is wrong, with
+>    file and line, page, or table and column; a severity (must fix / should fix / consider /
+>    note); the concrete harm if left as is; a `Settles it:` line naming one check; and a fix.
+>    [Paste § 3's severity scale and two tests.]
+> 4. Then step back: what would someone with a different background flag? Add those findings
+>    under the dimension they fit best.
+> 5. Report exactly what you find. No padding to a round number, no softening, no truncating.
+>    "No issues found" is a valid result. Say where you are unsure.
+> 6. Do not edit any file. [Write your report to `<path>` / Return your report as your final
+>    message.]
+
+**Brief hygiene:**
+
+- **Keep the brief to what the artifact is and what the audit asks.** Leave out your own numbers,
+  suspicions and descriptions of known defects: a reviewer repeats them, and they come back
+  looking like independent findings. If you suspect something, see whether a reviewer finds it
+  unprompted.
+- **Give each reviewer its own report path and scratch-file prefix** (`r1_`, `r2_`), so parallel
+  reviewers do not overwrite each other's working files.
+- **Once a reviewer has reported, never send it a correction.** If its work must change, launch a
+  fresh reviewer. A report revised after the merge has started makes the merge wrong without
+  anyone noticing.
+- **In plan mode, subagents cannot write files.** Have them return their reports as their final
+  messages instead.
+
+**Persona reviewer (papers, proposals, slides).** Alongside the dimension reviewers, never
+instead of them, one subagent reads the rendered artifact (the PDF, not the `.tex`) as a named
+reader ("a referee at [journal] who works in [neighbouring field]", "a panel member from outside
+the discipline") and notes, as it reads, where it gets confused, irritated, loses the thread or
+stops believing. It catches what dimensions cannot: the fifth restatement of an argument passes
+every check and is still where a reader's attention dies. A persona paraphrases, so check each
+passage it quotes against the source before acting on it. A stumble at a place a dimension
+reviewer also flagged is strong evidence.
+
+## 5. Consolidate (two or more reviewers)
+
+Launch one more fresh subagent and give it the reviewer reports only:
+
+> You merge independent review reports into one. **Do not read the artifact itself.** Judge the
+> reviewers' evidence, not your own impression; a finding you cannot judge without the source is
+> marked "unresolvable without source".
+> 1. Read all reports before writing anything.
+> 2. A finding in several reports: keep it, with the better-argued severity and the better fix.
+>    A finding in one report: keep it if its evidence is concrete; mark it uncertain or lower its
+>    severity if the evidence is thin.
+> 3. **Account for every finding.** Each one appears in the merged report (cited as `r1-4.2`) or
+>    under "Findings excluded" with a one-line reason. Nothing is dropped silently.
+> 4. Challenge each: is the harm concrete and plausible, or a theoretical edge case? Is the
+>    severity justified by the harm? Would its `Settles it:` check actually tell true from
+>    false? A check that would not discriminate makes an unverified finding look verified:
+>    lower it to note and say so.
+> 5. Add a "Reviewer agreement" section: found by several, found by one, unresolvable.
+> 6. Do not edit any other file. [Write to `<path>` / Return as your final message.]
+
+With a single reviewer, skip this step: its report goes straight to step 6.
+
+## 6. Verify, then decide each finding
+
+**Before acting on a finding, open the file and line it names and confirm the problem is there
+as described.** Reviewers misquote and misread, and the consolidator never saw the source at
+all. A finding the source refutes is dropped, with the refutation in one line.
+
+Every finding then ends in exactly one of three outcomes:
+
+- **Fix now:** small, in scope, the fix is clear. Must-fix and should-fix findings default here.
+- **File:** worth doing but needs its own session or a decision. One entry in the project's
+  `claude/OPEN_ISSUES.md`, naming the finding and its `Settles it:` check.
+- **Drop:** with one line saying why: refuted by the source, a fix that costs more than the harm,
+  or something nobody would ever choose to work on.
+
+Judge consider and note findings by "is this a concrete improvement worth its cost?", not by
+urgency. A consider is not automatically "later".
+
+**The user sees the outcome of every finding, including the ones you disagree with.** A fix that
+changes what a paper claims, or the design of a study, is always the user's decision: list it
+under "needs your decision" with your recommendation instead of applying it.
+
+```
+Audit of [scope]: [N] reviewers, dimensions: [set]
+Fixed:     [ID: one line each]
+Filed:     [ID: where]
+Dropped:   [ID: reason]
+Needs your decision: [ID: the choice, with my recommendation]
+```
+
+## Report format and where it goes
+
+```
+# Audit: [scope]
+_Date: YYYY-MM-DD. [N reviewers / single-session]. Dimensions: [set]_
 
 ## Scope
-[What was reviewed — list of files, systems, or areas]
-
 ## Findings
-
-### 1. Hidden assumptions
-[Findings or N/A]
-
-### 2. Missing pieces
-[Findings or N/A]
-
-### 3. Redundancies
-[Findings or N/A]
-
-### 4. Interface problems
-[Findings or N/A]
-
-### 5. Inconsistencies
-[Findings or N/A]
-
-### 6. Over-engineering
-[Findings or N/A]
-
-### 7. Scope creep
-[Findings or N/A]
-
-## Summary
-[Findings ranked by impact — as many or as few as the review warrants]
-
+### 1. [dimension]        (one section per dimension; "No issues found" allowed)
+## Summary                (findings ranked by impact)
 ## Recommended actions
-[Concrete next steps, ordered by priority]
+## Reviewer agreement     (merged report only)
+## Findings excluded      (merged report only; "None" if none)
 ```
 
-The consolidated report adds:
+Save the reports in the project's `claude/` folder: `claude/audit_<scope>_r1.md`, `_r2.md` and the
+merged `claude/audit_<scope>.md`. Keep the reviewer reports after the merge; they hold evidence
+the merged report only summarises.
 
-```
-## Reviewer agreement
-[Which findings were convergent (both reviewers), divergent (one reviewer only), or unresolvable (consolidator couldn't adjudicate)]
+## Improving this skill
 
-## Findings excluded
-[Reviewer findings not included in the report, with one-line reason per item. If none, write "None — all reviewer findings included."]
-```
-
-## How to invoke
-
-The main session orchestrates the audit:
-
-1. Define scope — which files/systems to review.
-2. Launch Reviewer 1A and 1B as parallel Opus agents, each writing to a separate file (e.g. `audit_{scope}_r1a.md` and `audit_{scope}_r1b.md`).
-3. After both complete, launch the Consolidator as an Opus agent with both review files, writing the final report to `audit_{scope}.md`.
-4. Delete the individual reviewer files after the consolidated report is reviewed.
+If an audit's findings were mostly wrong when verified (step 6), tighten the brief, not the
+severity scale: the usual cause is a reviewer that lacked context or was handed a suspicion. If
+an important defect surfaced later that no reviewer flagged, add the dimension that would have
+caught it to the matching narrower set in § 2.

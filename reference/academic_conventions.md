@@ -1,116 +1,110 @@
 # Academic Conventions (Defaults)
 
-**Load when:** starting a new academic-research project or making structural decisions about project layout, analysis plan, or deviation tracking.
-**Skip when:** the project is already set up and the task is implementation, analysis, or output.
+**Load when:** starting or restructuring an academic research project, or deciding how analysis plans, deviations, output specifications and rejected ideas are tracked in one.
+**Skip when:** the project is set up and the task is running analysis, writing code, or formatting output.
 
-> **Scope:** Project conventions, workflow defaults, and setup decisions. Folder structures live in `reference/new_project.md` (single source of truth). Low-level implementation details — code recipes, LaTeX templates, package-specific how-tos — belong in `skills/*/SKILL.md` files or `skills/*/recipes/` subfolders, not here.
-
-Use these as starting defaults when initializing a new academic research project. Discuss adjustments with the user before finalizing the project-level CLAUDE.md.
+Starting defaults for an empirical research project. Discuss adjustments with the user before
+writing them into the project's `CLAUDE.md`, which wins wherever it differs. Folder layout:
+`reference/new_project.md` (also used by `/newproject`). Methods: the `empirical-analysis` skill.
 
 ---
 
 ## Language
 
-- Use **American English** spelling throughout (e.g., "centered" not "centred", "analyze" not "analyse"). This is the standard for economics journals.
+- Papers in **American English** spelling ("analyze", "center", "behavior"), the standard in
+  economics journals, unless the target journal asks otherwise.
 
-## Research Identity
+## Working as a research assistant
 
-When assisting with data analysis, econometrics, or quantitative research:
-- Reason at the level of a published empirical economist. Prioritize identification, causal inference, and statistical validity over prediction accuracy.
-- When recommending methods, cite the standard reference (e.g., "following Wooldridge 2010" or "as in Imbens & Angrist 1994"). If you cannot name a specific reference, flag that your suggestion needs verification.
-- State assumptions explicitly. If an assumption is unlikely to hold, say so.
-- When uncertain about a method's properties or applicability, say "I'm not confident about this" rather than generating a plausible-sounding answer.
-- Prefer well-established methods over novel ones unless asked otherwise.
-- Do not invent paper titles, journal citations, or author attributions. If asked for a reference you're unsure about, say so.
+When helping with data analysis, econometrics or quantitative research:
 
-## Analysis Plan Discipline
-
-- Always check whether an analysis plan (preregistration, specification document) exists. If not, suggest creating one before beginning analysis.
-- Maintain an `analysis_plan_deviations.md` file whenever deviating from the plan, including: the original plan, the decision made, and a full discussion of pros and cons.
-- Maintain a `SUPERSEDED_IDEAS.md` file whenever an idea is considered and not adopted, including: the problem it was trying to solve, the pros, reasons for superseding, and the solution implemented instead (with a summary table at the top).
-- Keep both files updated continuously, not retroactively.
-- Code structure should mirror paper section structure.
-
-## Output Design Protocol
-
-Before writing output-generating code (tables, plots, exports):
-- First specify: which variables, what aggregation level, what statistics, what format, how it maps to the paper.
-- Discuss the spec with the user, then implement.
-- When file structure changes, ask the user whether output files should be renamed. Do NOT rename outputs without asking.
-- All table and figure output should target LaTeX. Use `booktabs` formatting and keep output Overleaf-friendly — avoid hardcoded formatting that Overleaf should handle (e.g., manual spacing, page breaks, font commands).
-- For detailed table/figure formatting, load the research-paper skill (`skills/research-paper/`).
+- Reason like a published empirical researcher: identification, causal inference and statistical
+  validity come before predictive fit.
+- Name the standard reference when recommending a method ("following Wooldridge 2010"). If you
+  cannot name one, say the suggestion needs checking.
+- State assumptions explicitly, and say so when one is unlikely to hold.
+- When unsure about a method's properties, say "I am not confident about this" instead of giving
+  a plausible-sounding answer.
+- Prefer well-established methods to novel ones unless asked otherwise.
+- **Never invent a paper, title, journal or author.** Cite only what you have opened or can look
+  up; otherwise mark it `[unverified]`.
 
 ---
 
-## Project Setup Workflow
+## Project setup: in this order, before any analysis code
 
-When starting a new academic data analysis project, follow these three steps **in order** before writing any analysis code:
+### Step 0: repository
 
-### Step 0: Repository Setup
+Set up the project as a git repository in a **local, not cloud-synced** folder (cloud sync corrupts
+`.git`), with a private GitHub remote, and a `.gitignore` that excludes data, outputs and
+generated files. `/newproject` does this.
 
-**At the start of every new project, ask the user whether to initialize a git repository and create a GitHub remote.** Git is recommended but not required. If the user wants git, set up `.gitignore` for the project type (data, outputs, and generated artifacts excluded). If not, skip to Step 1 — the project works without version control.
+### Step 1: analysis plan
 
-### Step 1: Analysis Plan
+**Ask the user whether to write an analysis plan first.** Do not write analysis code until this is
+settled: a plan written together, an existing plan confirmed, or the user deciding to skip it.
 
-**At the start of every new project, ask the user whether we should develop an analysis plan first.** Do not proceed to writing analysis code until this is resolved — either by creating a plan together, confirming an existing plan, or the user explicitly deciding to skip it.
+The plan says what analysis goes into each section of the paper's results: the results structure
+(4.1 Descriptives, 4.2 Manipulation check, ...), for each section the hypothesis, model and key
+variables, the identification strategy and its assumptions, and the pre-specified robustness
+checks. It may be a pre-registration, a specification document or `analysis_plan.md`. Writing it:
+the `analysis-plan` skill.
 
-Write (or review) the analysis plan — a document specifying what analyses go in each section of the paper's results. This may be a preregistration, a specification document, or an `analysis_plan.md`. It should cover:
+### Step 2: script structure
 
-- The paper's results section structure (e.g., 4.1 Descriptives, 4.2.1 Manipulation Check, ...)
-- For each section: what hypothesis is tested, what model is estimated, what the key variables are
-- Identification strategy and assumptions
-- Any pre-specified robustness checks or sensitivity analyses
+Translate the plan into numbered scripts **before writing code**: each results section maps to one
+or more scripts, and the full set is listed up front. Why: code that mirrors the paper's structure
+lets anyone go from a table in the paper to the script that made it.
 
-### Step 2: File Structure
+### Step 3: output specification, one section at a time
 
-Translate the analysis plan into a numbered script structure **before writing code**. Each paper section maps to one or more scripts. Establish the full set of scripts upfront.
-
-**Canonical folder structures (single-study and multi-study layouts) are defined in `reference/new_project.md` step 2.** Refer to that file for the full directory trees, key conventions per layout, and common conventions for both.
-
-### Step 3: Output Specification
-
-Before implementing each section, write its output specification in `output_spec.md`:
-
-- Which tables and figures this section produces
-- For each output: variables, aggregation level, statistics, format, file name
-- Formatting conventions (established once, applied to all outputs)
-
-The analysis plan covers *what* to analyze. The output specification covers *how* to present it. Spec at implementation time (not all upfront), one section at a time.
+Before implementing a section, write its entry in `output_spec.md`: which tables and figures it
+produces, and for each the variables, aggregation level, statistics, format and file name. Fix the
+formatting conventions once and apply them to every output. The plan says *what* to analyze; the
+output specification says *how* to present it. Specify at implementation time, not all up front.
 
 ---
 
-## Per-Project Decisions
+## While the analysis runs
 
-These should be discussed and decided at project start:
+- **Check for an analysis plan** at the start of any analysis work; if there is none, suggest one.
+- **Log every deviation from the plan** in `analysis_plan_deviations.md` as it happens: the
+  original plan, the decision, and the reasons for and against. A deviation reconstructed at
+  submission is a deviation nobody can verify.
+- **Record ideas considered and not adopted** in `claude/SUPERSEDED_IDEAS.md` (or in the
+  decision's discussion file): the problem it addressed, its advantages, why it was rejected, and
+  what was done instead. Why: otherwise the same idea is proposed and re-evaluated in a later session.
+- **Before writing output code** (tables, plots, exports), state the specification (variables,
+  aggregation, statistics, format, where it goes in the paper), agree it with the user, then implement.
+- **Do not rename output files without asking.** The paper's LaTeX and Overleaf refer to them by name.
+- **All tables and figures target LaTeX**: `booktabs` tables, PDF figures, nothing the document
+  class should control (manual spacing, page breaks, font commands). Formatting details: the
+  `research-paper` skill.
+- **Claude edits analysis scripts directly**; for a large change, or one Claude is unsure about,
+  show it before it lands. The thorough review happens over the finished code before submission
+  (the `pre-submission-audit` skill). Co-authored projects may agree on a stricter staging
+  convention (`reference/collaboration.md`).
 
-### Regression Table Conventions
-- Star thresholds (*, **, ***)
-- GOF rows to include (N, R², AIC, etc.)
-- Coefficient renaming to human-readable labels
-- Default standard error clustering
-- Model comparison layout (columns = models, rows = coefficients)
+---
 
-### Plot Conventions
-- Theme (minimal, classic, custom)
-- Color palette (colorblind-friendly, journal-specific)
-- Font sizes for publication
-- Axis label conventions
-- Export dimensions and resolution (DPI)
+## Decide at project start
 
-### Communication Style for Results
-- Distinguishing statistical significance from economic/substantive significance
-- Interpreting coefficients in real-world units
-- Reporting effect sizes alongside p-values
+**Regression tables:** star thresholds (or none); goodness-of-fit rows (N, R², ...); readable
+coefficient labels; default SE clustering; layout (columns = models, rows = coefficients).
 
-## Code Change Staging
+**Figures:** theme; colorblind-safe palette, consistent across the paper; font sizes; axis-label
+conventions; export size and format.
 
-All code suggestions must be drafted in a project's `Claude_suggestions.R` file first — never edit main codebase scripts directly.
+**Reporting results:** separate statistical from economic significance; interpret coefficients in
+real-world units; report effect sizes and confidence intervals, not only p-values.
 
-Workflow:
-1. Write proposed code into `Claude_suggestions.R` with a numbered suggestion header (e.g., `# Suggestion #11: ...`)
-2. Present the suggestion to the user and explain what it does
-3. Wait for explicit approval before pushing changes to the target scripts
-4. After pushing, clear the suggestion from `Claude_suggestions.R`
-5. Record non-adopted code in `SUPERSEDED_IDEAS.md`
+## Tracking files for research projects
 
-Record non-adopted code in `SUPERSEDED_IDEAS.md`; park approved-but-waiting code in `Claude_backlog.R`.
+Besides `claude/next_steps.md` and `claude/OPEN_ISSUES.md`:
+
+- **`claude/context_summary.md`** (optional): the intellectual context that is in neither the code
+  nor git: prior submissions and referee comments, the key references and how they relate, the
+  current framing. Update it when the framing changes (a new submission round, new literature).
+- **Prefer checks to checklists.** "Did LaTeX compile?" or "do the table notes match the
+  estimates?" belong in the script that builds the output, where a failure prints and stops.
+  A checklist is read once, then answered from memory and skipped without anyone noticing.

@@ -1,198 +1,183 @@
-# Overleaf Project Conventions
+# Overleaf conventions
 
-**Load when:** setting up or modifying an Overleaf project connected to an R analysis pipeline.
-**Skip when:** no Overleaf involvement in the current task.
+**Load when:** setting up a paper on Overleaf, connecting it to a local project, moving
+Claude-written LaTeX or generated tables and figures into Overleaf, or untangling two copies of
+a paper that have drifted apart.
+**Skip when:** the paper is not on Overleaf, or the task is the content of a table, figure or
+paragraph (`research-paper`, `author`).
 
-Standard structure and conventions for Overleaf projects connected to a `new_project.md`-style
-R analysis pipeline.
-
----
-
-## Standard Folder Structure
-
-```
-<overleaf_project_root>/
-├── main.tex                    # Main paper manuscript
-├── online_appendix.tex         # Online appendix (separate submission file)
-├── elevator_pitch.tex          # Brief written summary — proto-abstract
-├── ideas_and_sketches.tex      # Free-form scratchpad for ideas, notes, fragments
-├── table_sandbox.tex           # Compilable preview: \input{} refs to every table
-├── todo.tex                    # Paper-level to-do list (not analysis to-dos)
-├── readme.tex                  # Explains the folder structure (for self and co-authors)
-├── library.bib                 # Main paper bibliography
-│
-├── study_1/
-│   ├── pilot/
-│   │   ├── tables/             # Main tables (synced from R pipeline)
-│   │   │   └── appendix/       # Appendix tables
-│   │   ├── plots/              # Main plots (synced from R pipeline)
-│   │   │   └── appendix/       # Appendix plots
-│   │   └── pilot_results.tex   # Results narrative (standalone, compilable)
-│   └── main/                   # Same structure (for main study)
-│       ├── tables/appendix/
-│       └── plots/appendix/
-│
-├── study_2/              # Add when applicable (same structure)
-│
-├── archive/                    # Old versions of main.tex and other root files
-├── grants/                     # Grant applications and materials
-│   └── <grant_name>/           # e.g. dfg_2026/, erc_2027/
-├── materials/
-│   ├── preregistration/        # Pre-registration reports
-│   ├── ethics/                 # Ethics certificates and approvals
-│   └── experiment/             # Experiment materials (instructions, screenshots, oTree)
-├── presentations/              # Beamer slides, posters, conference talks
-│   └── <talk_name>/
-│       ├── slides.tex
-│       ├── Literature.bib      # Presentation-specific bib (stays here, not in library.bib)
-│       └── pictures/
-├── sections/                   # When main.tex is split via \input{} chapters
-├── style/                      # Custom .sty / .cls files, journal templates
-└── submission/
-    └── <journal_name>/         # e.g. aer/, restud/, jpe/
-        ├── first_submission/   # Submission files, cover letter
-        ├── first_rnr/          # Revised manuscript, response to reviewers
-        └── ...
-```
+Claude works on files on this computer; the user writes on Overleaf in the browser. Claude
+cannot see Overleaf, cannot compile there and cannot upload there. Something has to carry files
+across, and which route is available depends on the user's Overleaf plan.
 
 ---
 
-## Root File Conventions
+## 1. What each plan allows
 
-- **`main.tex`** — the manuscript. Can include author annotation commands
-  (e.g., `(e.g., \todo{}, \note{}) for collaborative drafting. Strip before submission.
-- **`online_appendix.tex`** — compiled independently; same preamble as `main.tex`.
-  Keep the same preamble (tabularray, tinytable macros, etc.).
-- **`elevator_pitch.tex`** — short written pitch for the paper; will eventually evolve
-  into the abstract. **Not** a slide deck — slides live in `presentations/`.
-- **`ideas_and_sketches.tex`** — free-form working document; not expected to compile
-  cleanly. Distinct from `todo.tex` (actionable items) and the analysis `OPEN_ISSUES.md`.
-- **`table_sandbox.tex`** — see § Table Sandbox Convention below.
-- **`todo.tex`** — paper-writing to-dos. Analysis to-dos go in `claude/OPEN_ISSUES.md`.
-- **`readme.tex`** — explains the folder structure for self-reference and co-authors.
-  Update when the structure changes significantly.
-- **`library.bib`** — the main paper bibliography. Presentation-specific bib files
-  live alongside the relevant `.tex` in `presentations/<name>/`.
+Last verified: 2026-10-07 (docs.overleaf.com).
 
----
+| | Free plan | Premium (paid, or through an institution) |
+|---|---|---|
+| Collaborators per project | one | more, by plan |
+| Compile timeout | 10 seconds | 240 seconds |
+| Upload files or a `.zip` | yes | yes |
+| Git integration (Overleaf as a git remote) | no | yes |
+| GitHub synchronisation | no | yes |
+| Dropbox synchronisation | no | yes |
 
-## Path Convention (\input and \includegraphics)
+**Ask the user first whether their university has an Overleaf institutional licence**
+("Overleaf Commons"). Its participants get the premium features, including Git, GitHub and
+Dropbox sync, usually by logging in with the university e-mail address. The answer decides
+which route below is possible.
 
-**Critical:** Overleaf resolves all paths relative to the **project root**, regardless
-of where the source file lives. A file at `study_1/pilot/pilot_results.tex` that
-includes a table must use the full root-relative path:
+## 2. The four routes
 
-```latex
-% Correct:
-\input{study_1/pilot/tables/tab_descriptive_stats}
-\includegraphics{study_1/pilot/plots/plot_treatment_effect.pdf}
+### A. Manual upload (works on every plan)
 
-% Wrong — even if the .tex file lives in study_1/pilot/:
-\input{tables/tab_descriptive_stats}
-\includegraphics{plots/plot_treatment_effect.pdf}
-```
+- **Into Overleaf:** in the project, the **Upload** button above the file list, then drop the
+  changed files into the matching folder (confirm the replacement if Overleaf asks). A whole new
+  project: **New project → Upload project** with a `.zip`.
+- **Out of Overleaf:** download the project's source as a `.zip` (Overleaf's menu, Download),
+  and unpack it over the local copy before Claude edits anything.
+- **Claude's part:** after each re-run of the analysis, list exactly which files in `5_tables/`
+  and `6_plots/` changed since the last upload, so the user uploads those and nothing else. For
+  prose Claude drafted, give the file (or the paragraph to paste) and say where it goes.
+- **The risk:** the user forgets an upload, and the paper shows numbers the code no longer
+  produces. A line in `claude/next_steps.md` ("tables re-generated, not yet uploaded") closes
+  most of that gap.
 
-Convention: omit the `.tex` extension in `\input{}` (LaTeX resolves both, without is cleaner).
-Use `.pdf` for plots (vector graphics, scales cleanly) unless the file is only available as PNG.
+### B. Git integration (premium)
 
----
+Every Overleaf project is also a git repository at `https://git.overleaf.com/<project-id>`; the
+id is the last part of the project's address (`overleaf.com/project/<project-id>`).
 
-## Retired: `preliminary_N` Pattern
+- **Authentication:** create a token in Overleaf's Account Settings. When git asks, the username
+  is `git` and the password is the token. Tokens expire after a year.
+- **Workflow:** clone it once into the local projects folder (not into a cloud-synced folder),
+  then for every change: `git pull` (gets the user's Overleaf edits), Claude edits, commit,
+  `git push`. Overleaf shows the change on the next refresh.
+- **Never force-push.** Overleaf keeps one linear history; a force-push replaces the project the
+  user is editing. If a push is rejected, pull, merge, push again.
+- **With GitHub as well:** add GitHub as a second remote on the same clone. This is the
+  documented way to connect an existing Overleaf project to an existing GitHub repository.
 
-An earlier approach used a `save_preliminary()` helper to copy individual tables/plots
-into the Overleaf folder as `preliminary_1.tex`, `preliminary_1.pdf`, etc. for quick
-preview. This is **retired** — `table_sandbox.tex` covers the same use case cleanly:
-tables are always synced via `sync_to_dropbox()` and always referenced in the sandbox,
-so any table can be previewed by compiling that one file. Do not reintroduce temporary
-`preliminary_N` files.
+### C. GitHub synchronisation (premium)
 
-## Table Sandbox Convention
+Set up from Overleaf's menu, **Integrations → GitHub**, by the project owner (a collaborator
+cannot set it up).
 
-**`table_sandbox.tex`** is a compilable document containing `\input{}` references to
-every table in the project. It serves as a single-file preview environment — compile it
-to check any table without compiling the full manuscript.
+- **It only creates, it does not link:** it makes a new GitHub repository from an Overleaf
+  project, or a new Overleaf project from a GitHub repository. It cannot connect an existing
+  project to an existing repository; for that, use route B with GitHub as a second remote.
+- **It is not automatic.** The user presses "pull changes from GitHub" or "push Overleaf
+  changes" in that menu. So when Claude commits to the GitHub repository, push at once after
+  every commit, and tell the user to pull in Overleaf; an unpushed commit is invisible to them.
+- **On a conflict** Overleaf pushes a separate branch (named after the date) to GitHub instead of
+  merging. Merge that branch into `main` (look at it first: if the user edited in Overleaf, those
+  edits exist only there), push, then continue the sync in Overleaf. Do not rewrite or
+  force-push the synced branch.
 
-**Rule (for Claude):** Every time a new table is added to the R pipeline and its `.tex`
-file is synced to Overleaf, immediately add the corresponding `\input{}` line to
-`table_sandbox.tex`. This applies to:
-- Main paper tables (`study_1/pilot/tables/tab_name`)
-- Appendix tables (`study_1/pilot/tables/appendix/tab_name`)
+### D. Dropbox synchronisation (premium)
 
-Do this as part of the same step as writing the table-generation code, before presenting
-the suggestion to the user.
+All of the user's Overleaf projects appear in `Dropbox/Apps/Overleaf/<project name>/` and sync in
+both directions automatically.
 
----
+- **The local copy lags.** Changes made in Overleaf can take a couple of minutes to arrive. If a
+  PDF compiled on Overleaf disagrees with the local `.tex`, suspect the local copy is not yet
+  current before calling the file wrong.
+- **Simultaneous edits create conflict copies** ("… conflicted copy …") that can break the
+  compile. Compiled files (`.pdf`, `.aux`, `.log`, `.bbl`) cause spurious conflicts; Overleaf
+  recommends excluding them from Dropbox sync.
+- **Collaborators** only get the Dropbox copy if they have premium themselves.
+- **Never put a git repository inside the Dropbox folder.** Git and a sync client both rewrite
+  files and corrupt each other's state. The analysis repository stays in the local projects
+  folder and copies outputs into Dropbox (§ 4).
+- Best use: the pipeline pushing generated tables and figures into the paper with no clicks.
 
-## Results Narrative Files
+## 3. Which route, and the one rule for all of them
 
-Every experiment × phase gets a standalone results narrative. Naming convention: `{phase}_results.tex`, located inside its study-phase subfolder.
-
-| Phase | Overleaf path |
-|-------|--------------|
-| Experiment 1, pilot | `study_1/pilot/pilot_results.tex` |
-| Experiment 1, main | `study_1/main/main_results.tex` |
-| Experiment 2, pilot | `study_2/pilot/pilot_results.tex` |
-| ... | ... |
-
-### File properties
-
-- **Self-contained:** own `\documentclass` and preamble — compiles independently without `main.tex`
-- **Linked to outputs via `\input{}` and `\includegraphics{}`** — never copy-paste table content
-- **Updated as analysis results solidify** — grows alongside the pipeline, not written retrospectively
-- **Eventually feeds into `main.tex`** as the results section when writing begins
-
-### Tone and audience
-
-The intended reader is a first-year economics PhD student — someone who knows econometrics and micro theory, but has no prior exposure to behavioral economics or to the specific experiment design. The file serves dual purpose: (1) making results legible to collaborators unfamiliar with the sub-field, and (2) forcing the authors to articulate their reasoning before it hardens into unspoken assumptions.
-
-Each analysis section must include:
-- **Background:** what question this analysis answers and why it is interesting
-- **Design motivation:** why this particular specification was chosen (e.g., why OLS vs. IV, why these controls, why this benchmark rather than another)
-- **Concept explanations:** any behavioral-economics concept the reader needs before interpreting the result — do not assume the reader knows what weight recovery is, what a Bayesian optimal prediction looks like, or why a trust bias is non-trivial
-- **Plain-language interpretation:** what the result means, not just its statistical form
-
-**Tone check:** would a first-year PhD student with no behavioral economics background be able to follow the argument from scratch? If not, add context.
-
-**Tone is textbook-style, not paper-draft style.** Err on the side of too much background rather than too little.
-
-### Claude rule: proactive file creation
-
-When the first results for a new experiment × phase are about to be written, pushed to the pipeline, or discussed — **check whether the corresponding `{phase}_results.tex` exists**. If it does not, suggest creating it before proceeding.
-
-The file can start as a minimal compiled shell with section placeholders. Creating it early costs almost nothing; creating it retrospectively means reconstructing reasoning from code comments and memory.
-
-### Co-author visibility
-
-**This convention must also be included inline in the project `CLAUDE.md`** — `~/.claude/` is machine-local and invisible to a co-author's Claude session. This file is the canonical template; copy the tone/audience and proactive-creation rule into the project file so both authors' Claude sessions enforce it.
-
----
-
-## Submission Folder
-
-```
-submission/
-  <journal_name>/         e.g. aer/, restud/, jpe/
-    first_submission/     submission package, cover letter
-    first_rnr/            revised manuscript, response to reviewers
-    second_rnr/           (if needed)
-  <another_journal>/      (if resubmitting after rejection)
-```
-
-Cover letters and response-to-reviewers letters live **inside the relevant round
-subfolder**, not in a separate `cover_letters/` folder. This keeps everything for one
-submission round co-located.
-
----
-
-## Sync: R Pipeline → Overleaf
-
-Outputs sync via Dropbox (automatic when pipeline runs `sync_to_dropbox()`):
-
-| R pipeline output | Overleaf target |
+| Situation | Route |
 |---|---|
-| `5_tables/tab_name.tex` | `study_1/pilot/tables/tab_name.tex` |
-| `5_tables/appendix/tab_name.tex` | `study_1/pilot/tables/appendix/tab_name.tex` |
-| `6_plots/plot_name.pdf` | `study_1/pilot/plots/plot_name.pdf` |
-| `6_plots/appendix/plot_name.pdf` | `study_1/pilot/plots/appendix/plot_name.pdf` |
+| Free plan, no institutional licence | A |
+| Premium, the user writes in Overleaf, Claude contributes prose | B (or C if the paper should also live on GitHub) |
+| Premium, mainly generated tables and figures flowing into the paper | D, or B with the copy step in § 4 |
+| Co-authors without premium | A or B for the person who holds the connection |
 
-Setup: see `rules/rules.md` § Machine-Specific Paths and `reference/new_project.md` step 7.
+**Declare which copy is the document of record, and keep the flow one-way.** Write it into the
+project's `CLAUDE.md` in one line, for example: *"The paper's text lives in Overleaf; tables and
+figures are generated in `analysis/` and copied into Overleaf's `tables/` and `figures/`; never
+edit them there."* *Why:* a mirror looks exactly like a workspace (same files, fully writable),
+so editing the wrong copy forks the paper silently, and both versions look correct until someone
+compares them.
+
+Two consequences:
+
+- **Before Claude edits any local copy of text the user also edits in Overleaf, bring it up to
+  date** (pull, download, or wait for Dropbox). Ask the user whether they edited since.
+- **Generated files flow one way, analysis → paper.** A fix to a table is made in the script,
+  never in Overleaf's copy of the table.
+
+## 4. Copying generated outputs into the paper
+
+A small helper in the pipeline's setup script copies tables and figures to wherever the paper
+lives locally: the Dropbox folder (route D) or the local clone of the Overleaf or GitHub
+repository (routes B and C, followed by a commit and push). The target is machine-specific, so it
+goes in the gitignored `analysis/config_local.R` (see `reference/collaboration.md`), never in
+committed code. If no target is set, the helper does nothing, so the pipeline still runs for a
+co-author or a replicator.
+
+```r
+# 0_shared/0_Setup.R — overleaf_sync_path is set in config_local.R (gitignored), e.g.
+#   overleaf_sync_path <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"
+if (file.exists("config_local.R")) source("config_local.R")
+if (!exists("overleaf_sync_path")) overleaf_sync_path <- NULL
+
+sync_to_paper <- function(source_dir, dest_subdir) {
+  if (is.null(overleaf_sync_path)) {
+    message("No overleaf_sync_path set; skipping copy of ", source_dir)
+    return(invisible(NULL))
+  }
+  dest <- file.path(overleaf_sync_path, dest_subdir)
+  if (!dir.exists(dest)) dir.create(dest, recursive = TRUE)
+  files <- list.files(source_dir, full.names = TRUE)   # includes appendix/ subfolders
+  file.copy(files, dest, overwrite = TRUE, recursive = TRUE)
+  message("Copied ", length(files), " items to ", dest)
+}
+
+# at the end of the table and figure export scripts:
+sync_to_paper("5_tables", "tables")
+sync_to_paper("6_plots",  "figures")
+```
+
+The Dropbox folder's location can also be read from Dropbox's own settings file
+(`%LOCALAPPDATA%\Dropbox\info.json` on Windows, field `personal` → `path`), which saves each
+co-author from typing it.
+
+On route B or C the paper's clone is its **own** repository: never nest it inside the analysis
+repository. Committing generated tables there is fine, because in that repository they are the
+paper's inputs.
+
+## 5. Inside the Overleaf project
+
+The layout (`main.tex`, `preamble.tex`, `sections/`, `tables/`, `figures/`, the `.bib`,
+`submission/`) is described in the `project-organizer` skill. Three Overleaf-specific points:
+
+- **Paths are relative to the main file's folder**, whichever file contains the command. A
+  section in `sections/results.tex` still writes `\input{tables/tab_main_effects}` and
+  `\includegraphics{figures/fig_effects}`, never `../tables/…`.
+- **A table preview file** (`table_sandbox.tex`): a minimal document that only `\input`s every
+  table and figure. Compiling it shows whether a new table renders without compiling the whole
+  paper; add each new table's line to it as soon as the table exists.
+- **Set the main document and the compiler** in Overleaf's menu: pdfLaTeX is the default;
+  XeLaTeX or LuaLaTeX only if the template requires them or the text needs system fonts.
+
+**On the free plan's 10-second compile limit:** large papers time out. Include figures as
+PDF files rather than TikZ code compiled on every run, comment out the `\input` lines of the
+sections not being worked on while drafting, and move the appendix into its own document.
+
+**Compile errors:** Claude cannot see them. Ask the user to paste the first error from the logs
+(the first one matters; later errors are usually consequences), or compile locally
+(`research-paper` § 7).
+
+**Backup:** Overleaf's version history is limited on the free plan. The local copy under git
+(route A's download, or routes B and C) is the backup that does not depend on the plan.

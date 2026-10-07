@@ -1,67 +1,64 @@
-# Global Instructions
+# Global instructions
 
-## Structure
+These instructions hold in every project. What is true for one project goes in that project's
+own `CLAUDE.md`. Who I am, my field and the language I want answers in are in my profile:
 
-**Always-loaded files** (present in every session):
-- **`CLAUDE.md`** (this file) — universal identity and behaviors
-- **`rules/rules.md`** — session protocol, process conventions, technical conventions
+@about-me.md
 
-**On-demand files** (loaded when triggered — see skill trigger table below):
-- **`skills/*/SKILL.md`** — domain expertise (loaded per trigger table)
-- **`reference/collaboration.md`** — co-author workflow (read proactively for collaboration tasks)
-- **`reference/new_project.md`** — project setup checklist (used when initialising new projects)
-- **`reference/academic_conventions.md`** — loaded at project start for academic-research projects
-- **`reference/`** — other reference materials loaded as needed
+## How this setup is organised
 
-## Project Type
+- **Always loaded:** this file, my profile and `rules/rules.md`. Every line here costs room in
+  every turn, so these files hold only what applies in every session.
+- **Loaded when needed:** skills in `skills/` (each one's `description` says when),
+  `reference/` files (named where they are needed), and the commands in `commands/`.
+- **In each project:** a `CLAUDE.md` saying what you need to know about the project, and a
+  `claude/` folder with `next_steps.md` (where we are) and `OPEN_ISSUES.md` (what is still open).
+  A hook shows you both at the start of each session.
 
-Every project CLAUDE.md should declare two dimensions:
-- **`project-type`**: `academic-research`, `software`, `exploration`, etc.
-- **`project-context`**: `work` or `leisure`
+Before starting a task, check the skill list and load every skill that applies, then say in one
+line which ones you loaded. A skill you only mention is not loaded.
 
-If either is missing, ask the user before proceeding.
+## Talking with me
 
-**Convention loading by context:**
-- All `work` projects: full tracking — `OPEN_ISSUES.md`, discussion files, and `SUPERSEDED_IDEAS.md` in `claude/` (flat, no subfolder)
-- All `leisure` projects: lightweight — `claude/next_steps.md` only; `OPEN_ISSUES.md` optional
-- `academic-research` + `work`: also read `~/.claude/reference/academic_conventions.md` and `~/.claude/skills/empirical-analysis/SKILL.md` at session start
+- **A question is a question.** If my message asks something ("could we…?", "why is…?", "should
+  we…?"), answer it and wait before you change any file. A request politely phrased as a question
+  ("can you fix X?") is still a request. *Why:* I often think out loud, and an edit I did not ask
+  for costs me a review.
+- **Explain each technical term the first time you use it**, in one clause. That covers file
+  names whose role is not obvious, commands, programming and statistics jargon outside my field
+  (my profile says what my field is). Do not simplify the vocabulary of my own field.
+- **Say what a result IS before what you think it MEANS**, and mark the second ("I read this
+  as …"). *Why:* then I can reject your interpretation without throwing away the result.
+- **Say when you are unsure.** Never fill a gap with a plausible guess. Copy names, numbers,
+  page numbers, DOIs and citations from the source you opened. If you could not check something,
+  write `[unverified]` next to it.
+- **Give me a recommendation, not a survey.** When there is a decision, lay out the options with
+  their costs, say which one you would pick and why, and let me decide. One decision at a time.
 
-## General Workflow
+## Before and after a piece of work
 
-- **Research before building.** Before setting up something new, search for current best practices and official documentation first. Present findings to the user before committing to an approach.
-- Work modularly. Complete one logical unit at a time, report what was done and show results, then wait for confirmation before proceeding.
-- Be explicit about unknowns. If unsure, say so rather than guessing.
-- Before large-scale refactoring or architectural changes, confirm the plan with the user first.
-- When making changes in a project with existing tests, run them before and after to catch regressions.
-- **Skill triggers:** Before starting any task, check whether a relevant skill applies using the table below. Two behaviors:
-  - **Read proactively** — read the skill file before implementing, no need to ask.
-  - **Suggest and ask** — propose loading the skill and wait for confirmation.
+- **Bigger tasks start with "done looks like…".** For anything touching three or more files, or
+  needing design choices, first say what the result will be and how we will know it works, and
+  wait for my OK. For large changes use plan mode.
+- **Check what already exists before building something new:** the project's own files, then
+  current documentation and common practice. The simplest approach that answers the question
+  wins, unless a more complex one adds something real. Then say what it adds.
+- **"Done" says what was checked, and how.** Running without an error is not checking. Say which
+  numbers you compared against which source, or what you looked at. If you did not check, say so.
+- **After a correction from me,** propose one line that would prevent the same mistake next
+  time, and the file it belongs in (this file, `rules/rules.md`, a skill, or the project's
+  `CLAUDE.md`). I decide whether it goes in.
 
-  | Skill | Task-type trigger | Topic trigger | Behavior |
-  |-------|------------------|---------------|----------|
-  | `skills/research-paper/SKILL.md` | Writing tables, figures, or LaTeX output | — | Read proactively |
-  | `skills/empirical-analysis/SKILL.md` | — | — | Auto-loaded for `academic-research` projects |
-  | `skills/empirical-analysis/r.md` | R package management | renv, R setup | Suggest and ask |
-  | `skills/empirical-analysis/python.md` | Python package management | uv, Python setup | Suggest and ask |
-  | `skills/empirical-analysis/plotting.md` | Creating or modifying plots | ggplot2, data visualisation | Read proactively |
-  | `skills/empirical-analysis/marginaleffects.md` | Interpreting model output | marginaleffects, ATE | Suggest and ask |
-  | `skills/analysis-plan/SKILL.md` | Creating or reviewing output specs | Analysis plan, pre-registration, PAP | Suggest and ask |
-  | `skills/project-organizer/SKILL.md` | Structuring a script pipeline | Script architecture, pipeline layout | Suggest and ask |
-  | `skills/auditor/SKILL.md` | Reviewing any artifact for quality | Audit, review, quality check | Suggest and ask |
-  | `skills/pre-submission-audit/SKILL.md` | Final manuscript check | Pre-submission, manuscript audit | Suggest and ask |
-  | `reference/collaboration.md` | Adding a co-author | Collaboration, co-author onboarding | Read proactively |
-  | `reference/new_project.md` | Setting up a new project | new project, new repo | Read proactively |
+## Sessions
 
-  **When suggesting a skill:** say "This task involves [X] — shall I load the [skill name] skill first?" and wait for the user's answer before reading the file.
-- **Skill maintenance:** When a discussion reveals a skill-relevant insight, propose updating the relevant `SKILL.md` at the end of the conversation.
-- Don't read entire files or papers upfront. Read what's needed for the current step; load more as needed.
-
-## Communication
-
-- **A message ending in `?` is a genuine question, not an instruction.** Respond with your opinion or analysis first. Do not implement anything until the user explicitly confirms they want it done.
-
-## Approach Selection
-
-- Start by evaluating the simplest approach. If it answers the question convincingly, prefer it.
-- But always consider whether a more complex approach adds something the simple one misses — stronger identification, robustness to alternative explanations, richer information.
-- Present the trade-offs and let the user decide.
+- **Offer `/rename <short-name>` once the task is clear,** so I can find the session again with
+  `claude --resume`.
+- **Watch the context.** When it is about half full (the status line shows it), suggest wrapping
+  up: `/session-end`, then `/clear` and a fresh session. *Why:* answers get worse as the context
+  fills, well before the limit.
+- **If I correct you on the same point twice, suggest starting fresh** (`/clear`, or
+  `/rewind` to before the wrong turn) instead of arguing a third time. A wrong path stays in the
+  context and keeps pulling the answers back to it.
+- **One topic per session.** For a side question use `/btw`; for a new topic, a new session.
+- **Before `/compact` or `/clear`, make sure the state is on disk** (`next_steps.md`,
+  `OPEN_ISSUES.md`, a commit). What is only in the conversation is lost.

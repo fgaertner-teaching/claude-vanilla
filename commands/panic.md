@@ -1,37 +1,32 @@
-Emergency session dump. Write everything to a single file and stop — no commits, no pushes, no multi-file writes.
+---
+description: Emergency save when the session is about to end abruptly (limit reached, laptop dying) - write everything to one file and stop.
+---
 
-## Instructions
+Write one file, `claude/panic_dump.md`, with everything the next session needs, and stop. No
+commits, no pushes, no other files: there may not be time for more than one write.
 
-1. Build the dump content as plain markdown containing all of the following sections:
+Use the file-writing tool once, with this content (fill each part from the conversation; do not
+run commands to find things out):
 
-   ```
-   # Panic Dump — [project name]
-   _Date: YYYY-MM-DD_
+```
+# Panic dump: <project name>
+_Written: <date and time>_
 
-   ## What was done this session
-   [Bullet list of completed work]
+## Done this session
+<bullets: what was finished>
 
-   ## In progress (not finished)
-   [What was being worked on when interrupted — include enough detail to resume]
+## In progress
+<what was being worked on when this was written, with enough detail to resume:
+ which file, which step, what was about to happen next>
 
-   ## Uncommitted changes
-   [List files modified but not yet committed — from memory, do NOT run git commands]
+## Not saved anywhere else
+<results, numbers, decisions or text that exist only in this conversation>
 
-   ## Open threads
-   [Anything discussed but not resolved, decisions pending, questions raised]
-   ```
+## Uncommitted changes
+<files changed this session, from memory>
 
-2. Write the file:
+## Open questions
+<anything discussed but not settled>
+```
 
-   ```bash
-   python -c "
-   import sys
-   content = sys.stdin.read()
-   with open('claude/panic_dump.md', 'w') as f:
-       f.write(content)
-   " << 'EOF'
-   [paste the markdown content here]
-   EOF
-   ```
-
-3. **That's it.** Do not commit. Do not push. Do not update `next_steps.md`, `OPEN_ISSUES.md`, or any other file. One Bash call, then stop.
+Then tell the user in one line where the file is. The next session's start hook shows it first.
