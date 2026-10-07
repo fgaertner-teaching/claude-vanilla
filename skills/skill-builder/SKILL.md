@@ -102,7 +102,7 @@ loading costs little; its body then says to offer the work and wait for a yes be
 | `when_to_use` | you want example requests or trigger phrases kept apart from the description (appended to it) |
 | `argument-hint` | the skill takes arguments when started as `/<name>`; the body reads them as `$ARGUMENTS` |
 | `disable-model-invocation: true` | the skill has side effects and only the user should start it |
-| `effort` | the skill needs deeper (or less) reasoning than the session default: `low` … `max` |
+| `effort` | the skill needs deeper (or less) reasoning than the session default: `low` … `max`. Higher effort uses more of the plan's usage; on a smaller plan prefer `high`, and keep `max` for rare, high-stakes checks |
 | `context: fork` (+ `agent`) | the skill reads a lot and only its result should come back to the conversation |
 | `paths` | the skill should only activate for matching files (glob patterns) |
 
