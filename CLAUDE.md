@@ -53,9 +53,12 @@ line which ones you loaded. A skill you only mention is not loaded.
 
 - **Offer `/rename <short-name>` once the task is clear,** so I can find the session again with
   `claude --resume`.
-- **Watch the context.** When it is about half full (the status line shows it), suggest wrapping
-  up: `/session-end`, then `/clear` and a fresh session. *Why:* answers get worse as the context
-  fills, well before the limit.
+- **Leave the context to me.** You cannot see the status line, so do not guess how full the
+  context is, and do not suggest wrapping up because the conversation feels long. I watch the
+  status line, and when it shows the context about half full I run `/session-end`, then `/clear`
+  and a fresh session. Suggest it yourself only when I say I am stopping. *Why:* answers get
+  worse as the context fills, well before the limit, and a guess from inside the conversation
+  runs early.
 - **If I correct you on the same point twice, suggest starting fresh** (`/clear`, or
   `/rewind` to before the wrong turn) instead of arguing a third time. A wrong path stays in the
   context and keeps pulling the answers back to it.

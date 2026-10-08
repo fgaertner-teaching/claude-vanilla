@@ -65,7 +65,9 @@ Code adds what it prints to the session.
 ## Status line
 
 `scripts/statusline.ps1` shows the folder, git branch and session name, then the model and how
-full the context is. The context figure is what the "wrap up at about half full" rule reads.
+full the context is. The context figure is for the user: the status line is drawn in the
+terminal and never reaches Claude, so `CLAUDE.md` § Sessions leaves the "wrap up at about half
+full" call to the user.
 
 ## Instruction files
 
