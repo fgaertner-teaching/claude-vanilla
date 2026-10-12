@@ -19,6 +19,7 @@ Last updated: 2026-10-12. Written for Windows first (for a Mac, see § On a Mac)
 | `skills/` | Analysis, analysis plans, LaTeX papers, writing, code, review |
 | `agents/` | A literature scout and a verifier |
 | `reference/` | Background files the skills and commands point to |
+| OpenAlex (MCP server) | The open literature database as a tool: Claude searches papers, citations and authors. Connected by the install, not a file here |
 
 ## Before you start
 
@@ -52,7 +53,10 @@ merge it in:
    > before saving it. Do not copy README.md, .git or .gitignore. On a Mac, point the three
    > hook and status-line commands in settings.json at the .sh scripts instead of the .ps1
    > ones (sh "$HOME/.claude/scripts/<name>.sh"). Then interview me, one question at a time,
-   > to create ~/.claude/about-me.md from the template. Last, check whether git, Rscript, uv,
+   > to create ~/.claude/about-me.md from the template. Then connect the OpenAlex literature
+   > database for all my folders: claude mcp add --scope user --transport stdio openalex --
+   > npx -y openalex-research-mcp@0.5.0 . If ~/.openalex_api_key exists, pass its content as
+   > OPENALEX_API_KEY with -e, placed before --transport, without printing the key. Last, check whether git, Rscript, uv,
    > quarto and pdftotext are found from a terminal, and for each one that is not, say where
    > it is installed and offer to add it to my PATH.
 
@@ -65,6 +69,8 @@ merge it in:
      and `Bash(git push *)`; under Deny, the `git … --force` and `git … --hard` rules and
      `Edit(**/1_raw_data/**)`.
    - `/hooks` lists a `SessionStart` and a `UserPromptSubmit` hook.
+   - `/mcp` lists `openalex`. If it shows the server failed, Node.js is missing: ask Claude to
+     install it, then start Claude Code again.
    - Ask *"What do you know about me, and which skills and commands do you have?"* The answer
      should come from your profile and name the kit's skills.
 
@@ -151,5 +157,5 @@ settings would be lost.
 
 ## Not included
 
-Things that pay off only in a larger setup: syncing several computers, literature databases
-connected as tools, and automated multi-step research pipelines.
+Things that pay off only in a larger setup: syncing several computers, and automated
+multi-step research pipelines.

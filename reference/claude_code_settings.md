@@ -80,6 +80,21 @@ also writes the context figure to a small file in the temp folder
 (`claude-context-<session id>.txt`), and the prompt hook puts it into each message. Until the
 status line has shown a figure in this session, the hook adds nothing.
 
+## MCP servers
+
+An MCP server adds tools to Claude's menu. The install connects one: OpenAlex, the open
+literature database, for all your folders (`--scope user`), pinned to version 0.5.0 of the npm
+package `openalex-research-mcp`. *Why pinned:* `npx -y` without a version runs whatever the
+package's author published last, on every start. It is stored in `~/.claude.json`, outside
+`~/.claude`, so it is not in this kit's files.
+
+- `/mcp` shows the servers and whether each is connected. A failed OpenAlex means Node.js is
+  missing: Claude can install it.
+- Optional key: OpenAlex reads `OPENALEX_API_KEY`. Without one, everyone behind the same
+  internet address shares one small daily budget.
+- Connect only servers you trust: a server that reads web pages can bring in instructions you
+  did not write. Remove one with `claude mcp remove <name> --scope user`.
+
 ## Instruction files
 
 - `~/.claude/CLAUDE.md` and every file in `~/.claude/rules/` load in every session. A project's
