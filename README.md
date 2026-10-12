@@ -56,7 +56,7 @@ merge it in:
    approve it.
 5. Close Claude Code and start it again in any folder. Check five things:
    - Two lines under the input box show the folder, the model and how full the context is.
-   - `/context` lists `CLAUDE.md`, `about-me.md` and `rules/rules.md`.
+   - `/context all` lists `CLAUDE.md`, `about-me.md` and `rules/rules.md` under Memory files.
    - `/permissions` lists the kit's rules: under Ask, `Bash(rm *)` and `PowerShell(Remove-Item *)`;
      under Deny, the `git … --force` and `git … --hard` rules.
    - `/hooks` lists one `SessionStart` hook.
