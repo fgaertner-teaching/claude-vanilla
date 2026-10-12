@@ -105,7 +105,7 @@ sns.set_theme(style="ticks", context="paper")   # close to theme_bw()
 palette = sns.color_palette("colorblind")       # Wong-style colorblind-safe set
 
 fig, ax = plt.subplots(figsize=(6, 4))
-sns.stripplot(data=df, x="group", y="outcome", alpha=0.35, size=4, jitter=True, ax=ax)
+sns.stripplot(data=data_final_survey_main, x="group", y="outcome", alpha=0.35, size=4, jitter=True, ax=ax)
 ax.errorbar(x_positions, means, yerr=1.96 * ses, fmt="o", color="black",
             capsize=4, linewidth=1.5)
 sns.despine(ax=ax)                              # removes top and right spines

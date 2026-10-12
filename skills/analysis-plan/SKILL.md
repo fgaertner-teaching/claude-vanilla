@@ -69,7 +69,7 @@ What to pre-specify with each:
   1[R ≥ c], and both reduced form and 2SLS reported.
 - **DiD:** unit and time FE, clustering at the treated unit, any time-varying controls (they risk
   being bad controls). **Staggered adoption:** name the heterogeneity-robust estimator now
-  (Callaway & Sant'Anna; Sun & Abraham; Borusyak et al.), never vanilla TWFE as primary. Event
+  (`empirical-analysis` § Identification lists them), never vanilla TWFE as primary. Event
   study: the omitted period (usually −1), the number of pre-periods shown, and the pre-trend test.
 - **IV:** the exclusion argument in words, the estimand (LATE, and for whom), the weak-instrument
   procedure (tF, Lee et al. 2022; not just F > 10).
@@ -196,6 +196,8 @@ checks (state the logic), auxiliary model selection, presentation.
 ## Power             effect size and source, α, power, MDE, N, clustering and attrition
 ## Criteria          each threshold with its expected value under the hypothesis
 ## Robustness        alternative specifications reported regardless of results
+## Deviations        none yet; each change after registration goes into
+                     claude/analysis_plan_deviations.md (plan, decision, reasons)
 ```
 
 ## 11. Common mistakes

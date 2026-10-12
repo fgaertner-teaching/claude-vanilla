@@ -62,8 +62,10 @@ runs them in order with `runpy.run_path(...)`.
    deleting one would lose work, that work is in the wrong place.
 6. **Hand-made inputs are not outputs.** A codebook, a crosswalk you typed, a questionnaire, a
    list of sample exclusions: written by a person, read by a script, produced by no script. Commit
-   them in a tracked folder (e.g. `analysis/0_shared/`) unless they hold personal data. *Test:*
-   search the scripts for the file name. If a script reads it and none writes it, it is an input.
+   them in a tracked folder (e.g. `analysis/0_shared/`) unless they hold personal data, and give
+   each kind its own `!` line in `.gitignore` before staging it: the template leaves out every
+   kind of file it does not list (`reference/gitignore_policy.md`, principle 2). *Test:* search
+   the scripts for the file name. If a script reads it and none writes it, it is an input.
 
 ## Script numbering: stage, position, role
 
@@ -76,6 +78,9 @@ runs them in order with `runpy.run_path(...)`.
 | 3 | estimate | `3_1_Results_Descriptives.R`, `3_2_Results_Main_Analysis.R`, `3_3_Results_Robustness.R` |
 | 4 | tables | `4_0_Tables_Setup.R`, `4_2_Tables_Main_Analysis.R` |
 | 5 | figures | `5_0_Plots_Setup.R`, `5_2_Plots_Main_Analysis.R`, `5_5_Plots_Export.R` |
+
+Stage numbers count steps and folder numbers count folders, so they differ: stage 4 writes to
+`5_tables/`, stage 5 to `6_plots/`.
 
 Inside each stage, three roles:
 
@@ -168,6 +173,9 @@ submission/       what was sent to and received from journals (below)
 - `\input{tables/tab_main_effects.tex}`: the path ends in the exact file name the script wrote.
 - Tables and figures should arrive by a sync step, not by hand. If they are uploaded by hand,
   re-upload after every rerun, or the paper shows numbers the code no longer produces.
+- A paper inside the repository (`paper/`) has no `tables/` or `figures/` copies: it reads the
+  outputs where the scripts write them (`\input{../analysis/5_tables/...}`), so nothing
+  generated is committed (`reference/new_project.md` § 8).
 
 ### Blind-review toggle
 

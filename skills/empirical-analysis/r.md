@@ -30,8 +30,9 @@ rerun later, or on another computer, with the same results.
 
 1. **Windows needs Rtools** (cran.r-project.org/bin/windows/Rtools/, the version matching the R
    version). Without it, any package that must be compiled from source fails to install.
-2. On a new project: `update.packages(ask = FALSE)`, then `renv::init()`, so the lockfile starts
-   from current versions.
+2. On a new project: ask the user whether to update the installed packages first
+   (`update.packages(ask = FALSE)` changes them for every project on the computer and can take
+   minutes; `rules/rules.md` counts that as a change outside the project), then `renv::init()`.
 3. After installing a package: `renv::install("pkg")`, then `renv::snapshot()`.
 4. After cloning or pulling a changed lockfile: `renv::restore()`.
 5. **Commit** `renv.lock`, `.Rprofile`, `renv/activate.R`, `renv/settings.json`. **Never commit**
@@ -109,7 +110,8 @@ Third-party CSVs (downloads, exports from other tools) are read with their own f
 | `emmeans` | estimated marginal means, post-hoc contrasts |
 | `car` | Type III tests, VIF |
 | `sandwich` / `estimatr` | robust and clustered SEs outside `fixest` |
-| `fwildclusterboot` | wild cluster bootstrap (few clusters) |
+| `fwildclusterboot` | wild cluster bootstrap (few clusters). Archived on CRAN since 2024-05-29; install with `renv::install("fwildclusterboot", repos = c("https://s3alfisc.r-universe.dev", "https://cloud.r-project.org"))` (Last verified: 2026-10-12) |
+| `clubSandwich` | CR2 small-sample cluster correction, the alternative for few clusters |
 | `marginaleffects` | predictions, AMEs, interactions (see `marginaleffects.md`) |
 | `rdrobust` | regression discontinuity |
 | `MatchIt` / `cobalt` | matching and balance diagnostics |

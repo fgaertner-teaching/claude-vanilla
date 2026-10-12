@@ -50,7 +50,15 @@ if ! ls claude/next_steps*.md >/dev/null 2>&1 && [ ! -f claude/OPEN_ISSUES.md ];
     printf 'No claude/next_steps.md or claude/OPEN_ISSUES.md in this folder. If this is a project, /newproject sets them up.\n\n'
 fi
 
-# Git: branch and uncommitted changes, from local state only (no network call).
+# Git: branch and uncommitted changes, from local state only (no network call). Without git every
+# git call fails, which must not read as "not a git repository". On a Mac without the command line
+# tools, /usr/bin/git is a stub that may open an install dialog, so that one is not called (a git
+# from elsewhere on PATH, e.g. GitHub Desktop or conda, is used as usual).
+git_path=$(command -v git 2>/dev/null)
+if [ -z "$git_path" ] || { [ "$git_path" = /usr/bin/git ] && [ "$(uname)" = Darwin ] && ! xcode-select -p >/dev/null 2>&1; }; then
+    printf 'Git: git was not found (on a Mac: the command line tools are not installed), so the git state is unknown. Tell the user.\n'
+    exit 0
+fi
 if git_dir=$(git -C "$project_dir" rev-parse --show-toplevel 2>/dev/null); then
     branch_line=$(git -C "$project_dir" status --short --branch 2>/dev/null | head -n 1)
     changed=$(git -C "$project_dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
@@ -58,7 +66,7 @@ if git_dir=$(git -C "$project_dir" rev-parse --show-toplevel 2>/dev/null); then
 
     # A git repository inside a cloud-synced folder is a known source of corruption.
     case $(printf '%s' "$git_dir" | tr '[:upper:]' '[:lower:]') in
-        *onedrive*|*dropbox*|*"google drive"*|*googledrive*|*nextcloud*|*icloud*|*/library/cloudstorage/*|*"mobile documents"*)
+        *onedrive*|*dropbox*|*"google drive"*|*googledrive*|*"my drive"*|*"meine ablage"*|*nextcloud*|*icloud*|*/library/cloudstorage/*|*"mobile documents"*)
             printf 'WARNING: this git repository sits inside a cloud-synced folder (%s). Tell the user; see rules/rules.md.\n' "$git_dir" ;;
     esac
 else

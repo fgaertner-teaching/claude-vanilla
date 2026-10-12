@@ -27,7 +27,9 @@ notes; layout claims are checked on the rendered page, not inferred from the log
 
 - **The analysis script writes each table as a `.tex` fragment** (`5_tables/tab_<name>.tex` in
   the standard pipeline), a sync step copies it into the paper's `tables/` folder, and the paper
-  pulls it in with `\input{tables/tab_<name>}`. *Why:* re-running the script updates the paper;
+  pulls it in with `\input{tables/tab_<name>}`. A paper inside the repository (`paper/`) skips
+  the copy and reads it in place: `\input{../analysis/5_tables/tab_<name>}`
+  (`reference/new_project.md` § 8). *Why:* re-running the script updates the paper;
   a number copied by hand goes stale the first time the analysis changes, and nobody notices.
   Never edit a generated `.tex` table by hand: fix the script and re-run.
 - **Numbers quoted in the text come from the script too.** Have the script write a small file of

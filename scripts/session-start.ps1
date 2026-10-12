@@ -9,10 +9,13 @@
 $ErrorActionPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-# Find the project folder: the hook input names it; fall back to the current folder.
+# Find the project folder: the hook input names it; fall back to the current folder. Claude Code
+# sends the JSON as UTF-8, so the raw input is decoded as UTF-8: [Console]::In would use the
+# console's code page in Windows PowerShell 5.1 and garble a folder name with an umlaut.
 $projectDir = (Get-Location).Path
 try {
-    $hookInput = [Console]::In.ReadToEnd() | ConvertFrom-Json
+    $stdinReader = New-Object System.IO.StreamReader([Console]::OpenStandardInput(), [System.Text.Encoding]::UTF8)
+    $hookInput = $stdinReader.ReadToEnd() | ConvertFrom-Json
     if ($hookInput.cwd) { $projectDir = $hookInput.cwd }
 } catch {}
 
@@ -71,7 +74,12 @@ if (-not ($hasNextSteps -or $hasIssues)) {
     Write-Output ""
 }
 
-# Git: branch and uncommitted changes, from local state only (no network call).
+# Git: branch and uncommitted changes, from local state only (no network call). Without git on
+# PATH every git call fails, which must not read as "not a git repository".
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Output "Git: git was not found on PATH, so the git state is unknown. Tell the user."
+    exit 0
+}
 $gitDir = git -C $projectDir rev-parse --show-toplevel 2>$null
 if ($LASTEXITCODE -eq 0 -and $gitDir) {
     $branchLine = git -C $projectDir status --short --branch 2>$null | Select-Object -First 1
@@ -79,7 +87,7 @@ if ($LASTEXITCODE -eq 0 -and $gitDir) {
     Write-Output "Git: $branchLine; $changed file(s) with uncommitted changes."
 
     # A git repository inside a cloud-synced folder is a known source of corruption.
-    if ($gitDir -match '(?i)onedrive|dropbox|google ?drive|nextcloud|icloud') {
+    if ($gitDir -match '(?i)onedrive|dropbox|google ?drive|my drive|meine ablage|nextcloud|icloud') {
         Write-Output "WARNING: this git repository sits inside a cloud-synced folder ($gitDir). Tell the user; see rules/rules.md."
     }
 } else {

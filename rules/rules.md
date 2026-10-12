@@ -24,7 +24,9 @@ Conventions for files, data, git, project tracking and code. Every project, ever
   find them later.
 - **Change text files with the file tools (Edit, Write), never through a shell command**
   (`sed`, `>`, a script that rewrites a file). Scripts write their outputs as usual. *Why:*
-  `/rewind` undoes what the file tools changed, not what a command did.
+  `/rewind` undoes what the file tools changed, not what a command did. The one exception, a
+  bulk edit (one change across many files, or a long `.bib`): by script only after a commit, so
+  git can undo it, and with the dry run the `coder` skill describes.
 - **Personal data, licensed data and secrets** (passwords, API keys) are never committed, never
   pasted into a public place, and only sent to a service I have approved. When unsure whether a
   file counts, ask.
@@ -51,6 +53,8 @@ Conventions for files, data, git, project tracking and code. Every project, ever
 - **Decisions get a short discussion file** in `claude/` (`decision_<topic>.md`): the question,
   the options, what we chose and why, and what we rejected. *Why:* a year later the reason is
   what you need, and nobody remembers it.
+- **A review of the project's own work** (the `auditor` skill) goes to `claude/audit_<scope>.md`;
+  read one when its findings are being worked on.
 - **Keep them current as we go,** not reconstructed at the end of the session.
 - **The project's `CLAUDE.md` says what you need to know about the project** in every session:
   its goal, its data, its folder layout, its rules. Keep it short, with details in files it
@@ -73,14 +77,17 @@ Conventions for files, data, git, project tracking and code. Every project, ever
 - **Push at the end of a session** if the repository has a remote. *Why:* a commit only on this
   laptop dies with it.
 - **Before a push, list what git tracks and what it leaves out,** and point at anything that
-  looks misplaced in either list. Claude Code then asks me before the push itself. *Why:* a push
+  looks misplaced in either list. Summarise the left-out files by folder (a data folder is one
+  line, with its file count); list single files only outside the data and output folders. Claude Code then asks me before the push itself. *Why:* a push
   cannot be taken back, and neither of us reliably spots what must stay off GitHub; two looks
   catch more than one. And a new kind of file stays out of git without any warning.
 - **Before an undo that changes the folder** (restoring files from an earlier commit, switching
   to an old state), run `git status`. Anything uncommitted: commit it first, or ask me.
 - **Two sessions writing in one repository:** each gets its own worktree, started with
   `--worktree <name>` (`claude --worktree analysis-fix`). In one folder, everything
-  uncommitted is shared between them.
+  uncommitted is shared between them. A worktree is a fresh checkout of what was pushed: no
+  data, no installed packages, no unpushed commits. Use it for code and text; work that needs
+  the data stays in the main folder.
 - **Explain each git command in plain words** the first time it comes up.
 - Force-pushing, `git reset --hard` and `git clean` are blocked in the settings in their usual
   forms. Never reach for another form: if one seems necessary, explain why and let me run it.

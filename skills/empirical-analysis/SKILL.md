@@ -103,7 +103,9 @@ source instead of surfacing weeks later as a strange coefficient.
 **Standard errors**
 - Cluster at the level of treatment assignment (Abadie et al. 2023). Why: that is where the
   correlated shocks come from; clustering lower overstates precision.
-- Fewer than ~50 clusters: wild cluster bootstrap (R `fwildclusterboot`).
+- Fewer than ~50 clusters: wild cluster bootstrap (R `fwildclusterboot`, archived on CRAN; how
+  to install it: `r.md`), or the CR2 correction with Satterthwaite degrees of freedom
+  (`clubSandwich::coef_test(fit, vcov = "CR2", cluster = ..., test = "Satterthwaite")`).
 - Small samples without clustering: HC2 over HC1 (`estimatr::lm_robust`).
 - A single time series: textbook Newey–West (short lag, normal critical values) over-rejects under
   persistence. Use fixed-b inference: Newey–West with lag ≈ 1.3·√T and fixed-b critical values, or
@@ -202,19 +204,20 @@ Why: without fields 5–7 the write-up reports numbers mechanically and the argu
 This list grows. When Claude gets an analysis wrong, Claude proposes adding the mistake and the
 rule that prevents it here, and adds it once the user agrees.
 
-- **Bad controls:** never control for post-treatment variables or mediators (Angrist & Pischke 2009, 3.2.3).
-- **Interactions in nonlinear models:** the coefficient on X₁×X₂ is not the interaction effect
-  (Ai & Norton 2003); compute it with `marginaleffects`.
-- **Collider bias:** conditioning on a common effect of treatment and outcome creates an association.
+- **The textbook ones:** controlling for a mediator or a collider, `causal_reasoning.md` § 3 (E4,
+  E5); interactions in nonlinear models, `marginaleffects.md`.
+- **Measurement error:** classical error in X attenuates the estimate toward zero, so a small
+  coefficient on a noisy measure is no evidence of a null; error in Y inflates SEs without bias (OLS).
+- **Ecological fallacy:** group-level correlations are not individual effects; match the level of
+  analysis to the claim.
 - **Partial confounder control can increase bias.** Biases carry signs and partly cancel: with two
   confounders biasing by +5 and −2 the net bias is +3; control for the −2 one and it becomes +5. So
   "we control for what we observe" does not mean "closer to the truth", and a coefficient that moves
   as control blocks are added is not converging. Sign the biases before claiming a direction.
-- **Measurement error:** classical error in X attenuates; in Y it inflates SEs without bias (OLS).
-- **Ecological fallacy:** group-level correlations are not individual effects.
 - **Subgroups:** adjust for multiple comparisons or label them exploratory.
 - **Forking paths:** Claude makes "one more specification" effortless. Pre-specify, report every
-  specification run (or a specification curve), and log each deviation from the plan with its reason.
+  specification run (or a specification curve), and log each deviation from the plan with its
+  reason in `claude/analysis_plan_deviations.md`.
 
 ---
 
@@ -235,4 +238,5 @@ If you recommend a method and cannot name its standard reference, say the sugges
 
 When a finding suggests a new research question, offer it in one line at a natural pause, not after
 every output. If the user wants to keep it, append it to `claude/research_ideas.md` with title,
-date, what prompted it, the idea (1–3 sentences) and a one-line feasibility note.
+date, what prompted it, the idea (1–3 sentences) and a one-line feasibility note. Read that file
+only when the user asks about ideas for further work.

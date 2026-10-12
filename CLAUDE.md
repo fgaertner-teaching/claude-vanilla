@@ -55,17 +55,20 @@ line which ones you loaded. A skill you only mention is not loaded.
 
 ## Sessions
 
-- **End your first reply in every session with a line I can paste, starting with `/rename`**
-  and a short name for the task. **If a file I mention is outside the current working
+- **End your first reply in every session I start with a line I can paste, starting with
+  `/rename`** and a short name for the task (not in a report you write as a subagent). **If a file I mention is outside the current working
   directory, also give a `/cd` line** for the folder that holds it. *Why:* I find a session
   again by its name (`claude --resume`, or through my launcher, e.g. `claude-jlu --resume`), and
   Claude Code works in the folder it was started in.
-- **After a `/cd`, read the new folder's `CLAUDE.md` and `claude/next_steps.md`** before working
-  there. The start hook showed the old folder's files, not these.
+- **After a `/cd`, run the `/startup` steps for the new folder** (its panic dump, `CLAUDE.md`,
+  `claude/next_steps.md` and git state) before working there. The start hook showed the old
+  folder, not this one.
 - **Watch the context figure.** A hook adds "Context: N% used." to my messages. When it passes
   about half, suggest `/session-end`, then `/clear` and a fresh session; past three quarters,
-  say so in every reply. Without the line, do not guess from how long the conversation feels:
-  leave it to me. *Why:* answers get worse as the context fills, well before the limit.
+  say so in every reply. If the line still says "unknown" after your first reply, tell me once
+  that context watching is off (usually the kit's status line is not running), and do not guess
+  from how long the conversation feels. *Why:* answers get worse as the context fills, well
+  before the limit.
 - **After a compaction, load again the skills the task needs.** Compaction keeps only the start
   of a long skill.
 - **If I correct you on the same point twice, suggest starting fresh** (`/clear`, or

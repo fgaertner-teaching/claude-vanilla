@@ -39,10 +39,16 @@ They are combined. `/permissions` shows the rules in force and where each comes 
   protected write: in auto mode a reviewer model decides, so do it in Manual mode.
 
 **What this kit sets:** git (except pushing) and `uv` / `Rscript` commands allowed; deleting
-and pushing ask; reading secret files (`.env`, SSH keys), force-pushing, `git reset --hard`,
-`git clean` and Claude's own edits in any `1_raw_data/` folder (`Edit(**/1_raw_data/**)`)
-denied. Pushing asks because a push cannot be taken back: each time, you check that nothing
-goes up that should stay off GitHub.
+and pushing ask; reading secret files (`.env` in any folder, SSH keys), force-pushing,
+`git reset --hard`, `git clean` and Claude's own edits in any `1_raw_data/` folder
+(`Edit(**/1_raw_data/**)`) denied. Pushing asks because a push cannot be taken back: each time,
+you check that nothing goes up that should stay off GitHub.
+
+**What the `uv` and `Rscript` allows let through:** a rule matches from the start of the
+command, so whatever runs inside them is not asked either: `uv run git push`, `uv tool install`
+(an install outside the project) or `Rscript -e "unlink('data')"` run without a prompt, and no
+deny or ask rule sees them. That is the price of not being asked at every script run. The
+instruction files ask Claude to ask in words before such steps; that is a request, not a lock.
 
 ## Permission modes
 
@@ -77,8 +83,11 @@ Notes:
 `scripts/statusline.ps1` shows the folder, git branch and session name, then the model and how
 full the context is. The status line is drawn in the terminal and never reaches Claude, so it
 also writes the context figure to a small file in the temp folder
-(`claude-context-<session id>.txt`), and the prompt hook puts it into each message. Until the
-status line has shown a figure in this session, the hook adds nothing.
+(`claude-context-<session id>.txt`), and the prompt hook puts it into each message. When there
+is no figure, the hook says "Context: unknown": normal before Claude's first reply and right
+after `/compact`. **The prompt hook depends on the kit's status line.** If you keep a status line
+of your own, the line stays "unknown" for good, unless your status line writes the same file
+(the kit's script shows the two lines that do it).
 
 ## MCP servers
 
@@ -110,6 +119,13 @@ package's author published last, on every start. It is stored in `~/.claude.json
 - **Skills:** `~/.claude/skills/<name>/SKILL.md`. Claude loads one when its `description`
   matches the task; you can also call it as `/<name>`. Without `name` and `description` in
   its frontmatter a skill is poorly found. The `skill-builder` skill explains how to write one.
+  Claude sees the skills' descriptions in a list whose budget is 1% of the model's context
+  window. On a model with a 200K window (Sonnet or Haiku 4.5) the kit's skills plus Claude
+  Code's own probably do not fit (derived from the docs, not measured), and Claude Code then
+  drops the descriptions of the skills used least,
+  so they stop loading on their own. The kit raises the budget to 3%
+  (`"skillListingBudgetFraction": 0.03`); on a 1M-window model that only allows more.
+  `/context`'s Skills row shows the list after the budget is applied; `/doctor` estimates it.
 - **Commands:** `~/.claude/commands/<name>.md`, run as `/<name>`. A name Claude Code already
   uses for its own command (e.g. `/review`) does not run yours: pick another.
 - **Agents:** `~/.claude/agents/<name>.md` (frontmatter `name`, `description`; optional

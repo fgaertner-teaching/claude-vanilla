@@ -188,7 +188,6 @@ Only these, and no restructuring:
 - **Syntax carried over from the writer's first language** (for German speakers: "the
   possibility to express" → "the possibility of expressing"; a dangling "the money participants
   decide about" → "the money participants allocate"; "and so on" → "etc.").
-- **Em-dashes**, replaced as in § 4.
 - **"We believe" stacks** (three in a paragraph): vary the verb or commit ("we find").
 - Spelling and typos: point them out; they belong to the final proofread.
 

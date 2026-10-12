@@ -44,8 +44,9 @@ each one in a line. Do not skip a step silently: if it does not apply, say why.
    # Good: Cluster SEs by firm in the main models (referee 2, point 4)
    ```
 3. If the repository has a remote: list what git tracks and what it leaves out
-   (`git ls-files`; `git status --ignored --short`), point at anything that looks misplaced,
-   then push. Claude Code asks the user before the push: say what goes up. Say if the push
+   (`git ls-files`; `git status --ignored --short`, the left-out files summarised by folder so a
+   data folder is one line with its file count), point at anything that looks misplaced, then
+   push. Claude Code asks the user before the push: say what goes up. Say if the push
    failed; do not force it.
 
 ## 3. Hand over

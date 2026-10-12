@@ -112,7 +112,8 @@ Add a block like this:
 - Branches: work on `<initials>/<topic>`; merge into `main` only through a pull request.
 - Packages: after installing one, `renv::snapshot()` and commit `renv.lock` (Python: commit
   `pyproject.toml` and `uv.lock`). After pulling a changed lock file: `renv::restore()` / `uv sync`.
-- Handover: each author has `claude/next_steps_<initials>.md`. Read the current user's at session
+- Handover: each author has `claude/next_steps_<initials>.md`; the start hook shows all of them,
+  so act on the current user's and treat the others as context. Read the current user's at session
   start and overwrite it at session end, instead of `claude/next_steps.md`.
 - Decisions: `claude/decision_<topic>.md` (question, options, choice, why) for any analytical
   choice another author would need the reason for.

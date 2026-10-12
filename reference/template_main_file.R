@@ -17,15 +17,17 @@
 #
 # --- How to get started (first-time setup) -----------------------------------
 #
-# 1. Open this project in Positron or RStudio. We recommend opening from the
-#    repository root (the top-level folder containing analysis/, claude/, etc.)
-#    — the working directory correction below will handle the rest.
+# 1. Open the analysis/ folder (the one holding renv.lock and this file) in
+#    Positron or RStudio, or start R there. R switches on the project's package
+#    library (renv) only for the folder it starts in; opened anywhere else, the
+#    pipeline would run on whatever packages are installed, and this file stops.
 #
 # 2. Install the renv package if you don't have it yet:
 #      install.packages("renv")
 #
-# 3. Restore the project's package library. This installs every R package at
-#    the exact version used in this project, so your results match ours:
+# 3. Restore the project's package library, still in analysis/. This installs
+#    every R package at the exact version used in this project, so your results
+#    match ours:
 #      renv::restore()
 #
 # 4. If a file called config_local.R exists in analysis/, it contains
@@ -38,9 +40,8 @@
 #
 # --- How the pipeline works --------------------------------------------------
 #
-# All paths in the pipeline are relative to analysis/. The working directory
-# correction below ensures this is true regardless of where you opened the
-# project.
+# All paths in the pipeline are relative to analysis/. The check below stops the
+# run if R was not started there.
 #
 # The pipeline has two modes:
 #
@@ -63,19 +64,34 @@
 # ==============================================================================
 
 
-# Working directory correction ------------------------------------------------
-# Handles three start locations: analysis/ (correct), repo root, or a
-# subdirectory of analysis/ left over from a crashed pipeline run.
-if (file.exists("0_shared/0_Setup.R")) {
-  # Already in analysis/ — nothing to do
-} else if (file.exists("analysis/0_shared/0_Setup.R")) {
-  setwd("analysis")  # Started from repo root
-} else if (file.exists(file.path(here::here(), "0_shared", "0_Setup.R"))) {
-  setwd(here::here())  # Started from a subdirectory; here anchors correctly
-} else {
-  stop("Cannot locate analysis/0_shared/0_Setup.R. ",
-       "Please open Positron from the repo root ",
-       "or set WD to analysis/ manually.")
+# Working directory and package check -----------------------------------------
+# R must have started in analysis/: only there does renv's .Rprofile switch the
+# project's package library on, and a setwd() later does not. Two start places
+# are handled: analysis/ itself, and a subfolder of it left over from a crashed
+# run in the same session (renv is already on then).
+if (!file.exists("0_shared/0_Setup.R")) {
+  if (!file.exists("analysis/0_shared/0_Setup.R") &&
+      file.exists(file.path(here::here(), "0_shared", "0_Setup.R"))) {
+    setwd(here::here())  # In a subfolder of analysis/; here::here() finds it
+  } else {
+    stop("Start R in the analysis/ folder (the one holding renv.lock), then run ",
+         "this file again. From anywhere else the project's packages are not used.")
+  }
+}
+# renv must be loaded AND active for this folder: loading renv elsewhere (say,
+# renv::status() run from the repository root) loads it without switching this
+# project's library on. renv names the active project in RENV_PROJECT.
+if (file.exists("renv.lock")) {
+  renv_project <- Sys.getenv("RENV_PROJECT")
+  same_folder <- function(a, b) {
+    identical(tolower(normalizePath(a, "/", mustWork = FALSE)),
+              tolower(normalizePath(b, "/", mustWork = FALSE)))
+  }
+  if (!isNamespaceLoaded("renv") ||
+      (nzchar(renv_project) && !same_folder(renv_project, getwd()))) {
+    stop("renv is not active for this folder: R was started outside analysis/, or ",
+         "with --vanilla. Start R in analysis/ without --vanilla.")
+  }
 }
 
 

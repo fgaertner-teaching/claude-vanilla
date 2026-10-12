@@ -91,7 +91,7 @@ Each step leaves evidence that someone else could look at.
 8. **The researcher runs it once.** You run the main script yourself, once, and look at the output.
    A result that only Claude has ever produced does not go out on Claude's word.
 
-**Deviations from the plan** go into `analysis_plan_deviations.md` with the original plan, the
+**Deviations from the plan** go into `claude/analysis_plan_deviations.md` with the original plan, the
 change and the reason, at the time they happen. A silent deviation is the thing pre-registration
 exists to prevent.
 

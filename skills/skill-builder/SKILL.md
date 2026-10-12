@@ -139,7 +139,9 @@ loading costs little; its body then says to offer the work and wait for a yes be
 - **A `# WRONG` / `# RIGHT` pair** for any rule that is easy to apply backwards. One good example
   beats a paragraph of adjectives.
 - **Say it once.** A rule that lives in `CLAUDE.md` and in a skill, worded slightly differently,
-  becomes two rules that disagree.
+  becomes two rules that disagree. The exception: two skills that each load without the other
+  may both carry a short rule, worded the same; a list that can go out of date (packages,
+  estimators) lives in one of them, and the other points to it.
 - **Leave out** what Claude already knows (what a t-test is), style rules a linter or formatter
   enforces, generic encouragement ("be thorough"), and all-caps shouting. *Why:* every line
   competes with every other instruction in the session; past a point, adding rules makes Claude

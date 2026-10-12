@@ -1,7 +1,6 @@
 ---
 name: pre-submission-audit
 description: "Final quality-control audit of a complete submission package before it goes to a journal: cross-references, table and figure numbers, sample sizes, variable names, citations, paper versus appendix versus response letter, a last language pass, the files to upload, and anonymisation for blind review; plus a check against a named journal's author guidelines when the user supplies them. ALWAYS use this skill when the user is about to submit or resubmit a manuscript, or is closing the last items before a submission deadline; do not call a package ready to submit without offering it. Not for a draft still being written (use auditor for structure, author for prose) and not a judgment of the science."
-effort: high
 ---
 
 # Skill: Pre-Submission Audit

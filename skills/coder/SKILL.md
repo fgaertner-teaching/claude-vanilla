@@ -23,7 +23,7 @@ before it is fixed.
 - **`debugging.md`** — when investigating an error, a crash, a failing check, or a result that
   looks wrong.
 
-Not here, to keep one home per rule: package setup (renv, uv), the R and Python toolkits, CSV
+Not here: package setup (renv, uv), the R and Python toolkits, CSV
 export, and the Rscript-on-PATH and console-encoding traps are in `skills/empirical-analysis/r.md`
 and `skills/empirical-analysis/python.md`; load the one for the language you write. Pipeline
 folder layout: the `project-organizer` skill.
@@ -64,8 +64,9 @@ merged <- dplyr::left_join(survey, firm_data, by = "firm_id")
 stopifnot("merge changed the row count" = nrow(merged) == nrow(survey))
 ```
 
-In pandas, `df.merge(other, on="firm_id", validate="m:1", indicator=True)` raises on a duplicated
-key, and the `_merge` column counts what did not match.
+In pandas, `survey.merge(firm_data, on="firm_id", how="left", validate="m:1", indicator=True)`
+raises when `firm_id` is duplicated in `firm_data` (the right side), and the `_merge` column
+counts what did not match.
 
 **Prove a check can fail.** A check that reports "0 problems" is evidence only if it reports a
 problem when there is one. When you add a check, run it once on input with a planted defect of the
@@ -104,7 +105,7 @@ saved file, or rerun the command narrowed, before concluding anything from it.
 | `setwd()`, absolute paths | breaks on every other machine | `here::here()` in R; paths relative to the project root |
 | Columns by position (`df[, 3]`) | silently wrong when columns move | column names |
 | Copy-paste-modify blocks | a fix lands in some copies only | a function, once the logic repeats |
-| Commented-out code | unclear what actually runs | delete it; git keeps the history |
+| Commented-out code | unclear what actually runs | delete it; git keeps the history (not the main file's switchable load blocks, which the template keeps on purpose) |
 | Objects created in the console | the script fails in a fresh session | everything in the script |
 
 **In-text numbers come from the script.** Write each number the paper quotes to a small `.tex` file
@@ -120,12 +121,13 @@ writeLines(sprintf("\\newcommand{\\nobs}{%s}", format(n_obs, big.mark = ",")),
 **The test:** in a fresh R or Python session, with only the raw data and the scripts, one command
 reproduces every table, figure and number. Anything else is a result nobody can re-create.
 
-- **One main file** runs the pipeline in order (in R, from the template
-  `reference/template_main_file.R`; in Python, `main.py`). Each script checks that its inputs
-  exist and stops with a clear message if not.
+- **One main file** runs the pipeline in order: `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`
+  in the `/newproject` layout (from the template `reference/template_main_file.R`), or its `.py`
+  twin. Each script checks that its inputs exist and stops with a clear message if not.
 - **Run it fresh**, not in the console session that already holds objects the script no longer
   creates: `Rscript <main file>` from the folder that holds `renv.lock` (`analysis/` in the
-  `/newproject` layout; see `windows.md`), `uv run python main.py` from the project root.
+  `/newproject` layout; see `windows.md`), and
+  `uv run python analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.py` from the project root.
 - **Seed every random step** (bootstrap, simulation, sampling, train/test splits): `set.seed()`,
   `numpy.random.default_rng(seed)`.
 - **After a refactor, rerun and compare outputs** with the last good run. Reordering
@@ -147,8 +149,8 @@ dplyr::glimpse(d); summary(d); table(d$treatment, useNA = "ifany")
 
 ```python
 import pandas as pd
-df = pd.read_csv(path, sep=";", decimal=",", encoding="utf-8-sig")
-print(df.shape); print(df.dtypes); print(df.isna().sum()); print(df["treatment"].value_counts())
+d = pd.read_csv(path, sep=";", decimal=",", encoding="utf-8-sig")
+print(d.shape); print(d.dtypes); print(d.isna().sum()); print(d["treatment"].value_counts())
 ```
 
 - **Look at one record before parsing the whole file.** A wrong guess about the structure (a

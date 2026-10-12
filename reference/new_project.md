@@ -61,6 +61,11 @@ more; details go in files it points to.
 - What happened, and when: `claude/session_log.md`. Read it only when I ask.
 - What can wait: `claude/long_term_open_issues.md`. Read it only when I ask.
 - Why we decided something: `claude/decision_<topic>.md`. Read one when its topic comes up.
+- The analysis plan: `claude/analysis_plan.md`, and what we changed from it,
+  `claude/analysis_plan_deviations.md`. Read both before analysis work.
+- Which script does what: `claude/pipeline_map.md`. Read it before adding or moving a script.
+- Which table or figure goes where in the paper: `claude/output_spec.md`. Read it before
+  writing output code.
 
 ## Conventions for this project
 - <R or Python; packages via renv / uv>
@@ -78,6 +83,7 @@ skill.
   CLAUDE.md, .gitignore, .claude/settings.json
   analysis/      the analysis pipeline (below)
   claude/        Claude's working files: handover, open issues, decisions, plans
+  paper/         the paper, if it is LaTeX in this repository           (optional)
   literature/    notes on papers as .md; PDFs stay out of git          (optional)
   programming/   code that GENERATES data: experiments, simulations   (only if needed)
 ```
@@ -102,9 +108,11 @@ analysis/
 - `programming/` holds the code that generates data, one subfolder per experiment or simulation;
   what it produces enters the pipeline as raw data in `analysis/1_raw_data/`. The two sides do not
   import each other's code, so collecting and analysing stay separate steps.
-- An empty `.gitkeep` file goes in every data and output folder (`1_` to `3_`, `5_` to `7_`, and
-  the `appendix/` subfolders). *Why:* git does not store empty folders, so a fresh clone would
-  lack them and the first script that writes there would fail.
+- An empty `.gitkeep` file goes in every data and output folder Claude may write to (`2_`, `3_`,
+  `5_` to `7_`, and the `appendix/` subfolders). *Why:* git does not store empty folders, so a
+  fresh clone would lack them and the first script that writes there would fail. Not in
+  `1_raw_data/`: the kit's settings refuse Claude's writes there, and the folder fills when the
+  user copies the data in.
 - Several studies, or a pilot plus a main wave: one pipeline per study and phase
   (`analysis/study_1/pilot/`, `analysis/study_1/main/`) with `run_*.R` entry points, plus
   `analysis/cross_study/`. Start single-study unless a second study is already planned.
@@ -129,6 +137,9 @@ analysis/
 - **For `academic-research`:** `claude/analysis_plan.md` (question, hypotheses, planned models;
   the `analysis-plan` skill helps), and header-only stubs of `claude/pipeline_map.md` and
   `claude/output_spec.md`, filled as scripts and outputs appear (`project-organizer` skill).
+  `claude/analysis_plan_deviations.md` is created with the first deviation. The order of work
+  before any analysis code (plan, script structure, output specification):
+  `reference/academic_conventions.md`.
 
 ## 5. `.gitignore`
 
@@ -159,9 +170,12 @@ Create `.claude/settings.json` in the project:
   itself, so scripts only ever read from `1_raw_data/`. A second layer the user can add: mark the
   raw files read-only (Windows: Properties, "Read-only"; Mac: Get Info, "Locked").
   (Last verified: 2026-10-07, Claude Code docs, "Configure permissions".)
-- **Test it once:** ask Claude to create `analysis/1_raw_data/lock_test.txt`; it must be refused.
-  If not: check the path, restart Claude Code in the project root, test again, and tell the user
-  a test file was created (removing it is their call).
+- **Check it by its source, not by a refused write.** The kit's global settings refuse Claude's
+  edits in any `1_raw_data/` folder, so a refused test file says nothing about this project's
+  lock, the one that travels to co-authors without the kit. Ask the user to start Claude Code
+  in the project root and run `/permissions`: under Deny, `Edit(./analysis/1_raw_data/**)` must
+  appear with the project's `.claude/settings.json` as its source, and its path must match the
+  real folder.
 - The `.gitignore` template keeps `.claude/settings.json` in git, so the lock travels with the
   repository. If Claude may not write permission rules in the current mode, give the user the
   content to paste.
@@ -180,8 +194,9 @@ repository on github.com (no README), then `git remote add origin <url>`.
 
 ## 8. Package environment, main file, co-authors, paper
 
-- **R:** in `analysis/`, run `update.packages(ask = FALSE)`, then `renv::init()`, so the lock
-  file starts from current versions; commit `renv.lock`, `.Rprofile`, `renv/activate.R` and
+- **R:** first ask the user whether to update the installed R packages
+  (`update.packages(ask = FALSE)`: it changes them for every project on the computer, not only
+  this one, and can take minutes); then, in `analysis/`, run `renv::init()`; commit `renv.lock`, `.Rprofile`, `renv/activate.R` and
   `renv/settings.json`. Details: `skills/empirical-analysis/r.md`.
 - **Python:** at the project root, `uv init`, then `uv add <package>`; commit `pyproject.toml`
   and `uv.lock`. Details: `skills/empirical-analysis/python.md`.
@@ -190,8 +205,11 @@ repository on github.com (no README), then `git remote add origin <url>`.
   file that runs the stage scripts in order (`project-organizer` skill).
 - **Co-authors** in the same code: read `reference/collaboration.md` before the first commit.
 - **The paper:** wherever the user writes it. If it is on Overleaf, `reference/overleaf_conventions.md`
-  says how outputs get there; a LaTeX folder in the repository or a Word file needs nothing
-  extra here.
+  says how outputs get there. **LaTeX in this repository:** `paper/main.tex` reads the tables and
+  figures where the scripts write them (`\input{../analysis/5_tables/tab_main.tex}`,
+  `\includegraphics{../analysis/6_plots/fig_main.pdf}`), never copies of them, so nothing
+  generated is committed and every rebuild of the paper shows the current results. **Word:**
+  agree with the user what format the tables take before writing output code.
 
 ## 9. First commit, and the check
 

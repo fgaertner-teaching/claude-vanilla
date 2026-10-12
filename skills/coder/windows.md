@@ -114,13 +114,11 @@ Setup and toolkits: `empirical-analysis/python.md` and `r.md`. What they do not 
 - **Finding `Rscript`:** it is in `C:/Program Files/R/R-<version>/bin/`, or under
   `%LOCALAPPDATA%/Programs/R/` for an install without admin rights. List the folder rather than
   guessing the version; several versions can sit side by side.
-- **`Rscript --vanilla` skips the project's `.Rprofile`** — and in an renv project, `.Rprofile` is
-  what switches renv on. A `--vanilla` run then uses whatever packages are installed system-wide,
-  not the project's recorded versions. R reads `.Rprofile` only from the folder it starts in, so in
-  an renv project run `Rscript script.R` from the folder that holds `renv.lock` (`analysis/` in
-  the `/newproject` layout). This is the one exception to "the command carries its own target":
-  change into that folder first and approve the prompt it may bring. Check once that
-  `Rscript -e ".libPaths()"` run from there lists the project library first.
+- **Rscript in an renv project:** run it from the folder that holds `renv.lock`, never with
+  `--vanilla`, which skips the `.Rprofile` that switches renv on (why, and the `.libPaths()`
+  check: `rules/rules.md` § Code).
+  This is the one exception to "the command carries its own target": change into that folder
+  first and approve the prompt it may bring.
 - **R's `system2()` quotes the command itself.** Quote only the arguments (`shQuote()`); quoting
   the command too fails with doubled quotes.
 - **Write code into a script file and run it** — no long `python -c "..."`, `Rscript -e '...'` or

@@ -45,12 +45,16 @@ merge it in:
    settings, leaving the install half done.
 3. Paste this request:
 
-   > Install this starter kit into my global Claude Code folder, ~/.claude. Copy CLAUDE.md,
-   > about-me.md.template and the folders rules, skills, commands, agents, reference and
-   > scripts. Where a file already exists in ~/.claude, show me the difference and ask before
+   > Install this starter kit into my global Claude Code folder, ~/.claude. If
+   > ~/.claude/settings.json exists, first copy it to ~/.claude/settings.before-kit.json. Copy
+   > CLAUDE.md, about-me.md.template and the folders rules, skills, commands, agents, reference
+   > and scripts. Where a file already exists in ~/.claude, show me the difference and ask before
    > changing it. Merge settings.json into my existing ~/.claude/settings.json: keep my own
-   > settings, add the kit's permissions, hook and status line, and show me the merged file
-   > before saving it. Do not copy README.md, .git or .gitignore. On a Mac, point the three
+   > settings, add the kit's permissions, hooks, status line and skillListingBudgetFraction,
+   > and show me the merged file
+   > before saving it. The kit's prompt hook only repeats the context figure the kit's status
+   > line writes: if I keep a status line of my own, tell me, and offer to add the kit's lines
+   > that write the figure to mine. Do not copy README.md, .git or .gitignore. On a Mac, point the three
    > hook and status-line commands in settings.json at the .sh scripts instead of the .ps1
    > ones (sh "$HOME/.claude/scripts/<name>.sh"). Then interview me, one question at a time,
    > to create ~/.claude/about-me.md from the template. Then connect the OpenAlex literature
@@ -62,7 +66,7 @@ merge it in:
 
 4. Approve the file changes as Claude asks, and read the merged `settings.json` before you
    approve it.
-5. Close Claude Code and start it again in any folder. Check five things:
+5. Close Claude Code and start it again in any folder. Check six things:
    - Two lines under the input box show the folder, the model and how full the context is.
    - `/context all` lists `CLAUDE.md`, `about-me.md` and `rules/rules.md` under Memory files.
    - `/permissions` lists the kit's rules: under Ask, `Bash(rm *)`, `PowerShell(Remove-Item *)`
@@ -72,14 +76,17 @@ merge it in:
    - `/mcp` lists `openalex`. If it shows the server failed, Node.js is missing: ask Claude to
      install it, then start Claude Code again.
    - Ask *"What do you know about me, and which skills and commands do you have?"* The answer
-     should come from your profile and name the kit's skills.
+     should come from your profile and name the kit's skills. (Names are always listed; whether
+     their descriptions fit is what `/context`'s Skills row and `/doctor` show.)
 
    If a check fails, ask Claude to compare `~/.claude/settings.json` with the kit's
    `settings.json` and show you what is missing.
 
 **By hand instead:** copy the files listed in step 3 into `~/.claude` (merge folders, keep
 your own files), copy `about-me.md.template` to `about-me.md` and fill it in, and add the
-`permissions`, `hooks` and `statusLine` parts of `settings.json` to your own settings file.
+`permissions`, `hooks`, `statusLine` and `skillListingBudgetFraction` parts of `settings.json`
+to your own settings file (save a copy of it first). On a Mac, point those three commands at the `.sh` scripts (§ On a
+Mac).
 
 ## A working day with it
 

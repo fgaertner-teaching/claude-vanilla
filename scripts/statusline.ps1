@@ -9,8 +9,13 @@
 $ErrorActionPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+# The status-line JSON arrives as UTF-8, so the raw input is decoded as UTF-8: [Console]::In would
+# use the console's code page in Windows PowerShell 5.1 and garble a folder name with an umlaut.
 $status = $null
-try { $status = [Console]::In.ReadToEnd() | ConvertFrom-Json } catch {}
+try {
+    $stdinReader = New-Object System.IO.StreamReader([Console]::OpenStandardInput(), [System.Text.Encoding]::UTF8)
+    $status = $stdinReader.ReadToEnd() | ConvertFrom-Json
+} catch {}
 
 # First row: the folder's name, the git branch, the session name if the session has one.
 $folder = $status.workspace.current_dir
@@ -33,11 +38,14 @@ if ($null -ne $used) {
 }
 
 # Hand the figure to the prompt hook. The session id names the file, so it is checked first:
-# letters, digits and dashes only, so it can never point outside the temp folder.
+# letters, digits and dashes only, so it can never point outside the temp folder. With no figure
+# (early in a session, right after /compact) the file is emptied, so the prompt hook says the
+# figure is unknown instead of repeating an old one.
 $sessionId = [string]$status.session_id
-if ($null -ne $used -and $sessionId -match '^[A-Za-z0-9-]+$') {
+if ($sessionId -match '^[A-Za-z0-9-]+$') {
     $contextFile = Join-Path ([IO.Path]::GetTempPath()) "claude-context-$sessionId.txt"
-    Set-Content -LiteralPath $contextFile -Value $usedRounded -Encoding ASCII
+    if ($null -ne $used) { $figure = $usedRounded } else { $figure = '' }
+    Set-Content -LiteralPath $contextFile -Value $figure -Encoding ASCII
 }
 
 Write-Output $row1

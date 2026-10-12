@@ -61,5 +61,7 @@
 | `CLAUDE.md` | what Claude needs to know about the project |
 | `claude/next_steps.md` | where the project stands; overwritten at each session end |
 | `claude/OPEN_ISSUES.md` | what is still open; resolved items deleted |
+| `claude/long_term_open_issues.md` | what is open but can wait; read only when asked |
+| `claude/session_log.md` | one dated entry per session; never rewritten |
 | `claude/decision_<topic>.md` | a decision, its options and its reasons |
 | `.claude/settings.json` | the project's own permissions, e.g. the raw-data lock |

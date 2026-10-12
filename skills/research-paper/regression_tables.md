@@ -107,13 +107,23 @@ finish_table <- function(path, label = NULL) {
   }
   # tabularray takes the label as an outer-spec key, right after caption={...}
   i_caption <- grep("^caption=\\{", tex)
-  if (length(i_caption) == 1 && !any(grepl("^label=", tex))) {
-    tex <- append(tex, paste0("label={", label, "},"), after = i_caption)
+  if (!any(grepl("^label=", tex))) {
+    if (length(i_caption) != 1) {
+      warning(basename(path), ": no single caption= line, so no label was added; ",
+              "save the table with a title, or \\ref will print ??")
+    } else {
+      tex <- append(tex, paste0("label={", label, "},"), after = i_caption)
+    }
   }
-  i_begin <- grep("\\\\begin\\{talltblr\\}", tex)
-  i_end   <- grep("\\\\end\\{talltblr\\}", tex)
-  tex[i_begin] <- paste0("\\adjustbox{max width=\\linewidth}{%\n", tex[i_begin])
-  tex[i_end]   <- paste0(tex[i_end], "\n}")
+  # The width wrapper, once: a second run must not wrap the table twice
+  if (!any(grepl("\\\\adjustbox\\{max width", tex))) {
+    i_begin <- grep("\\\\begin\\{talltblr\\}", tex)
+    i_end   <- grep("\\\\end\\{talltblr\\}", tex)
+    stopifnot("table file has no single talltblr environment; did tinytable change its output?" =
+                length(i_begin) == 1 && length(i_end) == 1)
+    tex[i_begin] <- paste0("\\adjustbox{max width=\\linewidth}{%\n", tex[i_begin])
+    tex[i_end]   <- paste0(tex[i_end], "\n}")
+  }
   writeLines(tex, path)
 }
 ```

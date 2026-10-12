@@ -71,7 +71,8 @@ with one line.
 # The environment's recipe (its installation stays out, section 3)
 !renv.lock
 !.Rprofile
-!renv/settings.json
+# **/ because renv lives in analysis/: a pattern with a slash inside counts from the root only
+!**/renv/settings.json
 !pyproject.toml
 !uv.lock
 !.python-version
@@ -97,16 +98,17 @@ with one line.
 config_local.*
 .Renviron
 # Installed environments and caches (they hold .R, .py and .md files of their own)
-renv/library/
-renv/sandbox/
-renv/staging/
+**/renv/library/
+**/renv/sandbox/
+**/renv/staging/
 .venv/
 *_cache/
 *.utf8.md
 *.knit.md
 .ipynb_checkpoints/
-# Claude Code: your own notes for this project
+# Claude Code: your own notes for this project, and the worktrees of `claude --worktree`
 CLAUDE.local.md
+.claude/worktrees/
 
 # === 4. KEEP THE EMPTY FOLDER STRUCTURE ===
 # The output folders' sub-folders (e.g. appendix/), then the .gitkeep files.

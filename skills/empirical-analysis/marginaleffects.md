@@ -64,7 +64,7 @@ avg_slopes(mod, vcov = "HC3")                                # robust SEs
 import statsmodels.formula.api as smf
 from marginaleffects import avg_slopes, avg_comparisons
 
-mod = smf.logit("employed ~ treatment * female + age", data=df).fit()
+mod = smf.logit("employed ~ treatment * female + age", data=data_final_survey_main).fit()
 avg_slopes(mod)
 avg_comparisons(mod, variables="treatment", by="female")
 ```
@@ -89,12 +89,17 @@ fixed effects. **Do not silence the warning by switching `re.form` without decid
 want to estimate.** For nonlinear mixed models (logit, Poisson) the two settings give materially
 different average effects:
 
-- `re.form = NULL` (default): **cluster-specific** effects, conditional on each cluster's random
-  effect, then averaged. Answers "the effect within a typical cluster". Usually smaller.
-- `re.form = NA`: **population-averaged** effects, integrating over the random-effect
-  distribution. Answers "the effect on the population probability". Usually larger.
+- `re.form = NULL` (default): each observation's prediction includes **its own cluster's
+  estimated random effect**, then the effects are averaged over the sample. Answers "the average
+  effect across the clusters in this sample".
+- `re.form = NA`: **all random effects set to zero**. Answers "the effect in a cluster whose
+  random effect is zero", a typical cluster on the model's scale.
 
-Both are valid; they answer different questions. Choose the estimand, pass `re.form` explicitly,
+`lme4`'s help (`?predict.merMod`): "If NULL, include all random effects; if NA or ~0, include no
+random effects." Neither setting integrates over the random-effect distribution, so neither is
+the population-averaged effect of a GEE or marginal model; say which one you report. Which of
+the two is larger depends on where the clusters sit on the curve: compute both rather than
+assuming. Both are valid; they answer different questions. Choose the estimand, pass `re.form` explicitly,
 and rerun every downstream test after a switch: SEs and significance can change too. A switch made
 "just to silence the warning" can move published effects by several percentage points.
 

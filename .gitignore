@@ -31,13 +31,10 @@
 !agents/
 !agents/**/*.md
 
-# Scripts (the hook and status line are PowerShell)
+# Scripts (the hooks and the status line, in PowerShell with sh twins)
 !scripts/
 !scripts/**/*.ps1
 !scripts/**/*.sh
-!scripts/**/*.py
-!scripts/hooks/
-!scripts/hooks/**/*.sh
 
 # Allow folders to be tracked
 !*/

@@ -36,8 +36,8 @@ When helping with data analysis, econometrics or quantitative research:
 ### Step 0: repository
 
 Set up the project as a git repository in a **local, not cloud-synced** folder (cloud sync corrupts
-`.git`), with a private GitHub remote, and a `.gitignore` that excludes data, outputs and
-generated files. `/newproject` does this.
+`.git`), with a private remote if the user wants one, and a `.gitignore` that excludes data,
+outputs and generated files. `/newproject` does this.
 
 ### Step 1: analysis plan
 
@@ -58,7 +58,7 @@ lets anyone go from a table in the paper to the script that made it.
 
 ### Step 3: output specification, one section at a time
 
-Before implementing a section, write its entry in `output_spec.md`: which tables and figures it
+Before implementing a section, write its entry in `claude/output_spec.md`: which tables and figures it
 produces, and for each the variables, aggregation level, statistics, format and file name. Fix the
 formatting conventions once and apply them to every output. The plan says *what* to analyze; the
 output specification says *how* to present it. Specify at implementation time, not all up front.
@@ -68,17 +68,19 @@ output specification says *how* to present it. Specify at implementation time, n
 ## While the analysis runs
 
 - **Check for an analysis plan** at the start of any analysis work; if there is none, suggest one.
-- **Log every deviation from the plan** in `analysis_plan_deviations.md` as it happens: the
-  original plan, the decision, and the reasons for and against. A deviation reconstructed at
+- **Log every deviation from the plan** in `claude/analysis_plan_deviations.md` as it happens:
+  the original plan, the decision, and the reasons for and against. A deviation reconstructed at
   submission is a deviation nobody can verify.
-- **Record ideas considered and not adopted** in `claude/SUPERSEDED_IDEAS.md` (or in the
-  decision's discussion file): the problem it addressed, its advantages, why it was rejected, and
-  what was done instead. Why: otherwise the same idea is proposed and re-evaluated in a later session.
+- **Record ideas considered and not adopted** in the project's decision file on that topic,
+  `claude/decision_<topic>.md` (an idea with no decision file gets one): the problem it
+  addressed, its advantages, why it was rejected, and what was done instead. Why: otherwise the same idea is proposed and
+  re-evaluated in a later session.
 - **Before writing output code** (tables, plots, exports), state the specification (variables,
   aggregation, statistics, format, where it goes in the paper), agree it with the user, then implement.
 - **Do not rename output files without asking.** The paper refers to them by name.
-- **All tables and figures target LaTeX**: `booktabs` tables, PDF figures, nothing the document
-  class should control (manual spacing, page breaks, font commands). Formatting details: the
+- **Tables and figures target LaTeX** unless the paper is written in Word (then agree the format
+  with the user first): `booktabs` tables, PDF figures, nothing the document class should
+  control (manual spacing, page breaks, font commands). Formatting details: the
   `research-paper` skill.
 - **Claude edits analysis scripts directly**; for a large change, or one Claude is unsure about,
   show it before it lands. The thorough review happens over the finished code before submission
@@ -100,11 +102,10 @@ real-world units; report effect sizes and confidence intervals, not only p-value
 
 ## Tracking files for research projects
 
-Besides `claude/next_steps.md` and `claude/OPEN_ISSUES.md`:
+Besides the files `rules/rules.md` § Project tracking names: `claude/analysis_plan.md`,
+`claude/analysis_plan_deviations.md`, `claude/pipeline_map.md` and `claude/output_spec.md`, each
+named in the project's `CLAUDE.md` with when to read it (`reference/new_project.md` § 2).
 
-- **`claude/context_summary.md`** (optional): the intellectual context that is in neither the code
-  nor git: prior submissions and referee comments, the key references and how they relate, the
-  current framing. Update it when the framing changes (a new submission round, new literature).
 - **Prefer checks to checklists.** "Did LaTeX compile?" or "do the table notes match the
   estimates?" belong in the script that builds the output, where a failure prints and stops.
   A checklist is read once, then answered from memory and skipped without anyone noticing.
