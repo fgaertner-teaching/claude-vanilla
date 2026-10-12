@@ -12,7 +12,7 @@ to change code that a co-author owns.
 |---|---|---|
 | Local folder with git, pushed to GitHub | code, `CLAUDE.md`, `claude/`, notes, lock files | git keeps the code's history; it must not sit in a cloud folder |
 | A shared cloud folder (Google Drive, Nextcloud, Dropbox, university cloud) | raw data, materials, literature PDFs | shared files that are not code; git handles large binaries badly and must never hold personal data |
-| Overleaf | the paper | how tables and figures get there: `reference/overleaf_conventions.md` |
+| Overleaf, if the paper is there | the paper | how tables and figures get there: `reference/overleaf_conventions.md` |
 
 - **Raw data is copied once** from the shared folder into each author's own
   `analysis/1_raw_data/` (gitignored); scripts read the local copy. *Why:* no script depends on a
@@ -26,10 +26,11 @@ to change code that a co-author owns.
 ```r
 # config_local.R: this machine only, never committed
 shared_data_path   <- "G:/My Drive/<project>"                            # to re-copy raw data
-overleaf_sync_path <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"  # where outputs are copied
+overleaf_sync_path <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"  # only with an Overleaf paper
 ```
 
-(`overleaf_sync_path` is what the copy helper in `reference/overleaf_conventions.md` reads.)
+(`overleaf_sync_path` is what the copy helper in `reference/overleaf_conventions.md` reads.
+Without an Overleaf paper, leave that line out.)
 
 ---
 

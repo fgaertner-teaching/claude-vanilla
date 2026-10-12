@@ -115,7 +115,7 @@ can also call one directly, for example `/auditor`.
 |---|---|
 | `empirical-analysis` | estimation, identification, diagnostics, R and Python setup, plots |
 | `analysis-plan` | pre-registrations and analysis plans, power, success criteria |
-| `research-paper` | LaTeX tables and figures, the Overleaf project |
+| `research-paper` | LaTeX tables and figures, on Overleaf or locally |
 | `author` | prose others will read: papers, proposals, referee replies |
 | `pre-submission-audit` | the last check before submitting a paper |
 | `project-organizer` | script pipelines and folder layout |

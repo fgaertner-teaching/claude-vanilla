@@ -189,7 +189,9 @@ repository on github.com (no README), then `git remote add origin <url>`.
   `source()` lines (single study) or the `run_*.R` lines (several studies). Python: a `.py` main
   file that runs the stage scripts in order (`project-organizer` skill).
 - **Co-authors** in the same code: read `reference/collaboration.md` before the first commit.
-- **A paper on Overleaf:** `reference/overleaf_conventions.md`.
+- **The paper:** wherever the user writes it. If it is on Overleaf, `reference/overleaf_conventions.md`
+  says how outputs get there; a LaTeX folder in the repository or a Word file needs nothing
+  extra here.
 
 ## 9. First commit, and the check
 

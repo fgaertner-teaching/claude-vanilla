@@ -10,7 +10,7 @@
 |---|---|---|
 | `empirical-analysis` | estimation, identification, diagnostics, interpretation | `r.md`, `python.md`, `plotting.md`, `marginaleffects.md`, `causal_reasoning.md`, `research_integrity.md` |
 | `analysis-plan` | pre-registrations, analysis plans, power, success criteria | |
-| `research-paper` | LaTeX tables and figures, the Overleaf project | `regression_tables.md` |
+| `research-paper` | LaTeX tables and figures, on Overleaf or locally | `regression_tables.md` |
 | `author` | prose that others read: papers, proposals, referee replies | `diagnostics.md`, `sections.md` |
 | `pre-submission-audit` | the last check before submitting a paper | |
 | `project-organizer` | script pipelines, folder layout, outputs mapped to the paper | |
@@ -23,7 +23,7 @@
 | Command | Does |
 |---|---|
 | `/startup` | shows where the project stands (when the start hook did not) |
-| `/session-end` | updates `next_steps.md` and `OPEN_ISSUES.md`, records decisions, commits, pushes |
+| `/session-end` | updates `next_steps.md`, `OPEN_ISSUES.md` and the session log, records decisions, commits, pushes |
 | `/newproject` | sets up a new project |
 | `/what-slipped` | a fresh subagent critiques the work just done |
 | `/explain` | explains the last thing in plain terms |
@@ -43,12 +43,13 @@
 | How Claude talks, plans, checks, handles sessions | `CLAUDE.md` |
 | Files and data, project tracking, git, code, quality | `rules/rules.md` |
 | Who you are, your language and field | `about-me.md` |
-| Permissions, the start hook, the status line | `settings.json`, `scripts/` |
+| Permissions, the two hooks, the status line | `settings.json`, `scripts/` |
 | Settings explained | `reference/claude_code_settings.md` |
 | Setting up a project | `reference/new_project.md` (used by `/newproject`) |
 | `.gitignore` patterns | `reference/gitignore_policy.md` |
 | Working with co-authors | `reference/collaboration.md` |
-| Overleaf | `reference/overleaf_conventions.md` |
+| An Overleaf paper | `reference/overleaf_conventions.md` |
+| Deadlines | `reference/deadlines.md` |
 | Defaults for academic projects | `reference/academic_conventions.md` |
 | Before committing | `reference/checklist.md` |
 | A main R script to start from | `reference/template_main_file.R` |

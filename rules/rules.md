@@ -105,7 +105,8 @@ Conventions for files, data, git, project tracking and code. Every project, ever
 
 ## Writing
 
-LaTeX tables, figures and the Overleaf project: the `research-paper` skill. Prose that other
+LaTeX tables and figures, and the paper's Overleaf project if it has one: the `research-paper`
+skill. Prose that other
 people will read (papers, proposals, replies to referees): the `author` skill.
 
 ## Quality

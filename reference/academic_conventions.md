@@ -76,7 +76,7 @@ output specification says *how* to present it. Specify at implementation time, n
   what was done instead. Why: otherwise the same idea is proposed and re-evaluated in a later session.
 - **Before writing output code** (tables, plots, exports), state the specification (variables,
   aggregation, statistics, format, where it goes in the paper), agree it with the user, then implement.
-- **Do not rename output files without asking.** The paper's LaTeX and Overleaf refer to them by name.
+- **Do not rename output files without asking.** The paper refers to them by name.
 - **All tables and figures target LaTeX**: `booktabs` tables, PDF figures, nothing the document
   class should control (manual spacing, page breaks, font commands). Formatting details: the
   `research-paper` skill.

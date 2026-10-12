@@ -152,7 +152,8 @@ edit 4_0_Tables_Setup.R (coefficient labels) -> rerun the main file
 
 ## The paper's LaTeX project
 
-How outputs reach Overleaf: `reference/overleaf_conventions.md`. The layout:
+The same layout serves a LaTeX folder in the repository and an Overleaf project; if the paper
+is on Overleaf, how outputs get there is in `reference/overleaf_conventions.md`. The layout:
 
 ```
 main.tex          \documentclass, \input{preamble}, \input{sections/...}

@@ -29,8 +29,9 @@ Say which mode you see and let the user confirm before changing anything.
 7. **GitHub:** a private remote now, or later?
 8. **Co-authors** working in the same code? If yes, read `~/.claude/reference/collaboration.md`
    before the first commit.
-9. **A paper on Overleaf?** If yes, note it in `CLAUDE.md`; its layout is in
-   `~/.claude/reference/overleaf_conventions.md`.
+9. **Where the paper is written:** LaTeX in this repository, Overleaf, Word, or not decided yet.
+   Note it in `CLAUDE.md`. For Overleaf, `~/.claude/reference/overleaf_conventions.md` has the
+   copy step.
 
 Then say what "done" will look like for this project (the list at the top of the reference,
 adapted to the answers) and wait for the user's OK.
