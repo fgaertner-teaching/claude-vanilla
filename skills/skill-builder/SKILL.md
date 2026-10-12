@@ -31,6 +31,11 @@ rule in disguise.
 existing skill covers more than about half of the new one, extend it instead. *Why:* two skills
 that half-overlap either both load or neither does, and their rules drift apart.
 
+**Write the test before the skill, from a task you just did.** Do the task once without a skill
+and note what you had to tell Claude. Then write down two requests that should load the skill,
+one near miss that should not, and what a good result looks like. § 6 runs these. *Why:* written
+afterwards, the test checks what the skill says rather than what the task needs.
+
 Skills in `~/.claude/skills/` work in every project; a skill in a project's `.claude/skills/`
 works only there. Commands and skills have been merged: a skill can also be started as
 `/<name>`, and `commands/` files keep working (`Last verified: 2026-10-07`).
@@ -47,7 +52,9 @@ skills/<name>/
 
 1. **YAML frontmatter** between `---` lines, with `name` (the folder name, lowercase with
    hyphens) and `description` (§ 3). Both are required in this setup: the description is the
-   only part Claude sees before the skill loads.
+   only part Claude sees before the skill loads. The name: at most 64 characters, no
+   "anthropic" or "claude" in it (Anthropic's skill authoring guide), and specific: `clean-survey`,
+   not `helper` or `tools`.
 2. **Title:** `# Skill: <Name>`.
 3. **The four-line header**, which Claude reads once the skill is loaded:
 
@@ -59,8 +66,8 @@ skills/<name>/
    ```
 
 4. **The body:** the most important instructions first, then examples, then a checklist at the
-   end. *Why:* models attend most to the beginning and end of a long text; the middle is where
-   instructions get lost.
+   end. *Why:* models attend most to the beginning and end of a long text, and after a
+   compaction Claude Code keeps only the first 5,000 tokens of a skill.
 
 ## 3. The description decides whether the skill ever loads
 
@@ -80,6 +87,10 @@ vague description is a skill that never runs.
 - **Every clause that decides loading goes in the description.** The header lines are read
   only after the skill has loaded, so they cannot make it load; they must not contradict the
   description either.
+- **All descriptions share one budget.** The listing gets about 1% of the context window; when
+  it is full, Claude Code drops descriptions, starting with the skills used least. A new skill
+  has been used least, so its description goes first. After adding a skill, check the Skills
+  row of `/context` (`/doctor` estimates the listing's cost). `Last verified: 2026-10-12`.
 
 ```
 # WRONG: passive, no trigger words, no exclusion
@@ -103,8 +114,10 @@ loading costs little; its body then says to offer the work and wait for a yes be
 | `argument-hint` | the skill takes arguments when started as `/<name>`; the body reads them as `$ARGUMENTS` |
 | `disable-model-invocation: true` | the skill has side effects and only the user should start it |
 | `effort` | the skill needs deeper (or less) reasoning than the session default: `low` … `max`. Higher effort uses more of the plan's usage; on a smaller plan prefer `high`, and keep `max` for rare, high-stakes checks |
-| `context: fork` (+ `agent`) | the skill reads a lot and only its result should come back to the conversation |
+| `context: fork` (+ `agent`) | the skill reads a lot and only its result should come back. The fork runs in the background, and `/rewind` does not undo its edits: use git for that |
 | `paths` | the skill should only activate for matching files (glob patterns) |
+| `user-invocable: false` | only Claude should start it (background knowledge): hidden from the `/` menu |
+| `allowed-tools` | tools Claude may use without asking while the skill runs; the grant ends with your next message |
 
 ## 4. Write the body
 
@@ -113,6 +126,16 @@ loading costs little; its body then says to offer the work and wait for a yes be
   at all.
 - **Specific and testable.** "Every table has a title, units in the column headers and a note on
   the sample" beats "make tables clear".
+- **As exact as the task is fragile.** Exact steps where a mistake is costly or hard to see (a
+  merge, a submission check, a file that must not change); room for judgment where the task is
+  open (drafting a paragraph, choosing a plot).
+- **Word guidance for the whole task:** "Run the tests after every edit", not "Run the tests".
+  *Why:* Claude reads the skill once, when it loads, and does not re-read it on later turns.
+- **A rule that must hold every time belongs in a hook,** not only in the skill (a hook can be
+  defined in the skill's own `hooks` frontmatter). *Why:* a hook runs on its event whether or
+  not Claude is still following the skill.
+- **A list of traps that grows.** End the body with the mistakes Claude made on this task, each
+  with the rule that prevents it; add one each time Claude gets the task wrong.
 - **A `# WRONG` / `# RIGHT` pair** for any rule that is easy to apply backwards. One good example
   beats a paragraph of adjectives.
 - **Say it once.** A rule that lives in `CLAUDE.md` and in a skill, worded slightly differently,
@@ -161,19 +184,40 @@ only the body does, so a sub-file listed nowhere in the body is never read.
 3. **Ask for a near miss** that the exclusion clause should send elsewhere, and check that the
    skill does not load.
 4. **Ask for one task the skill governs and check its effect** on the output.
+5. **Run the same requests with the skill turned off** (in `/skills`, highlight it, press
+   `Space` until it reads off, then `Esc` to save; or `"skillOverrides": {"<name>": "off"}` in
+   settings), in another new session, and compare. If the result is as good without it, the skill is not earning its
+   place.
+6. **Test with the model you work with.** What works on a large model may need more detail on a
+   small one, such as Haiku.
 
 If it does not load, fix the description, not the body: the body is never seen until it loads.
-Edits are picked up in the running session, but repeat the test in another fresh one.
+Also check the listing budget (§ 3). Edits are picked up in the running session, but repeat the
+test in another fresh one.
 
 Then add the skill to `reference/skill_catalog.md`, so the user can find it too.
 
 ## Improving a skill later
 
-Watch for three signals: the skill did not load when it should have (fix the description's
+Watch for four signals: the skill did not load when it should have (fix the description's
 trigger words); it loaded when it should not have (sharpen the "Not for" clause); it loaded but
-Claude still got the task wrong (the body is missing a rule, or the rule lacks its reason). Change
-one thing at a time and re-test, so you know which change helped. Delete rules that change
-nothing; they cost attention and buy nothing.
+Claude still got the task wrong (the body is missing a rule, or the rule lacks its reason: add a
+trap); Claude followed it at first and dropped it later in the session (word the rule for the
+whole task, move it up, or make it a hook; after a compaction, load the skill again). Change one
+thing at a time and re-test, so you know which change helped. Delete rules that change nothing;
+they cost attention and buy nothing.
+
+## Traps
+
+Mistakes that recur when writing skills, each with the rule that prevents it. Add one each time
+Claude gets this task wrong.
+
+- **Testing in the session that wrote the skill.** That session knows what the skill is for and
+  loads it for that reason, so the test proves nothing about the description. Test in a new one.
+- **Fixing the body when the skill did not load.** The body is never seen until the skill
+  loads; only the description can fix a skill that does not fire.
+- **A sub-file named only in the frontmatter.** Claude never sees the frontmatter list once the
+  skill is loaded; a sub-file the body does not name is never read.
 
 ## Checklist
 
@@ -187,4 +231,6 @@ nothing; they cost attention and buy nothing.
 - [ ] Nothing duplicated from `CLAUDE.md`, `rules/rules.md` or another skill?
 - [ ] Under ~250 lines, or split by use case, with every sub-file named in the body?
 - [ ] Time-sensitive facts carry `Last verified:`?
-- [ ] Tested in a fresh session: loads on a real request, stays out of a near miss?
+- [ ] A traps list at the end of the body, to grow with each mistake?
+- [ ] Tested in a fresh session: loads on a real request, stays out of a near miss, and does
+      better than the same request with the skill off?
