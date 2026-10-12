@@ -214,3 +214,21 @@ round can see exactly what a referee saw.
 
 When you see one, tell the user and propose the fix; do not restructure silently, because moving
 files breaks paths in scripts and in the paper.
+
+## Traps
+
+This list grows. When Claude gets this skill's task wrong, Claude proposes adding the mistake and
+the rule that prevents it here, and adds it once the user agrees.
+
+- **Shared helpers written inside a content script.** Claude once put the significance stars,
+  the goodness-of-fit rows and a custom tidy function straight into `4_2`, not into
+  `4_0_Tables_Setup.R`. The next table script then needs its own copy, and the copies drift.
+  Anything two scripts of a stage could use goes in the stage's setup script, and the content
+  script names it in its `Depends on:` line.
+
+  ```r
+  # WRONG: at the top of 4_2_Tables_Main_Analysis.R
+  stars <- c("*" = 0.1, "**" = 0.05, "***" = 0.01)
+  # RIGHT: defined in 4_0_Tables_Setup.R. 4_2 opens with this line:
+  # Depends on: 4_0_Tables_Setup.R (stars, gof_map)
+  ```

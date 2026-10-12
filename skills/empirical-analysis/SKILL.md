@@ -199,6 +199,9 @@ Why: without fields 5–7 the write-up reports numbers mechanically and the argu
 
 ## Common pitfalls
 
+This list grows. When Claude gets an analysis wrong, Claude proposes adding the mistake and the
+rule that prevents it here, and adds it once the user agrees.
+
 - **Bad controls:** never control for post-treatment variables or mediators (Angrist & Pischke 2009, 3.2.3).
 - **Interactions in nonlinear models:** the coefficient on X₁×X₂ is not the interaction effect
   (Ai & Norton 2003); compute it with `marginaleffects`.

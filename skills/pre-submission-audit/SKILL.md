@@ -165,6 +165,28 @@ paths) from the shipped `.bib`; uncited entries are harmless.
 **Last checks.** Journal name, editor name and manuscript number are right in the letters; the
 files are named as the journal asks; the uploaded PDF is the one just compiled.
 
+## Traps
+
+This list grows. When Claude gets a submission check wrong, Claude proposes adding the mistake and
+the rule that prevents it here, and adds it once the user agrees.
+
+- **A consistency check answers the wrong question.** The user asked whether a paper met a
+  journal's rules. Claude ran the consistency audit (§ 1) instead, and the mix-up survived a later
+  check. The two checks barely overlap. A question about a journal's rules needs § 3 and the
+  guidelines text. If the user has not supplied the guidelines, Claude asks for them.
+- **A short, hand-picked list of names to search for.** Claude once cleared a file for a blind
+  review after searching for about 7 terms. The full list had 20. The search had missed every
+  given name, every institution, and the directly typed accented spelling of a surname whose
+  ASCII and LaTeX spellings were both checked. In the same project, the `.tex` source held a
+  commented-out title footnote naming the funder and two research assistants, and no search term
+  covered them. Claude writes the full list once: every term § 4 names, plus everyone the
+  acknowledgements name. Claude then searches every shipped file with all of it and reports which
+  terms were searched.
+- **Trimming the `.bib` to the cited entries.** It looks tidy, but it creates a second reference
+  list that can disagree with the `.bbl` the user proofread. If the publisher recompiles, the
+  printed references then come from the trimmed file, not from the checked one. Claude ships the
+  full cleaned `.bib` with the `.bbl` (§ 4).
+
 ## Improving this skill
 
 When something slips through to the journal or a referee report, add the check that would have

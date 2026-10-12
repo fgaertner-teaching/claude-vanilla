@@ -217,6 +217,24 @@ Save the reports in the project's `claude/` folder: `claude/audit_<scope>_r1.md`
 merged `claude/audit_<scope>.md`. Keep the reviewer reports after the merge; they hold evidence
 the merged report only summarises.
 
+## Traps
+
+This list grows. When Claude gets an audit wrong, Claude proposes adding the mistake and the rule
+that prevents it here, and adds it once the user agrees.
+
+- **Context Claude puts in a brief comes back as a finding.** Claude once gave the consolidator a
+  file size "for context". The merged report then used that number in a verdict, as if a reviewer
+  had established it. Neither reviewer had written it. Every brief, the consolidator's included,
+  holds only what the artifact is and what the audit asks (§ 4, brief hygiene).
+- **A persona's quote is not the source.** A persona reported a "garbled sentence" that was clean
+  in the draft. The persona had paraphrased it. Claude checks each quoted passage against the
+  source. A finding whose quote fails the check is dropped or downgraded. Claude never edits the
+  source to match a paraphrase.
+- **The fixes are a change no reviewer saw.** Fixes applied after an audit can carry defects of
+  their own. A separate review of only the fixes has found several real defects that no audit
+  finding had named. After applying the fixes, Claude offers `/what-slipped` on them before the
+  user treats the artifact as done.
+
 ## Improving this skill
 
 If an audit's findings were mostly wrong when verified (step 6), tighten the brief, not the

@@ -200,6 +200,9 @@ checks (state the logic), auxiliary model selection, presentation.
 
 ## 11. Common mistakes
 
+This list grows. When Claude gets a plan wrong, Claude proposes adding the mistake and the rule
+that prevents it here, and adds it once the user agrees.
+
 - **Vague outcome:** "decision quality" instead of its formula.
 - **Open control set:** "relevant controls" instead of a list or a selection rule.
 - **Subgroups called confirmatory without a correction family.**

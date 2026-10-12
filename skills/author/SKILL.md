@@ -193,6 +193,31 @@ internal vocabulary at all, no file names, IDs or tool names; locations in the r
 only this text and the document it discusses? If not, add the missing piece or cut the
 reference.
 
+## Traps
+
+This list grows. When Claude gets a drafting or editing task wrong, Claude proposes adding the
+mistake and the rule that prevents it here, and adds it once the user agrees. A new prose tell
+goes to `diagnostics.md` instead (see below).
+
+- **An approved plan is not an approved wording.** Claude once edited four paragraphs of the
+  user's own text after the user had approved a plan, then showed all four at once as a diff. The
+  user could only veto, not choose. On the user's prose, Claude shows each change as a before /
+  after pair and waits, even when the plan is already agreed.
+
+  ```
+  # WRONG: the plan is approved. Claude rewrites four paragraphs, then shows the diff.
+  # RIGHT: the plan is approved. Claude shows paragraph 1 before / after, waits, then paragraph 2.
+  ```
+
+- **Claude talks itself out of a flag.** A self-audit saw three goals that each opened "The
+  project will establish ... The result is ..." and dismissed the sameness as deliberate list
+  parallelism. The user then caught it. When Claude finds a reason why a flagged pattern is fine
+  here, Claude still runs that pattern's test from `diagnostics.md` and reports the result.
+- **A style fix quietly changes the claim.** "Values no input produces" was rewritten as "values
+  that an input does not produce". The new version reads more naturally but drops the "no", which
+  was the point. After each fix, Claude checks that the sentence still claims exactly what it did
+  before. A fix that loosens the logic is worse than the tell it removes.
+
 ## Improving this skill
 
 When the user rejects a fix ("that is worse") or catches a tell the catalogue missed, propose
