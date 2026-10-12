@@ -1,6 +1,7 @@
 # SessionStart hook: shows Claude where the project stands.
 # Reads:  the hook's JSON on stdin (for the working directory), then the project's
-#         claude/panic_dump.md, claude/next_steps.md and claude/OPEN_ISSUES.md.
+#         claude/panic_dump.md and claude/next_steps.md. Not claude/OPEN_ISSUES.md: Claude
+#         reads that when the user asks what is open (the project CLAUDE.md's pointer).
 # Writes: plain text to stdout, which Claude Code adds to the session's context.
 # Keep this file ASCII-only: Windows PowerShell 5.1 misreads non-ASCII characters
 # in a script saved without a byte-order mark.
@@ -47,7 +48,7 @@ Write-Output ""
 
 # The files to show, in order. A panic dump means the last session ended abruptly, so it comes
 # first; then next_steps.md, or one per co-author (next_steps_<initials>.md,
-# reference/collaboration.md); then the open issues.
+# reference/collaboration.md).
 $filesToShow = @()
 if (Test-Path -LiteralPath (Join-Path $projectDir 'claude\panic_dump.md')) {
     $filesToShow += ,@('claude\panic_dump.md', 'PANIC DUMP from an interrupted session - surface this to the user first')
@@ -55,9 +56,6 @@ if (Test-Path -LiteralPath (Join-Path $projectDir 'claude\panic_dump.md')) {
 $nextStepsFiles = @(Get-ChildItem -LiteralPath (Join-Path $projectDir 'claude') -Filter 'next_steps*.md' -File)
 foreach ($nextStepsFile in $nextStepsFiles) {
     $filesToShow += ,@(('claude\' + $nextStepsFile.Name), 'Where the project stands')
-}
-if (Test-Path -LiteralPath (Join-Path $projectDir 'claude\OPEN_ISSUES.md')) {
-    $filesToShow += ,@('claude\OPEN_ISSUES.md', 'Open issues')
 }
 
 if ($filesToShow.Count -gt 0) {
