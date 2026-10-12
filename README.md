@@ -6,7 +6,7 @@ each project where the last session stopped, and skills for analysis, LaTeX pape
 Claude writes R, Python and LaTeX for you, and the kit is set up so you can check results
 without reading code.
 
-Last updated: 2026-10-07. Written for Windows first (for a Mac, see § On a Mac).
+Last updated: 2026-10-12. Written for Windows first (for a Mac, see § On a Mac).
 
 ## What you get
 
@@ -14,7 +14,7 @@ Last updated: 2026-10-07. Written for Windows first (for a Mac, see § On a Mac)
 |---|---|
 | `CLAUDE.md`, `rules/rules.md` | Instructions Claude reads in every session |
 | `about-me.md` | Your profile: field, language, tools (you fill it in) |
-| `settings.json` | Asks before deleting, blocks risky git commands, status line, start hook |
+| `settings.json` | Asks before deleting or pushing; blocks risky git commands and edits in raw-data folders; status line; two hooks |
 | `commands/` | `/startup`, `/session-end`, `/newproject`, `/what-slipped`, `/explain`, `/panic` |
 | `skills/` | Analysis, analysis plans, LaTeX papers, writing, code, review |
 | `agents/` | A literature scout and a verifier |
@@ -49,17 +49,22 @@ merge it in:
    > scripts. Where a file already exists in ~/.claude, show me the difference and ask before
    > changing it. Merge settings.json into my existing ~/.claude/settings.json: keep my own
    > settings, add the kit's permissions, hook and status line, and show me the merged file
-   > before saving it. Do not copy README.md, .git or .gitignore. Then interview me, one
-   > question at a time, to create ~/.claude/about-me.md from the template.
+   > before saving it. Do not copy README.md, .git or .gitignore. On a Mac, point the three
+   > hook and status-line commands in settings.json at the .sh scripts instead of the .ps1
+   > ones (sh "$HOME/.claude/scripts/<name>.sh"). Then interview me, one question at a time,
+   > to create ~/.claude/about-me.md from the template. Last, check whether git, Rscript, uv,
+   > quarto and pdftotext are found from a terminal, and for each one that is not, say where
+   > it is installed and offer to add it to my PATH.
 
 4. Approve the file changes as Claude asks, and read the merged `settings.json` before you
    approve it.
 5. Close Claude Code and start it again in any folder. Check five things:
    - Two lines under the input box show the folder, the model and how full the context is.
    - `/context all` lists `CLAUDE.md`, `about-me.md` and `rules/rules.md` under Memory files.
-   - `/permissions` lists the kit's rules: under Ask, `Bash(rm *)` and `PowerShell(Remove-Item *)`;
-     under Deny, the `git … --force` and `git … --hard` rules.
-   - `/hooks` lists one `SessionStart` hook.
+   - `/permissions` lists the kit's rules: under Ask, `Bash(rm *)`, `PowerShell(Remove-Item *)`
+     and `Bash(git push *)`; under Deny, the `git … --force` and `git … --hard` rules and
+     `Edit(**/1_raw_data/**)`.
+   - `/hooks` lists a `SessionStart` and a `UserPromptSubmit` hook.
    - Ask *"What do you know about me, and which skills and commands do you have?"* The answer
      should come from your profile and name the kit's skills.
 
@@ -73,13 +78,13 @@ your own files), copy `about-me.md.template` to `about-me.md` and fill it in, an
 ## A working day with it
 
 1. **Start Claude Code in the project's folder.** The start hook shows Claude the project's
-   `claude/next_steps.md` and `claude/OPEN_ISSUES.md`, so it knows where things stand. If the hook
-   is missing, type `/startup`.
+   `claude/next_steps.md`, so it knows where things stand. If the hook is missing, type
+   `/startup`.
 2. **Work.** Claude says what "done" will look like before bigger tasks, explains technical
    terms the first time, and asks before deleting anything.
-3. **When the status line shows the context about half full, or you stop:** `/session-end`.
-   Claude updates the two files, commits and pushes. Then `/clear`, and the next session starts
-   fresh with everything it needs on disk.
+3. **When Claude says the context is about half full, or you stop:** `/session-end`. Claude
+   updates the project's files, commits and pushes (you approve the push). Then `/clear`, and
+   the next session starts fresh with everything it needs on disk.
 
 ## Starting a project
 
@@ -129,18 +134,22 @@ can also call one directly, for example `/auditor`.
 
 ## On a Mac
 
-The start hook and the status line run Windows PowerShell. Either install PowerShell
-(`brew install powershell`) and change `powershell` to `pwsh` in the two commands in
-`settings.json`, or delete the `hooks` and `statusLine` parts and type `/startup` at the
-start of each session.
+The hooks and the status line are PowerShell scripts, and each has a twin in `sh`
+(`scripts/*.sh`). The install request has Claude switch `settings.json` to the twins. They have
+not been tried on a Mac yet: if `/hooks` shows an error, ask Claude to look at the script it
+names.
 
 ## Updating the kit
 
-Download the new version and run the install request again. Claude shows each difference
-before changing anything, so your own additions and your `about-me.md` stay.
+Get the new version as a folder, start Claude in it, and ask:
+
+> Compare this kit with my ~/.claude. Which changes are upgrades for me, and which would undo
+> something I set up on purpose? Show me each one, and change nothing until I say so.
+
+Do not simply copy the new files over yours: your own additions, your `about-me.md` and your
+settings would be lost.
 
 ## Not included
 
-Things that pay off only in a larger setup: syncing several computers, running several sessions
-in parallel on one repository, literature databases connected as tools, and automated
-multi-step research pipelines.
+Things that pay off only in a larger setup: syncing several computers, literature databases
+connected as tools, and automated multi-step research pipelines.

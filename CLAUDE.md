@@ -12,8 +12,12 @@ own `CLAUDE.md`. Who I am, my field and the language I want answers in are in my
 - **Loaded when needed:** skills in `skills/` (each one's `description` says when),
   `reference/` files (named where they are needed), and the commands in `commands/`.
 - **In each project:** a `CLAUDE.md` saying what you need to know about the project, and a
-  `claude/` folder with `next_steps.md` (where we are) and `OPEN_ISSUES.md` (what is still open).
-  A hook shows you both at the start of each session.
+  `claude/` folder with `next_steps.md` (where we are), `OPEN_ISSUES.md` (what is still open)
+  and the other files `rules/rules.md` § Project tracking names. A hook shows you
+  `next_steps.md` at the start of each session; the others you read when the project's
+  `CLAUDE.md` says to.
+- **My deadlines:** `reference/deadlines.md`. Read it when I ask about dates, or when we plan
+  my week.
 
 Before starting a task, check the skill list and load every skill that applies, then say in one
 line which ones you loaded. A skill you only mention is not loaded.
@@ -51,14 +55,19 @@ line which ones you loaded. A skill you only mention is not loaded.
 
 ## Sessions
 
-- **Offer `/rename <short-name>` once the task is clear,** so I can find the session again with
-  `claude --resume`.
-- **Leave the context to me.** You cannot see the status line, so do not guess how full the
-  context is, and do not suggest wrapping up because the conversation feels long. I watch the
-  status line, and when it shows the context about half full I run `/session-end`, then `/clear`
-  and a fresh session. Suggest it yourself only when I say I am stopping. *Why:* answers get
-  worse as the context fills, well before the limit, and a guess from inside the conversation
-  runs early.
+- **End your first reply in every session with a line I can paste, starting with `/rename`**
+  and a short name for the task. **If a file I mention is outside the current working
+  directory, also give a `/cd` line** for the folder that holds it. *Why:* I find a session
+  again by its name (`claude --resume`, or through my launcher, e.g. `claude-jlu --resume`), and
+  Claude Code works in the folder it was started in.
+- **After a `/cd`, read the new folder's `CLAUDE.md` and `claude/next_steps.md`** before working
+  there. The start hook showed the old folder's files, not these.
+- **Watch the context figure.** A hook adds "Context: N% used." to my messages. When it passes
+  about half, suggest `/session-end`, then `/clear` and a fresh session; past three quarters,
+  say so in every reply. Without the line, do not guess from how long the conversation feels:
+  leave it to me. *Why:* answers get worse as the context fills, well before the limit.
+- **After a compaction, load again the skills the task needs.** Compaction keeps only the start
+  of a long skill.
 - **If I correct you on the same point twice, suggest starting fresh** (`/clear`, or
   `/rewind` to before the wrong turn) instead of arguing a third time. A wrong path stays in the
   context and keeps pulling the answers back to it.

@@ -50,4 +50,7 @@ adapted to the answers) and wait for the user's OK.
    make one commit with the whole setup. Push if a remote exists.
 2. Tell the user in a few lines what was created, what was checked (folder location, lock test,
    staged files), and the next step from `claude/next_steps.md`.
-3. Offer `/rename <project-name>` so the session can be found again.
+3. **The new-session test** (the reference's step 9): ask the user to start a new session in the
+   project and ask it what the project is, where the raw data is, and what comes next. Fix
+   `CLAUDE.md` where an answer is wrong or vague.
+4. Offer `/rename <project-name>` so the session can be found again.

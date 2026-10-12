@@ -31,8 +31,8 @@ Check the project folder's absolute path (`Get-Location` in PowerShell, `pwd` el
   `~/Documents` and `~/Desktop` sync to iCloud when "Desktop & Documents Folders" is on, though
   the path looks normal: ask the user.
 
-If it is synced: stop and say so. Propose `C:\Users\<name>\projects\<project>` (Mac:
-`~/projects/<project>`). Shared data may stay in the cloud; the code moves out. Moving an
+If it is synced: stop and say so. Propose `C:\Users\<name>\repos\<project>` (Mac:
+`~/repos/<project>`). Shared data may stay in the cloud; the code moves out. Moving an
 existing folder is the user's decision.
 
 ## 2. The project `CLAUDE.md`
@@ -52,7 +52,15 @@ more; details go in files it points to.
 - Pipeline: `analysis/`; run everything with `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`
 - Raw data: `analysis/1_raw_data/`, read-only (locked in `.claude/settings.json`).
   The untouched original lives at: <provider, shared drive, ...>
-- Paper: <Overleaf project name>
+- Paper: <where it lives: a LaTeX folder here, an Overleaf project, a Word file; or "none yet">
+
+## What to read, and when
+- Where we stand: `claude/next_steps.md` (the start hook shows it).
+- What is open: `claude/OPEN_ISSUES.md`. Read it when I ask what is open, or before work on an
+  item in it.
+- What happened, and when: `claude/session_log.md`. Read it only when I ask.
+- What can wait: `claude/long_term_open_issues.md`. Read it only when I ask.
+- Why we decided something: `claude/decision_<topic>.md`. Read one when its topic comes up.
 
 ## Conventions for this project
 - <R or Python; packages via renv / uv>
@@ -110,8 +118,12 @@ analysis/
   `analysis/1_raw_data/` (keep the original where it was); draft `claude/analysis_plan.md`."
 - **`claude/OPEN_ISSUES.md`** holds only what is open, one `## <short title>` per item with what
   would close it. A resolved item is deleted, not ticked off, so the file stays short enough to
-  read at every session start. At setup it holds a heading and nothing else, or the first known
-  gaps.
+  read whenever the user asks what is open. At setup it holds a heading and nothing else, or the
+  first known gaps.
+- **`claude/session_log.md`**, the diary: one dated entry per session, added by `/session-end`,
+  never rewritten. At setup: a heading and the first entry ("Project set up").
+- **`claude/long_term_open_issues.md`** holds what can wait; created when the first such item
+  comes up, not at setup.
 - **Decisions** get their own `claude/decision_<topic>.md` (question, options, choice, why),
   written when a decision is made, not at setup.
 - **For `academic-research`:** `claude/analysis_plan.md` (question, hypotheses, planned models;
@@ -120,8 +132,9 @@ analysis/
 
 ## 5. `.gitignore`
 
-Copy the template from `reference/gitignore_policy.md` and adapt it: data, generated outputs,
-secrets and local settings stay out of git.
+Copy the template from `reference/gitignore_policy.md` and adapt it. It leaves out everything,
+then lets in the kinds of file the project writes by hand (code, text, LaTeX, the environment's
+recipe files); data, generated outputs, secrets and local settings stay out.
 
 ## 6. Lock the raw data
 
@@ -191,6 +204,11 @@ git push -u origin main                            # only if a remote exists
 `git status` must show no data, PDFs or `.env`. `git check-ignore -v` prints the matching
 pattern; a pattern starting with `!` means the file is NOT ignored. Then tell the user what was
 checked: the folder location, the lock test, the staged file list.
+
+**The new-session test.** Ask the user to start a new session in the project folder and ask it
+three things: what the project is, where the raw data is, and what comes next. The answers must
+come from `CLAUDE.md` and `claude/next_steps.md`. An answer that is wrong or vague means a line
+is missing from one of them: add it, and ask again in a new session.
 
 ---
 

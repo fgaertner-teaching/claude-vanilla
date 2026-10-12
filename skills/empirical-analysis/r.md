@@ -9,9 +9,12 @@ R setup, toolkit and Windows traps for empirical work. Load alongside `SKILL.md`
 
 ## Running R from Claude Code on Windows
 
-- **`Rscript` is usually not on PATH.** The R installer does not add it. Find the installed
-  version under `C:\Program Files\R\` and call `"C:/Program Files/R/R-<version>/bin/Rscript.exe"`
-  by full path, or ask the user to add that `bin` folder to PATH once.
+- **`Rscript` is usually not on PATH.** The R installer does not add it. Find the newest
+  installed version under `C:\Program Files\R\`, say which one, and offer to add its `bin`
+  folder to the user's PATH yourself (a user-level change: ask first, as `rules/rules.md`
+  says). Until a new terminal picks it up, call `"C:/Program Files/R/R-<version>/bin/Rscript.exe"`
+  by full path. PATH can also name an OLD R while a newer one is installed: compare
+  `Rscript --version` with the folders there.
 - **Run scripts from files, not long `Rscript -e '...'` one-liners.** On Windows a `|` anywhere in
   the `-e` expression, even inside an R string, breaks the call with a misleading "path not found"
   error, because the command line treats it as a pipe.

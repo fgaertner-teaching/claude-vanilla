@@ -9,7 +9,8 @@ Check what applies; say in one line which items mattered for this commit.
 
 - [ ] Only files this step changed are staged, named one by one (`git status` before and after).
 - [ ] No data, generated outputs (tables, figures, PDFs, model objects) or secrets are staged.
-      A new kind of file that should stay out gets a `.gitignore` line first.
+      A new kind of file that belongs in git gets a `!` line in `.gitignore` first; without one
+      it stays out without a warning (`git status --ignored --short` lists what stays out).
 - [ ] No personal or licensed data, in any file, even inside a script or a comment.
 - [ ] The repository is not inside a cloud-synced folder (OneDrive, Dropbox, Google Drive,
       Nextcloud).

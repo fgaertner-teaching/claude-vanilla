@@ -1,8 +1,8 @@
 # UserPromptSubmit hook: tells Claude how full the context is, with every message.
 # Reads:  the hook's JSON on stdin (for the session id), then the figure statusline.ps1 wrote
 #         for this session: claude-context-<session id>.txt in the temp folder.
-# Writes: one line, "Context: N% used.", which Claude Code adds to the message. Nothing when
-#         there is no figure yet: the status line runs after Claude's first answer.
+# Writes: one line, "Context: N% used.", which Claude Code adds to the message. Nothing until
+#         the status line has shown a figure in this session.
 # Keep this file ASCII-only: Windows PowerShell 5.1 misreads non-ASCII characters
 # in a script saved without a byte-order mark.
 

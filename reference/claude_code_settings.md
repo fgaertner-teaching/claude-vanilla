@@ -5,7 +5,7 @@ setup does not work as expected.
 **Skip when:** normal project work.
 
 Last verified: 2026-10-07, against code.claude.com/docs (settings, permissions, hooks, memory,
-skills). Claude Code changes quickly: check the docs when something here does not match.
+skills); hooks, push and raw-data rules re-checked 2026-10-12 in headless sessions. Claude Code changes quickly: check the docs when something here does not match.
 
 ## Where settings live
 
@@ -38,8 +38,11 @@ They are combined. `/permissions` shows the rules in force and where each comes 
   new session and ask Claude to change a file there. Writing `.claude/settings.json` is itself a
   protected write: in auto mode a reviewer model decides, so do it in Manual mode.
 
-**What this kit sets:** git and `uv` / `Rscript` commands allowed; deleting asks; reading
-secret files (`.env`, SSH keys), force-pushing, `git reset --hard` and `git clean` denied.
+**What this kit sets:** git (except pushing) and `uv` / `Rscript` commands allowed; deleting
+and pushing ask; reading secret files (`.env`, SSH keys), force-pushing, `git reset --hard`,
+`git clean` and Claude's own edits in any `1_raw_data/` folder (`Edit(**/1_raw_data/**)`)
+denied. Pushing asks because a push cannot be taken back: each time, you check that nothing
+goes up that should stay off GitHub.
 
 ## Permission modes
 
@@ -50,24 +53,32 @@ rules still apply), **Plan** (reads and plans, changes nothing).
 ## Hooks
 
 A hook is a command Claude Code runs on an event, not something Claude decides to do. This kit
-has one: at session start (`SessionStart`), `scripts/session-start.ps1` prints the project's
-`claude/next_steps.md`, `claude/OPEN_ISSUES.md` and any panic dump, plus the git state; Claude
-Code adds what it prints to the session.
+has two:
 
+- **At session start** (`SessionStart`), `scripts/session-start.ps1` prints the project's
+  `claude/next_steps.md` and any panic dump, plus the git state; Claude Code adds what it
+  prints to the session. It leaves `claude/OPEN_ISSUES.md` out on purpose: Claude reads that
+  when you ask what is open (the pointer in the project's `CLAUDE.md`).
+- **With each message** (`UserPromptSubmit`), `scripts/context-in-prompt.ps1` adds one line,
+  "Context: N% used.", so Claude knows how full the context is (next section).
+
+Notes:
 - On Windows a hook command runs in Git Bash, or in PowerShell when Git Bash is not installed.
   The kit's command, `powershell -NoProfile -ExecutionPolicy Bypass -File "$HOME/.claude/..."`,
   works from both.
-- **On a Mac,** Windows PowerShell does not exist. Either install PowerShell
-  (`brew install powershell`) and change `powershell` to `pwsh` in `settings.json` (both
-  places), or remove the hook and the status line and run `/startup` at the start instead.
+- **On a Mac,** Windows PowerShell does not exist. Each script has a twin in `sh`
+  (`session-start.sh`, `statusline.sh`, `context-in-prompt.sh`); the install points the
+  three commands in `settings.json` at them, e.g. `sh "$HOME/.claude/scripts/statusline.sh"`.
+  Not yet tried on a Mac: if one fails, `/hooks` and its error say which.
 - `/hooks` lists the hooks in force. A hook that fails shows an error and the session goes on.
 
 ## Status line
 
 `scripts/statusline.ps1` shows the folder, git branch and session name, then the model and how
-full the context is. The context figure is for the user: the status line is drawn in the
-terminal and never reaches Claude, so `CLAUDE.md` § Sessions leaves the "wrap up at about half
-full" call to the user.
+full the context is. The status line is drawn in the terminal and never reaches Claude, so it
+also writes the context figure to a small file in the temp folder
+(`claude-context-<session id>.txt`), and the prompt hook puts it into each message. Until the
+status line has shown a figure in this session, the hook adds nothing.
 
 ## Instruction files
 
@@ -100,3 +111,8 @@ every session belongs in a `CLAUDE.md`.
 What you send goes to Anthropic. Whether it may be used for model training is a setting of
 your account: claude.ai/settings/data-privacy-controls. Check it before working with personal
 data, and check what your data's licence or consent allows.
+
+Claude Code also keeps every session on your computer, as a transcript under
+`~/.claude/projects/` (one folder per starting folder). That is what `claude --continue` and
+`--resume` read. Whatever a session saw, a data file it read included, is in there in plain
+text. Claude Code deletes transcripts older than `cleanupPeriodDays` (30 days unless set).
