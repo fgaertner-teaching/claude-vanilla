@@ -77,7 +77,7 @@ merge it in:
      install it, then start Claude Code again.
    - Ask *"What do you know about me, and which skills and commands do you have?"* The answer
      should come from your profile and name the kit's skills. (Names are always listed; whether
-     their descriptions fit is what `/context`'s Skills row and `/doctor` show.)
+     their descriptions fit is what `/context`'s Skills row shows.)
 
    If a check fails, ask Claude to compare `~/.claude/settings.json` with the kit's
    `settings.json` and show you what is missing.

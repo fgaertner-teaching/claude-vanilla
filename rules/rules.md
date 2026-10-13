@@ -91,6 +91,11 @@ Conventions for files, data, git, project tracking and code. Every project, ever
 - **Explain each git command in plain words** the first time it comes up.
 - Force-pushing, `git reset --hard` and `git clean` are blocked in the settings in their usual
   forms. Never reach for another form: if one seems necessary, explain why and let me run it.
+- **An SSH key for GitHub:** `~/.ssh` is closed to your reads (a deny rule keeps the private
+  key out of the conversation), so never list it. Run `ssh-keygen -t ed25519 -f
+  ~/.ssh/id_ed25519 -N ""` directly: if a key exists, it stops and says so, and only the paste
+  is left. Open the public half with `notepad ~/.ssh/id_ed25519.pub` (on a Mac `open -e`),
+  never with `cat`.
 
 ## Code (you write it, I check what it produces)
 
