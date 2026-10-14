@@ -44,23 +44,12 @@
 # All paths in the pipeline are relative to analysis/. The check below stops the
 # run if R was not started there.
 #
-# The pipeline has two modes:
-#
-#   RECOMPUTE (default): Runs every script from raw data through to final
-#     tables and plots. This is the full replication path.
-#
-#   LOAD OBJECTS: Skips the computation and loads pre-saved R objects instead.
-#     This is useful when you want to inspect results without waiting for the
-#     full pipeline to run, or when raw data is not available (e.g. restricted
-#     micro-data not included in the replication package).
-#
-# By default, the pipeline recomputes everything. The "Save Objects" lines are
-# commented out to prevent accidentally overwriting the original objects. The
-# "Load Objects" lines are also commented out because the loaded objects use the
-# same names as the computed ones — uncommenting both would cause conflicts.
-#
-# To switch to load-objects mode: comment out the source() calls for a stage
-# and uncomment the corresponding load() block below it.
+# Each stage reads its input from a file and writes its output to a file
+# (the header of each script says which). So a single stage also runs on its
+# own, and the tables and plots can be redrawn from the saved objects in
+# 7_r_objects/ without running the analysis again: comment out the stages
+# before them. That is also the way to show results when the raw data cannot
+# be shared (restricted micro-data left out of a replication package).
 #
 # ==============================================================================
 
@@ -107,41 +96,17 @@ if (file.exists("renv.lock")) {
 source("0_shared/0_Setup.R")
 
 
-# =============================================================================
-# [STUDY NAME]
-# =============================================================================
-# [TEMPLATE NOTE — delete this block after filling in]
-#
-# For a SINGLE-STUDY project, source scripts directly:
-#
-#   source("4_scripts/1_0_Load_Data_Setup.R")
-#   source("4_scripts/1_1_Load_Data.R")
-#   source("4_scripts/2_0_Clean_Data_Setup.R")
-#   source("4_scripts/2_1_Clean_Data.R")
-#   source("4_scripts/2_2_Clean_Data_Save_Objects.R")
-#   source("4_scripts/2_3_EDA_Plots.R")
-#   source("4_scripts/3_0_Results_Setup.R")
-#   source("4_scripts/3_1_Results_Descriptives.R")
-#   # ... etc.
-#
-#   # --- Load pre-saved objects (alternative to recomputing) ---
-#   # load("7_r_objects/data_objects.RData")
-#   # load("7_r_objects/results_objects.RData")
-#   # load("7_r_objects/table_objects.RData")
-#   # load("7_r_objects/plot_objects.RData")
-#
-# For a MULTI-STUDY project, each study has its own run_*.R entry point:
-#
+# The stages, in order ---------------------------------------------------------
+# A new script goes in its stage, numbered after the ones there
+# (e.g. 3_2_Robustness.R), and gets its source() line here.
+source("4_scripts/1_1_Load_Data.R")     # 1_raw_data/           -> 2_interim_data_steps/
+source("4_scripts/2_1_Clean_Data.R")    # 2_interim_data_steps/ -> 3_clean_data/
+source("4_scripts/3_1_Analysis.R")      # 3_clean_data/         -> 7_r_objects/
+source("4_scripts/4_1_Tables.R")        # 7_r_objects/          -> 5_tables/
+source("4_scripts/5_1_Plots.R")         # 3_clean_data/         -> 6_plots/
+message("--- Pipeline finished.")
+
+# With several studies (reference/new_project.md § 3), each study gets its own
+# run_*.R holding the lines above, and this file sources those instead:
 #   source("study_1/pilot/run_pilot.R")
 #   source("study_1/main/run_main.R")
-#   source("study_2/main/run_main.R")
-#   source("cross_study/4_scripts/1_cross_study_analysis.R")
-#
-#   # --- Load pre-saved objects (alternative to recomputing) ---
-#   # load("study_1/pilot/7_r_objects/data_objects.RData")
-#   # load("study_1/pilot/7_r_objects/results_objects.RData")
-#   # load("study_1/main/7_r_objects/data_objects.RData")
-#   # ... etc.
-#
-# Delete this template note once the pipeline is set up.
-# =============================================================================

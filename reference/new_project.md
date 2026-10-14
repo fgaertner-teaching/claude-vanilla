@@ -105,7 +105,8 @@ analysis/
   1_raw_data/                  a copy of the data as received; the original stays where it is
   2_interim_data_steps/
   3_clean_data/
-  4_scripts/                   1_1_Load_Data.R, 2_1_Clean_Data.R, 3_2_Results_Main_Analysis.R ...
+  4_scripts/                   1_1_Load_Data.R, 2_1_Clean_Data.R, 3_1_Analysis.R, 4_1_Tables.R,
+                               5_1_Plots.R (load, clean, analyse, tables, plots)
   5_tables/appendix/
   6_plots/appendix/
   7_r_objects/                 Python: 7_objects/
@@ -127,7 +128,20 @@ analysis/
   - no data yet: "none yet", and `claude/next_steps.md` says what comes.
 
   The original is only ever read: when it changes, the user copies it in again.
-- **`0_shared/0_Setup.R`** is written at setup, because the main file runs it first: the
+- **The pipeline skeleton is copied in at setup, complete:** for R, `reference/templates/r/`
+  (`0_shared/0_Setup.R` and the five scripts in `4_scripts/`) plus the main file from
+  `reference/template_main_file.R`; for Python, everything in `reference/templates/python/`
+  (`0_shared/setup.py`, the five scripts, `Data_Analysis_Main_File_OPEN_ME_FIRST.py`). Copy the
+  files as they are, then fill in the main file's project name and description. Each script says
+  in its header what it reads and writes; it reads the previous stage's file, stops with a
+  message naming the script to run first if that file is missing, and the load script stops with
+  "copy your data into 1_raw_data/" while that folder is empty. So the main file runs from the
+  first day, and stops with that message until the data is in. The placeholder stages (a
+  description of the numeric columns, one table, one figure) are replaced by the real ones from
+  `claude/analysis_plan.md`; a new script goes into its stage with the next number
+  (`3_2_Robustness.R`) and gets its line in the main file. Several studies: one copy of the
+  scripts per study, with the folder names in the setup file adapted.
+- **`0_shared/0_Setup.R`** runs first, from the main file or from a stage run on its own: the
   libraries, the folder paths (`here::here("1_raw_data")`, ...), and, only in a project with a
   `config_local.R`, the line that reads it:
   `if (file.exists(here::here("config_local.R"))) source(here::here("config_local.R"))`.
@@ -151,13 +165,15 @@ analysis/
   ```
 
   (The main file sits in `analysis/` itself: `Path(__file__).resolve().parent`. With several
-  studies, `parents[1]` is the study's own folder, e.g. `analysis/study_1/pilot/`, and
-  `0_shared/` is in `analysis/` above it.)
+  studies, `parents[1]` is the study's own folder, e.g. `analysis/study_1/pilot/`, so each study
+  gets its own copy of `0_shared/setup.py` next to its `4_scripts/`; in R, each study's copy of
+  `0_Setup.R` puts the study's path into its folder lines,
+  `here::here("study_1", "pilot", "1_raw_data")`.)
   `setup.py` finds `analysis/` the same way and reads `config_local.py`, if the project has one,
   by its path, never by `import`: `runpy.run_path(str(ANALYSIS / "config_local.py"))` when the
   file exists. A missing file means no laptop paths; an error in it stops the run. A script reads
-  setup's variables from the dictionary `run_path` returns, e.g. `setup["shared_data_path"]` for
-  a value `setup.py` took from `config_local.py`.
+  setup's variables from the dictionary `run_path` returns, e.g. `setup["RAW_DATA_DIR"]`; a value
+  from `config_local.py` sits one level down, `setup["config_local"]["shared_data_path"]`.
 
 - Folder names are `lower_snake_case`: nothing to quote or mistype in code.
 - `programming/` holds the code that generates data, one subfolder per experiment or simulation;
@@ -259,9 +275,13 @@ repository on github.com (no README), then `git remote add origin <url>`.
   `renv/settings.json`. Details: `skills/empirical-analysis/r.md`.
 - **Python:** at the project root, `uv init`, then `uv add <package>`; commit `pyproject.toml`
   and `uv.lock`. Details: `skills/empirical-analysis/python.md`.
-- **Main file:** from `reference/template_main_file.R`; fill in the project name and the
-  `source()` lines (single study) or the `run_*.R` lines (several studies). Python: a `.py` main
-  file that runs the stage scripts in order (`project-organizer` skill).
+- **Main file:** copied in with the skeleton (step 3): `reference/template_main_file.R`, or
+  `reference/templates/python/Data_Analysis_Main_File_OPEN_ME_FIRST.py`. Its five stage lines
+  are already there; fill in the project name and description. Several studies: the `run_*.R`
+  lines instead (step 3). Then run it once: it must stop with "copy your data into
+  1_raw_data/", or run through if the data is already in. The R skeleton needs only the `here`
+  package, which `renv::init()` finds in the copied scripts and records; the Python one needs
+  `uv add pandas matplotlib`.
 - **Co-authors** in the same code: read `reference/collaboration.md` before the first commit.
 - **The paper:** wherever the user writes it. If it is on Overleaf, `reference/overleaf_conventions.md`
   says how outputs get there. **LaTeX in this repository:** `paper/main.tex` reads the tables and

@@ -26,6 +26,7 @@
 !reference/
 !reference/**/*.md
 !reference/**/*.R
+!reference/**/*.py
 
 # Agents
 !agents/

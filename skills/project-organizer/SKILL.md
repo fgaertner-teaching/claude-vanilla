@@ -78,13 +78,16 @@ its own (`reference/new_project.md` step 3).
 
 `S_N_Name.R`: `S` is the stage, `N` the position inside the stage.
 
-| Stage | Does | Typical scripts |
-|---|---|---|
-| 1 | load raw data | `1_0_Load_Data_Setup.R`, `1_1_Load_Data.R` |
-| 2 | clean, build variables | `2_1_Clean_Data.R`, `2_2_Clean_Data_Save_Objects.R`, `2_3_EDA_Plots.R` |
-| 3 | estimate | `3_1_Results_Descriptives.R`, `3_2_Results_Main_Analysis.R`, `3_3_Results_Robustness.R` |
-| 4 | tables | `4_0_Tables_Setup.R`, `4_2_Tables_Main_Analysis.R` |
-| 5 | figures | `5_0_Plots_Setup.R`, `5_2_Plots_Main_Analysis.R`, `5_5_Plots_Export.R` |
+| Stage | Does | From `/newproject`'s skeleton | Typical later scripts |
+|---|---|---|---|
+| 1 | load raw data | `1_1_Load_Data.R` | `1_0_Load_Data_Setup.R`, `1_2_Load_Second_Source.R` |
+| 2 | clean, build variables | `2_1_Clean_Data.R` | `2_2_Build_Variables.R`, `2_3_EDA_Plots.R` |
+| 3 | estimate | `3_1_Analysis.R` | `3_2_Robustness.R` |
+| 4 | tables | `4_1_Tables.R` | `4_0_Tables_Setup.R`, `4_2_Tables_Robustness.R` |
+| 5 | figures | `5_1_Plots.R` | `5_0_Plots_Setup.R`, `5_2_Plots_Robustness.R` |
+
+The skeleton (`reference/templates/r/`, `reference/templates/python/`) has one script per stage,
+each reading the previous stage's file and writing its own, so each also runs alone.
 
 Stage numbers count steps and folder numbers count folders, so they differ: stage 4 writes to
 `5_tables/`, stage 5 to `6_plots/`.
@@ -96,16 +99,16 @@ Inside each stage, three roles:
   cannot drift between two tables.
 - **`S_N_....R`**: the content.
 - **`S_M_..._Save_Objects.R`**: writes the stage's results to `7_r_objects/`, so a later stage,
-  or a reader without the raw data, can load instead of recompute.
+  or a reader without the raw data, can load instead of recompute. The skeleton's stages save
+  their one result file themselves; split this out when a stage saves many objects.
 
-Stages 3, 4 and 5 reuse the same section words (`Descriptives`, `Main_Analysis`, `Robustness`),
-so the table in `4_2_Tables_Main_Analysis.R` is fed by `3_2_Results_Main_Analysis.R`.
+Stages 3, 4 and 5 reuse the same section words (`Robustness`, `Heterogeneity`), so the table in
+`4_2_Tables_Robustness.R` is fed by `3_2_Robustness.R`.
 
-Every content script opens with what it needs and what it makes:
+Every content script opens with what it reads and what it writes:
 
 ```r
-# Depends on: 4_0_Tables_Setup.R (stars, gof_map)
-# Needs in memory: main_models (from 3_2_Results_Main_Analysis.R)
+# Reads:  7_r_objects/results.rds (from 3_1_Analysis.R); helpers from 4_0_Tables_Setup.R
 # Writes: 5_tables/tab_main_effects.tex
 ```
 

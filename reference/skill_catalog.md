@@ -53,6 +53,7 @@
 | Defaults for academic projects | `reference/academic_conventions.md` |
 | Before committing | `reference/checklist.md` |
 | A main R script to start from | `reference/template_main_file.R` |
+| The pipeline's scripts to start from (R, Python) | `reference/templates/r/`, `reference/templates/python/` |
 
 ## In each project
 

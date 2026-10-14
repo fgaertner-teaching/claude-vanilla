@@ -43,6 +43,12 @@ adapted to the answers) and wait for the user's OK.
 ## 3. Build
 
 - Follow the reference's steps in order; report each in one line as it is done.
+- **The pipeline skeleton is copied in complete** (reference step 3): for R
+  `reference/templates/r/` plus `reference/template_main_file.R` as
+  `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`, for Python `reference/templates/python/`
+  (both, if the answer to question 3 was both). Copy, do not write the scripts anew; fill in
+  only the main file's project name and description. Run the main file once and report what it
+  said (with no data yet: "copy your data into 1_raw_data/").
 - **The user copies the raw data in** (Explorer or Finder), and keeps the original where it was.
   Claude does not move or copy data into `1_raw_data/` on its own: the lock refuses Claude's own
   tools, and Claude never routes around it with a script.
