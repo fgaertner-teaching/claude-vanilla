@@ -44,13 +44,15 @@ adapted to the answers) and wait for the user's OK.
 
 - Follow the reference's steps in order; report each in one line as it is done.
 - **The pipeline skeleton is copied in complete** (reference step 3): for R
-  `reference/templates/r/` plus `reference/template_main_file.R` as
-  `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`, for Python `reference/templates/python/`
-  (both, if the answer to question 3 was both). Copy, do not write the scripts anew; fill in
-  only the main file's project name and description. Once the package environment exists
-  (reference step 8), run the main file once and report what it said (with no data yet:
-  "copy your data into 1_raw_data/"). For `academic-research`, the five scripts get their rows in
-  `claude/pipeline_map.md` (reference step 4).
+  `~/.claude/reference/templates/r/` plus `~/.claude/reference/template_main_file.R` as
+  `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`, for Python
+  `~/.claude/reference/templates/python/`. If the answer to question 3 was both, ask which
+  language runs the analysis pipeline and copy that skeleton only: the two write the same output
+  files. Copy, do not write the scripts anew; fill in only the main file's project name and
+  description. Once the package environment exists (reference step 8), run the main file once
+  and report what it said: with no data yet, "copy your data into 1_raw_data/"; with the data
+  already in, run only the load stage instead (reference step 8). For `academic-research`, the
+  five scripts get their rows in `claude/pipeline_map.md` (reference step 4).
 - **The user copies the raw data in** (Explorer or Finder), and keeps the original where it was.
   Claude does not move or copy data into `1_raw_data/` on its own: the lock refuses Claude's own
   tools, and Claude never routes around it with a script.

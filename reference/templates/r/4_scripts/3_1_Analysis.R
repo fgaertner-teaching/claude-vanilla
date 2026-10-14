@@ -8,7 +8,10 @@
 
 # Setup, when this script runs on its own ----------------------------------
 if (!exists("require_input")) {
-  if (!file.exists(here::here("0_shared", "0_Setup.R"))) {
+  # Without here, R was started outside analysis/, where renv switches the
+  # project's packages on; outside analysis/, the setup file is not found.
+  if (!requireNamespace("here", quietly = TRUE) ||
+      !file.exists(here::here("0_shared", "0_Setup.R"))) {
     stop("Start R in the analysis/ folder (or open it in Positron or RStudio), ",
          "then run this again.", call. = FALSE)
   }

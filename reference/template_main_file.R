@@ -46,7 +46,8 @@
 #
 # Each stage reads its input from a file and writes its output to a file
 # (the header of each script says which). So a single stage also runs on its
-# own, and the tables and plots can be redrawn from the saved objects in
+# own, with R started in analysis/ like this file (Rscript 4_scripts/<script>,
+# or the script opened in Positron or RStudio), and the tables and plots can be redrawn from the saved objects in
 # 7_r_objects/ without running the analysis again: comment out the stages
 # before them. That is also the way to show results when the raw data cannot
 # be shared (restricted micro-data left out of a replication package).

@@ -79,7 +79,7 @@ result. A staging file makes the change visible, reviewable and attributed.
 
 ```r
 # ---- Suggestion: cluster standard errors by school ----------------------
-# Target: 4_scripts/3_2_Results_Main_Analysis.R, the feols() call for model 2
+# Target: 4_scripts/3_1_Analysis.R, the feols() call for model 2
 # Why: treatment is assigned by school, so errors are correlated within schools.
 # Replace
 #   feols(score ~ treat + controls, data = data_final_survey_main)
@@ -89,7 +89,7 @@ feols(score ~ treat + controls, data = data_final_survey_main, cluster = ~school
 
 ```
 # WRONG: the co-author owns stage 3, and Claude edits it directly
-edit 4_scripts/3_2_Results_Main_Analysis.R
+edit 4_scripts/3_1_Analysis.R
 # RIGHT
 append the block to analysis/Claude_suggestions_<initials>.R and tell the user it awaits the owner
 ```

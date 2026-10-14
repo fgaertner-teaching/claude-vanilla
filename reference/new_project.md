@@ -215,7 +215,7 @@ analysis/
   The skeleton's five scripts (step 3) get their five rows at setup, from their headers, with
   the Check left `to set with the data` (none can be set before the data is known); the user
   approves them with the rest of the setup, and each Check is set before its stage first runs
-  on the real data.
+  on the real data (the setup run in step 8 only loads it).
   `claude/analysis_plan_deviations.md` is created with the first deviation. The order of work
   before any analysis code (plan, script structure, output specification):
   `reference/academic_conventions.md`.
@@ -283,7 +283,9 @@ repository on github.com (no README), then `git remote add origin <url>`.
   `reference/templates/python/Data_Analysis_Main_File_OPEN_ME_FIRST.py`. Its five stage lines
   are already there; fill in the project name and description. Several studies: the `run_*.R`
   lines instead (step 3). Then run it once: it must stop with "copy your data into
-  1_raw_data/", or run through if the data is already in. The R skeleton needs only the `here`
+  1_raw_data/". If the data is already in, run only `4_scripts/1_1_Load_Data.R` (or `.py`)
+  instead, which reads the data and changes nothing; the later stages run on the real data
+  once the analysis plan and their Checks are set (step 4). The R skeleton needs only the `here`
   package: `renv::init()` scans the scripts for the packages they load, so it should record
   `here` on its own; if `renv.lock` lacks it, `renv::install("here")`, then `renv::snapshot()`.
   The Python one needs `uv add pandas matplotlib`.
