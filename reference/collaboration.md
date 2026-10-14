@@ -28,6 +28,7 @@ to change code that a co-author owns.
 # config_local.R: this machine only, never committed
 shared_data_path   <- "G:/My Drive/<project>"                            # only for data too large to copy in
 overleaf_sync_path <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"  # only with a synced Overleaf folder
+# On a Mac, e.g. "~/Library/CloudStorage/GoogleDrive-<you>/My Drive/<project>"
 ```
 
 (`overleaf_sync_path` is what the copy helper in `reference/overleaf_conventions.md` reads.

@@ -5,9 +5,10 @@ Conventions for files, data, git, project tracking and code. Every project, ever
 ## Files and data
 
 - **Raw data is never changed, and the project works on a copy.** The original stays where it
-  arrived; the project's `1_raw_data/` holds a copy, and every cleaning or coding step reads it
-  and writes a new file. *Why:* a request or a script that goes wrong changes the copy, never the
-  original, and a mistake in a step can always be undone by re-running it.
+  arrived; the project's raw-data folder (`1_raw_data/` in the `/newproject` layout) holds a
+  copy, and every cleaning or coding step reads it and writes a new file. *Why:* a request or a
+  script that goes wrong changes the copy, never the original, and a mistake in a step can always
+  be undone by re-running it.
 - **Numbers come from scripts, never typed in by hand.** A number in a table, a paper or a
   slide must be produced by a script that runs from the raw data. *Why:* otherwise next year's
   update, or a referee's question, cannot be answered by re-running it.

@@ -53,8 +53,9 @@ the `analysis-plan` skill.
 ### Step 2: script structure
 
 Translate the plan into numbered scripts **before writing code**: each results section maps to one
-or more scripts, and the full set is listed up front. Why: code that mirrors the paper's structure
-lets anyone go from a table in the paper to the script that made it.
+or more scripts, and the full set is listed up front in `claude/pipeline_map.md`, one row per
+script with its Check, approved by the user before any code. Why: code that mirrors the paper's
+structure lets anyone go from a table in the paper to the script that made it.
 
 ### Step 3: output specification, one section at a time
 

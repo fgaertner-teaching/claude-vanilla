@@ -16,9 +16,9 @@ own `CLAUDE.md`. Who I am, my field and the language I want answers in are in my
   and the other files `rules/rules.md` § Project tracking names. A hook shows you
   `next_steps.md` at the start of each session; the others you read when the project's
   `CLAUDE.md` says to.
-- **My deadlines:** `reference/deadlines.md`. Read it when I ask about dates, or when we plan
-  my week.
-- **Where my projects are:** `projects.md`. Read it before you look for a project.
+- **My deadlines:** `~/.claude/reference/deadlines.md`. Read it when I ask about dates, or when
+  we plan my week.
+- **Where my projects are:** `~/.claude/projects.md`. Read it before you look for a project.
   `/newproject` adds each new project to it.
 
 Before starting a task, check the skill list and load every skill that applies, then say in one

@@ -28,6 +28,9 @@ analysis/
   5_tables/                 generated .tex tables (+ appendix/)             (not in git)
   6_plots/                  generated figures (+ appendix/)                 (not in git)
   7_r_objects/              saved models and data objects (.rds, .RData)    (not in git)
+  config_local.R            this laptop's paths, only where the pipeline    (not in git)
+                            needs one (reference/new_project.md step 3)
+  .here                     empty; makes here::here() point at analysis/    (in git)
   Data_Analysis_Main_File_OPEN_ME_FIRST.R    runs everything, top to bottom
 ```
 
@@ -38,14 +41,18 @@ the folder sees the pipeline before reading a line of code.
 `.pkl`), and a main file `Data_Analysis_Main_File_OPEN_ME_FIRST.py` run with
 `uv run python analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.py`. Make each Python script
 self-contained (it reads its inputs from files and writes its outputs to files); the main file
-runs them in order with `runpy.run_path(...)`.
+runs them in order with `runpy.run_path(...)`. Every script, the main file included, builds
+its paths from `analysis/`, found from its own place (`Path(__file__)`), never from the folder
+Python was started in; so the main file runs from the project root, and a stage also runs on
+its own (`reference/new_project.md` step 3).
 
 ## Six rules, each with its reason
 
-1. **Raw data is read-only.** Every change (a renamed variable, a dropped respondent, a recode)
-   happens in a script that writes to `2_` or `3_`. *Why:* the original stays available to rerun
-   from, and every change is written down where a referee or co-author can read it. A hand edit
-   in Excel is invisible and cannot be repeated.
+1. **Raw data is read-only.** `1_raw_data/` holds a copy; the original stays where it arrived,
+   named in the project's `CLAUDE.md`, and is only read. Every change (a renamed variable, a
+   dropped respondent, a recode) happens in a script that writes to `2_` or `3_`. *Why:* the data
+   as received stay available to rerun from, and every change is written down where a referee or
+   co-author can read it. A hand edit in Excel is invisible and cannot be repeated.
 2. **Data flows forward only.** A script reads from earlier folders and writes to its own.
    Results scripts read `3_clean_data/` or saved objects, never `1_raw_data/`. *Why:* otherwise
    the order the scripts must run in is hidden, and a fix to the cleaning silently fails to reach
@@ -104,11 +111,12 @@ Every content script opens with what it needs and what it makes:
 
 *Why:* a new session, or a co-author, can run or change one script without reading the others.
 
-**Adding a script.** Take the next free number in its stage, and in the same change add its
-`source()` line to the main file and its row to `claude/pipeline_map.md`. If it must run between
-two existing scripts, renumber, and update the main file, the map and every `Depends on:` header
-in the same change (search for the old names). A stale number misleads more than a renumbering
-costs.
+**Adding a script.** Its row in `claude/pipeline_map.md` (Does, Reads, Writes, Check) comes
+first, and the user approves it, just as an `output_spec.md` row comes before its code; then the
+script. Take the next free number in its stage, and add its `source()` line to the main file in
+the same change as the script. If it must run between two existing scripts, renumber, and update the
+main file, the map and every `Depends on:` header in the same change (search for the old names).
+A stale number misleads more than a renumbering costs.
 
 ## Several studies
 
@@ -129,14 +137,19 @@ One table, one row per script:
 | 2_1_Clean_Data.R | drops speeders, builds indices | 1_raw_data/survey.csv | 3_clean_data/survey_clean.rds | 1,840 respondents, no missing index |
 ```
 
-Read it before working on the pipeline instead of opening scripts one by one, and update it in
-the same change that adds, removes or renames a script. *Why:* one file orients a fresh session
-in seconds; a stale map is worse than none, because it is trusted.
+Read it before working on the pipeline instead of opening scripts one by one. A new script's row
+comes before its code (above); a removed or renamed script's row changes in the same change.
+*Why:* one file orients a fresh session in seconds; a stale map is worse than none, because it is
+trusted.
 
 **The Check is decided before the script runs:** the result it must give (a row count, a date
 range, a number of coefficients), from the data's documentation or the plan, never from a first
 run. The script tests it in code (`stopifnot()` in R, `assert` in Python), so a run stops when a
-check fails. *Why:* a check written after the run only confirms what the run produced.
+check fails. The first stage's Check describes the raw data the analysis expects: its row count
+and date range, which a different file usually breaks, or its md5, which every other file
+breaks. When the original changes on purpose and the user copies it in again,
+the Check changes in the same commit, from the new data's documentation. *Why:* a check written
+after the run only confirms what the run produced.
 
 ## Outputs and the paper
 
@@ -224,6 +237,9 @@ round can see exactly what a referee saw.
   `output_spec.md`.
 - The main file does not run start to finish in a fresh session.
 - `pipeline_map.md` lists a script that no longer exists, or misses one that does.
+- A map row's Check has no `stopifnot()` or `assert` behind it in its script.
+- A laptop path written into a script: the raw data are read from the copy in `1_raw_data/`, and
+  any other path that differs per laptop belongs in `config_local.R`.
 
 When you see one, tell the user and propose the fix; do not restructure silently, because moving
 files breaks paths in scripts and in the paper.

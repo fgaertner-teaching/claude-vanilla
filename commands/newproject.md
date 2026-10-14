@@ -24,10 +24,12 @@ Say which mode you see and let the user confirm before changing anything.
 3. **Language:** R, Python, or both.
 4. **Studies:** one study, or several (or a pilot plus a main wave).
 5. **Generated data:** does the project create its own data (experiment, simulation, scraping)?
-   If yes, it also gets `programming/`.
-6. **Raw data:** where it comes from, and where the untouched original stays. The project works
-   on a copy in `analysis/1_raw_data/`, and `CLAUDE.md` names the original's place in words.
-   Data too large to copy: reference step 3, `config_local`.
+   If yes, it also gets `programming/`, and where its code first writes the data, a backed-up
+   place, is the original (reference step 3).
+6. **Raw data:** where it comes from, and where the untouched original stays: a folder
+   elsewhere, a download, data the project generates, or none yet (reference step 3 says what
+   `CLAUDE.md` records for each). The project works on a copy in `analysis/1_raw_data/`. Data
+   too large to copy: reference step 3, `config_local`.
 7. **GitHub:** a private remote now, or later?
 8. **Co-authors** working in the same code? If yes, read `~/.claude/reference/collaboration.md`
    before the first commit.
@@ -42,21 +44,28 @@ adapted to the answers) and wait for the user's OK.
 
 - Follow the reference's steps in order; report each in one line as it is done.
 - **The user copies the raw data in** (Explorer or Finder), and keeps the original where it was.
-  Claude does not move or copy data into `1_raw_data/` on its own (the lock refuses it anyway).
-- **`config_local`** only if the pipeline needs a path that differs on every laptop (reference
-  step 3); most projects have none.
-- **Existing projects:** never move, rename or delete a file without asking. Moving breaks every
-  path that points to it.
-- **Test the raw-data lock** as the reference describes, and report the result.
+  Claude does not move or copy data into `1_raw_data/` on its own: the lock refuses Claude's own
+  tools, and Claude never routes around it with a script.
+- **`config_local`** only if the pipeline needs a path that differs on every laptop: data too
+  large to copy in, or the paper's synced folder if question 9 named one (`overleaf_sync_path`)
+  (reference step 3). Most projects have none.
+- **Existing projects:** commit first, then move (the reference's last section). Never move,
+  rename or delete a file without asking. Moving breaks every path that points to it.
+- **Have the user check the raw-data lock** with `/permissions` (reference step 6), and report
+  what they saw.
 
 ## 4. Finish
 
-1. Run `git status` and read the list: no data, PDFs or secrets. State the commit message, then
-   make one commit with the whole setup. Push if a remote exists.
-2. **The index:** ask, then add the project to `~/.claude/projects.md` (reference step 9).
-3. Tell the user in a few lines what was created, what was checked (folder location, lock test,
-   staged files), and the next step from `claude/next_steps.md`.
-4. **The new-session test** (the reference's step 9): ask the user to start a new session in the
-   project and ask it what the project is, where the raw data is, and what comes next. Fix
-   `CLAUDE.md` where an answer is wrong or vague.
+1. **The checks, then the commit** (reference step 9, in its order): `git check-ignore -v` on a
+   file in each raw-data folder; `git status` and `git status --ignored --short`, both lists read
+   (no data, PDFs or secrets in the first; nothing that belongs in git in the second). State the
+   commit message, then make one commit with the whole setup. Push if a remote exists.
+2. **The index:** ask, then add the project to `~/.claude/projects.md` (reference step 9). If
+   the write is refused, give the user the entry to paste.
+3. Tell the user in a few lines what was created, what was checked (folder location, the lock,
+   both lists), and the next step from `claude/next_steps.md`.
+4. **The new-session test** (reference step 9): ask the user to start a new session in the
+   project and ask it what the project is, where the raw data is (the copy and the original), and
+   what comes next. Fix `CLAUDE.md` where an answer is wrong or vague, then commit the fix,
+   stating the message first, and push it if a remote exists.
 5. Offer `/rename <project-name>` so the session can be found again.

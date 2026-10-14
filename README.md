@@ -103,7 +103,9 @@ Mac).
 
 In an empty folder (outside OneDrive, Dropbox and similar synced folders), type `/newproject`.
 Claude asks what the project is and sets up its `CLAUDE.md`, the `claude/` tracking files, the
-folders, git, and a lock on the raw-data folder.
+folders, git, and a lock on the raw-data folder. The project works on a copy of your raw data,
+which you copy in yourself. The original stays where it is. At the end, Claude asks before
+adding the project to your list of projects, `~/.claude/projects.md`.
 
 ## Commands
 

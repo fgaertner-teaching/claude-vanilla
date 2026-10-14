@@ -69,11 +69,16 @@
 # R must have started in analysis/: only there does renv's .Rprofile switch the
 # project's package library on, and a setwd() later does not. Two start places
 # are handled: analysis/ itself, and a subfolder of it left over from a crashed
-# run in the same session (renv is already on then).
+# run in the same session (renv is already on then). In analysis/ itself with
+# the setup file missing, the message says so instead of naming the folder.
 if (!file.exists("0_shared/0_Setup.R")) {
   if (!file.exists("analysis/0_shared/0_Setup.R") &&
+      requireNamespace("here", quietly = TRUE) &&
       file.exists(file.path(here::here(), "0_shared", "0_Setup.R"))) {
     setwd(here::here())  # In a subfolder of analysis/; here::here() finds it
+  } else if (file.exists("Data_Analysis_Main_File_OPEN_ME_FIRST.R")) {
+    stop("0_shared/0_Setup.R is missing. R is in the analysis/ folder, but the ",
+         "setup file this file runs first is not there.")
   } else {
     stop("Start R in the analysis/ folder (the one holding renv.lock), then run ",
          "this file again. From anywhere else the project's packages are not used.")

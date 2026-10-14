@@ -123,13 +123,13 @@ A small helper in the pipeline's setup script copies tables and figures to where
 lives locally: the Dropbox folder (route D) or the local clone of the Overleaf or GitHub
 repository (routes B and C, followed by a commit and push). The target is machine-specific, so it
 goes in the gitignored `analysis/config_local.R` (see `reference/collaboration.md`), never in
-committed code. If no target is set, the helper does nothing, so the pipeline still runs for a
-co-author or a replicator.
+committed code. `0_Setup.R` reads that file with the one line in `reference/new_project.md`
+step 3; a project that had no `config_local.R` before gets that line now. If no target is set,
+the helper does nothing, so the pipeline still runs for a co-author or a replicator.
 
 ```r
-# 0_shared/0_Setup.R — overleaf_sync_path is set in config_local.R (gitignored), e.g.
+# 0_shared/0_Setup.R, below the line that reads config_local.R (gitignored), which sets e.g.
 #   overleaf_sync_path <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"
-if (file.exists("config_local.R")) source("config_local.R")
 if (!exists("overleaf_sync_path")) overleaf_sync_path <- NULL
 
 sync_to_paper <- function(source_dir, dest_subdir) {
