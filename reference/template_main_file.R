@@ -30,11 +30,11 @@
 #    match ours:
 #      renv::restore()
 #
-# 4. Write analysis/config_local.R with this laptop's paths: where the raw data's
-#    untouched original is (CLAUDE.md § Where things are says which folder),
-#    and a synced paper folder if there is one. Each laptop keeps its own copy;
-#    git leaves it out. Copy the raw data into 1_raw_data/; the scripts read
-#    that copy. With co-authors, COAUTHOR_GUIDE.md has a template.
+# 4. Copy the raw data into 1_raw_data/ (CLAUDE.md § Where things are says
+#    where the original is); the scripts read that copy. Only if CLAUDE.md
+#    names a config_local.R: write it in analysis/ with this laptop's paths.
+#    Each laptop keeps its own; git leaves it out. With co-authors,
+#    COAUTHOR_GUIDE.md has a template.
 #
 # 5. Run this file top-to-bottom. That's it!
 #

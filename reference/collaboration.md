@@ -19,18 +19,19 @@ to change code that a co-author owns.
   cloud path that differs on every machine, and the shared folder stays the untouched original.
 - **Generated outputs are not shared** through git or the cloud folder. Each author rebuilds them
   by running the main file; the paper receives them through its copy step.
-- **Machine-specific paths** go in `analysis/config_local.R` (or `config_local.py`), which is
-  gitignored; each author writes their own. Scripts read it if it exists and never hard-code a
-  path:
+- **Machine-specific paths** the pipeline needs go in `analysis/config_local.R` (or
+  `config_local.py`), which is gitignored; each author writes their own. Scripts read it if it
+  exists and never hard-code a path. Most projects need none: the scripts read the copy in
+  `1_raw_data/` (`reference/new_project.md` step 3).
 
 ```r
 # config_local.R: this machine only, never committed
-raw_data_original_path <- "G:/My Drive/<project>"                        # the original, to re-copy from
-overleaf_sync_path     <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"  # only with an Overleaf paper
+shared_data_path   <- "G:/My Drive/<project>"                            # only for data too large to copy in
+overleaf_sync_path <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"  # only with a synced Overleaf folder
 ```
 
 (`overleaf_sync_path` is what the copy helper in `reference/overleaf_conventions.md` reads.
-Without an Overleaf paper, leave that line out.)
+Leave out every line the project does not need.)
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-description: Set up a new research project (folder-location check, CLAUDE.md, claude/ tracking files, folder structure, config_local, .gitignore, raw-data lock, git, the index of projects) or bring an existing project up to these conventions.
+description: Set up a new research project (folder-location check, CLAUDE.md, claude/ tracking files, folder structure, .gitignore, raw-data lock, git, the index of projects) or bring an existing project up to these conventions.
 ---
 
 Set up this project with the user by walking through `~/.claude/reference/new_project.md`.
@@ -26,8 +26,8 @@ Say which mode you see and let the user confirm before changing anything.
 5. **Generated data:** does the project create its own data (experiment, simulation, scraping)?
    If yes, it also gets `programming/`.
 6. **Raw data:** where it comes from, and where the untouched original stays. The project works
-   on a copy in `analysis/1_raw_data/`; the original's path goes into `config_local`, and
-   `CLAUDE.md` names the place in words.
+   on a copy in `analysis/1_raw_data/`, and `CLAUDE.md` names the original's place in words.
+   Data too large to copy: reference step 3, `config_local`.
 7. **GitHub:** a private remote now, or later?
 8. **Co-authors** working in the same code? If yes, read `~/.claude/reference/collaboration.md`
    before the first commit.
@@ -43,8 +43,8 @@ adapted to the answers) and wait for the user's OK.
 - Follow the reference's steps in order; report each in one line as it is done.
 - **The user copies the raw data in** (Explorer or Finder), and keeps the original where it was.
   Claude does not move or copy data into `1_raw_data/` on its own (the lock refuses it anyway).
-- **`config_local`** gets the original's path on this laptop (reference step 3), and `0_Setup`
-  reads it.
+- **`config_local`** only if the pipeline needs a path that differs on every laptop (reference
+  step 3); most projects have none.
 - **Existing projects:** never move, rename or delete a file without asking. Moving breaks every
   path that points to it.
 - **Test the raw-data lock** as the reference describes, and report the result.
