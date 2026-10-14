@@ -1,6 +1,6 @@
 ---
 name: pre-submission-audit
-description: "Final quality-control audit of a complete submission package before it goes to a journal: cross-references, table and figure numbers, sample sizes, variable names, citations, paper versus appendix versus response letter, a last language pass, the files to upload, and anonymisation for blind review; plus a check against a named journal's author guidelines when the user supplies them. ALWAYS use this skill when the user is about to submit or resubmit a manuscript, or is closing the last items before a submission deadline; do not call a package ready to submit without offering it. Not for a draft still being written (use auditor for structure, author for prose) and not a judgment of the science."
+description: "Final quality-control audit of a complete submission package before it goes to a journal: cross-references, table and figure numbers, sample sizes, variable names, citations, paper versus appendix versus response letter, a last language pass, the files to upload, and anonymisation for blind review. ALWAYS use this skill when the user is about to submit or resubmit a manuscript, or is closing the last items before a submission deadline; do not call a package ready to submit without offering it. Not for a draft still being written (use auditor for structure, author for prose), not for whether the paper meets a named journal's author guidelines (journal-formalia-check), and not a judgment of the science."
 ---
 
 # Skill: Pre-Submission Audit
@@ -15,8 +15,8 @@ confirmed; nothing passes silently.
 **What this checks, and what it does not.** It checks the package **against itself**:
 consistency, completeness, production quality. It needs no outside input. It does not judge
 whether the science is good (use `auditor` or a colleague), it does not rewrite prose (findings
-about wording go to `author`), and it does not know a journal's rules unless the user supplies
-them (§ 3).
+about wording go to `author`), and it does not check a journal's rules (that is the
+`journal-formalia-check` skill, § 3).
 
 ---
 
@@ -29,7 +29,8 @@ them (§ 3).
    the prompt below. *Why:* a context that helped write the paper reads what it meant, not what
    is on the page. Expect it to take a while for a full package; that is the point.
 3. **Run the language pass (§ 2).**
-4. **If a target journal is named, run the guidelines check (§ 3).**
+4. **If a target journal is named, run the `journal-formalia-check` skill** with its guidelines
+   (§ 3).
 5. **Assemble the upload (§ 4)**, including the anonymisation check for blind review.
 6. **Report** one list sorted by severity, and let the user decide what to fix. Re-check every
    fix in the compiled PDF.
@@ -115,26 +116,11 @@ legitimate (see the false alarms in `diagnostics.md` § 7). Also check: no `\cla
 
 ## § 3 Checking against a journal's author guidelines
 
-Only with the guidelines in hand. **Never state a journal's requirement from memory**: limits and
-styles change, differ between journals of one publisher and between article types, and a
-plausible half-remembered rule ("abstracts are capped at 250 words") reads exactly like a
-checked one.
-
-- **Inputs:** the guidelines text (pasted, saved, a PDF, or a page Claude can actually fetch),
-  the article type (research article, short paper, registered report), and the stage (first
-  submission or revision; many journals accept any format at first submission).
-- **Every rule checked is quoted from the guidelines** next to the finding.
-- **Silence is reported as silence:** if the guidelines say nothing about, say, a funding
-  statement, report `not specified`, not a violation.
-- If the guidelines cannot be obtained, do not run this part; say what is needed.
-- Conformance predicts nothing about acceptance; never imply it does.
-
-```
-# WRONG — sounds checked, is not
-Abstract is 261 words; most journals cap abstracts at 250.
-# RIGHT — quoted and traceable
-Abstract is 261 words; limit is 200: "The abstract should not exceed 200 words." (Guide for Authors, 2.3)
-```
+This is its own skill, `journal-formalia-check`: load it and follow it. It needs the guidelines
+text, the article type and the submission stage, and it builds the rule set before it looks at
+the paper. **Never state a journal's requirement from memory**: with no guidelines supplied, the
+check does not run. A question about a journal's rules is never answered by the consistency
+audit in § 1; the two barely overlap.
 
 ## § 4 Assembling the upload
 
@@ -162,17 +148,14 @@ paths) from the shipped `.bib`; uncited entries are harmless.
   and funder, in plain and accented spellings (`Müller`, `M{\"u}ller`, `Mueller`).
 
 **Last checks.** Journal name, editor name and manuscript number are right in the letters; the
-files are named as the journal asks; the uploaded PDF is the one just compiled.
+files are named as the journal's guidelines ask (from the guidelines, through
+`journal-formalia-check`, never from memory); the uploaded PDF is the one just compiled.
 
 ## Traps
 
 This list grows. When Claude gets a submission check wrong, Claude proposes adding the mistake and
 the rule that prevents it here, and adds it once the user agrees.
 
-- **A consistency check answers the wrong question.** The user asked whether a paper met a
-  journal's rules. Claude ran the consistency audit (§ 1) instead, and the mix-up survived a later
-  check. The two checks barely overlap. A question about a journal's rules needs § 3 and the
-  guidelines text. If the user has not supplied the guidelines, Claude asks for them.
 - **A short, hand-picked list of names to search for.** Claude once cleared a file for a blind
   review after searching for about 7 terms. The full list had 20. The search had missed every
   given name, every institution, and the directly typed accented spelling of a surname whose

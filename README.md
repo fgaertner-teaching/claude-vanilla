@@ -6,7 +6,7 @@ each project where the last session stopped, and skills for analysis, LaTeX pape
 Claude writes R, Python and LaTeX for you, and the kit is set up so you can check results
 without reading code.
 
-Last updated: 2026-10-12. Written for Windows first (for a Mac, see § On a Mac).
+Last updated: 2026-10-14. Written for Windows first (for a Mac, see § On a Mac).
 
 ## What you get
 
@@ -16,8 +16,8 @@ Last updated: 2026-10-12. Written for Windows first (for a Mac, see § On a Mac)
 | `about-me.md` | Your profile: field, language, tools (you fill it in) |
 | `settings.json` | Asks before deleting or pushing; blocks risky git commands and edits in raw-data folders; status line; two hooks |
 | `commands/` | `/startup`, `/session-end`, `/newproject`, `/what-slipped`, `/explain`, `/panic` |
-| `skills/` | Analysis, analysis plans, LaTeX papers, writing, code, review |
-| `agents/` | A literature scout and a verifier |
+| `skills/` | Analysis, analysis plans, LaTeX papers, writing, code, review, a journal's author guidelines |
+| `agents/` | A literature scout, a verifier, and a referee for a finished analysis |
 | `reference/` | Background files the skills and commands point to |
 | OpenAlex (MCP server) | The open literature database as a tool: Claude searches papers, citations and authors. Connected by the install, not a file here |
 
@@ -132,7 +132,8 @@ can also call one directly, for example `/auditor`.
 | `analysis-plan` | pre-registrations and analysis plans, power, success criteria |
 | `research-paper` | LaTeX tables and figures, on Overleaf or locally |
 | `author` | prose others will read: papers, proposals, referee replies |
-| `pre-submission-audit` | the last check before submitting a paper |
+| `pre-submission-audit` | the last check before submitting a paper: does it agree with itself? |
+| `journal-formalia-check` | a paper against the journal's own author guidelines, which you supply |
 | `project-organizer` | script pipelines and folder layout |
 | `coder` | writing and debugging R and Python |
 | `auditor` | an independent review of any document, plan or code |

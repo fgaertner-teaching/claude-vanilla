@@ -84,8 +84,9 @@ output specification says *how* to present it. Specify at implementation time, n
   control (manual spacing, page breaks, font commands). Formatting details: the
   `research-paper` skill.
 - **Claude edits analysis scripts directly**; for a large change, or one Claude is unsure about,
-  show it before it lands. The thorough review happens over the finished code before submission
-  (the `pre-submission-audit` skill). Co-authored projects may agree on a stricter staging
+  show it before it lands. The thorough review happens over the finished analysis and its code
+  (the `referee2` agent), and over the whole package before submission (the
+  `pre-submission-audit` skill). Co-authored projects may agree on a stricter staging
   convention (`reference/collaboration.md`).
 
 ---

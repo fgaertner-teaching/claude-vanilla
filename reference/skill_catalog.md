@@ -12,7 +12,8 @@
 | `analysis-plan` | pre-registrations, analysis plans, power, success criteria | |
 | `research-paper` | LaTeX tables and figures, on Overleaf or locally | `regression_tables.md` |
 | `author` | prose that others read: papers, proposals, referee replies | `diagnostics.md`, `sections.md` |
-| `pre-submission-audit` | the last check before submitting a paper | |
+| `pre-submission-audit` | the last check before submitting a paper: consistency, upload, anonymisation | |
+| `journal-formalia-check` | a manuscript against one journal's author guidelines, supplied, never from memory | |
 | `project-organizer` | script pipelines, folder layout, outputs mapped to the paper | |
 | `coder` | writing and debugging R and Python | `windows.md`, `long_runs.md`, `debugging.md` |
 | `auditor` | independent review of a document, plan, code or setup | |
@@ -35,6 +36,7 @@
 |---|---|
 | `literature-scout` | searches the web for existing work on a question; every reference copied from a page it opened |
 | `verifier` | read-only pass/fail check that a task was done |
+| `referee2` | adversarial referee for a finished analysis and its code: five audits, a replication in the other language, a report in `claude/referee2/`; never changes the author's files |
 
 ## Where each convention lives
 
@@ -64,4 +66,5 @@
 | `claude/long_term_open_issues.md` | what is open but can wait; read only when asked |
 | `claude/session_log.md` | one dated entry per session; never rewritten |
 | `claude/decision_<topic>.md` | a decision, its options and its reasons |
+| `claude/referee2/` | `referee2`'s reports and replication scripts, once it has run |
 | `.claude/settings.json` | the project's own permissions, e.g. the raw-data lock |
