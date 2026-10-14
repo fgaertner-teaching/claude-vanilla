@@ -36,7 +36,7 @@
 |---|---|
 | `literature-scout` | searches the web for existing work on a question; every reference copied from a page it opened |
 | `verifier` | read-only pass/fail check that a task was done |
-| `referee2` | adversarial referee for a finished analysis and its code: five audits, a replication in the other language, a report in `claude/referee2/`; never changes the author's files |
+| `referee2` | adversarial referee for a finished analysis and its code: five audits, a replication in the other language, a report in `claude/referee2/`; reads but never runs or changes the author's files, installs nothing |
 
 ## Where each convention lives
 
