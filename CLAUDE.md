@@ -15,7 +15,8 @@ own `CLAUDE.md`. Who I am, my field and the language I want answers in are in my
   `claude/` folder with `next_steps.md` (where we are), `OPEN_ISSUES.md` (what is still open)
   and the other files `rules/rules.md` § Project tracking names. A hook shows you
   `next_steps.md` at the start of each session; the others you read when the project's
-  `CLAUDE.md` says to.
+  `CLAUDE.md` says to. Projects follow the layout in `reference/new_project.md` § 3 (read it
+  before you add or move a folder), so a project's `CLAUDE.md` names only where it differs.
 - **My deadlines:** `~/.claude/reference/deadlines.md`. Read it when I ask about dates, or when
   we plan my week.
 - **Where my projects are:** `~/.claude/projects.md`. Read it before you look for a project.

@@ -11,12 +11,19 @@ to change code that a co-author owns.
 | Place | Holds | Why separate |
 |---|---|---|
 | Local folder with git, pushed to GitHub | code, `CLAUDE.md`, `claude/`, notes, lock files | git keeps the code's history; it must not sit in a cloud folder |
-| A shared cloud folder (Google Drive, Nextcloud, Dropbox, university cloud) | raw data, materials, literature PDFs | shared files that are not code; git handles large binaries badly and must never hold personal data |
+| A shared cloud folder (Google Drive, Nextcloud, Dropbox, university cloud) | raw data, materials, literature PDFs, a Word or PowerPoint paper written together | shared files that are not code; git handles large binaries badly and must never hold personal data |
 | Overleaf, if the paper is there | the paper | how tables and figures get there: `reference/overleaf_conventions.md` |
 
 - **Raw data is copied once** from the shared folder into each author's own
   `analysis/1_raw_data/` (gitignored); scripts read the local copy. *Why:* no script depends on a
   cloud path that differs on every machine, and the shared folder stays the untouched original.
+- **A Word or PowerPoint paper written with coauthors lives once,** in the shared cloud folder
+  (at JLU: the Nextcloud, next.Hessenbox), and is edited together in the browser, never on two
+  laptops at once. *Why:* the sync client cannot merge two edited copies; it keeps one and
+  saves the other as a "conflicted copy". Claude works on the laptop's synced copy, so Claude
+  changes the shared paper only while nobody else edits it, or writes the tables as files the
+  authors paste in. A paper only you write may live in git instead (`!*.docx` in
+  `reference/gitignore_policy.md`).
 - **Generated outputs are not shared** through git or the cloud folder. Each author rebuilds them
   by running the main file; the paper receives them through its copy step.
 - **Machine-specific paths** the pipeline needs go in `analysis/config_local.R` (or
