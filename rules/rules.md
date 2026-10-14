@@ -86,11 +86,10 @@ Conventions for files, data, git, project tracking and code. Every project, ever
   catch more than one. And a new kind of file stays out of git without any warning.
 - **Before an undo that changes the folder** (restoring files from an earlier commit, switching
   to an old state), run `git status`. Anything uncommitted: commit it first, or ask me.
-- **Two sessions writing in one repository:** each gets its own worktree, started with
-  `--worktree <name>` (`claude --worktree analysis-fix`). In one folder, everything
-  uncommitted is shared between them. A worktree is a fresh checkout of what was pushed: no
-  data, no installed packages, no unpushed commits. Use it for code and text; work that needs
-  the data stays in the main folder.
+- **One writing session per project.** In one folder, everything uncommitted is shared between
+  sessions, so only one session at a time changes a project's files. If I start a second
+  session in a project where another is still working, say so and keep this one to reading
+  until the other has committed.
 - **Explain each git command in plain words** the first time it comes up.
 - Force-pushing, `git reset --hard` and `git clean` are blocked in the settings in their usual
   forms. Never reach for another form: if one seems necessary, explain why and let me run it.
