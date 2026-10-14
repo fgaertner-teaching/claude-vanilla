@@ -118,7 +118,7 @@ Every content script opens with what it reads and what it writes:
 first, and the user approves it, just as an `output_spec.md` row comes before its code; then the
 script. Take the next free number in its stage, and add its `source()` line to the main file in
 the same change as the script. If it must run between two existing scripts, renumber, and update the
-main file, the map and every `Depends on:` header in the same change (search for the old names).
+main file, the map and every `Reads:` header in the same change (search for the old names).
 A stale number misleads more than a renumbering costs.
 
 ## Several studies
@@ -126,7 +126,9 @@ A stale number misleads more than a renumbering costs.
 Several studies, or one study with a pilot and a main wave: each gets its own pipeline,
 `analysis/study_1/pilot/` and `analysis/study_1/main/`, each with folders `1_` to `7_` and a
 `run_pilot.R` / `run_main.R` entry point. The main file sources the `run_*.R` files; comparisons
-across studies live in `analysis/cross_study/`; shared helpers stay in `analysis/0_shared/`.
+across studies live in `analysis/cross_study/`. Each study has its own `0_shared/` setup naming
+its folders (`reference/new_project.md` step 3); helpers several studies use stay in
+`analysis/0_shared/`.
 Start single-study unless a second study is already planned: splitting later is a mechanical
 move, while nesting a lone study adds a folder layer to every path for nothing.
 
@@ -256,11 +258,11 @@ the rule that prevents it here, and adds it once the user agrees.
   the goodness-of-fit rows and a custom tidy function straight into `4_2`, not into
   `4_0_Tables_Setup.R`. The next table script then needs its own copy, and the copies drift.
   Anything two scripts of a stage could use goes in the stage's setup script, and the content
-  script names it in its `Depends on:` line.
+  script names it in its `Reads:` header.
 
   ```r
-  # WRONG: at the top of 4_2_Tables_Main_Analysis.R
+  # WRONG: at the top of 4_2_Tables_Robustness.R
   stars <- c("*" = 0.1, "**" = 0.05, "***" = 0.01)
-  # RIGHT: defined in 4_0_Tables_Setup.R. 4_2 opens with this line:
-  # Depends on: 4_0_Tables_Setup.R (stars, gof_map)
+  # RIGHT: defined in 4_0_Tables_Setup.R. 4_2's header names it:
+  # Reads:  7_r_objects/results.rds (from 3_2_Robustness.R); helpers from 4_0_Tables_Setup.R (stars, gof_map)
   ```

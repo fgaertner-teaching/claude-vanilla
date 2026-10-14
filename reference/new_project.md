@@ -139,8 +139,10 @@ analysis/
   first day, and stops with that message until the data is in. The placeholder stages (a
   description of the numeric columns, one table, one figure) are replaced by the real ones from
   `claude/analysis_plan.md`; a new script goes into its stage with the next number
-  (`3_2_Robustness.R`) and gets its line in the main file. Several studies: one copy of the
-  scripts per study, with the folder names in the setup file adapted.
+  (`3_2_Robustness.R`) and gets its line in the main file. The skeleton is for one study; with
+  several, each study folder gets its own copy, including its own `0_shared/` setup naming that
+  study's folders (in R, also each stage's setup line: `here::here("study_1", "pilot",
+  "0_shared", "0_Setup.R")`).
 - **`0_shared/0_Setup.R`** runs first, from the main file or from a stage run on its own: the
   libraries, the folder paths (`here::here("1_raw_data")`, ...), and, only in a project with a
   `config_local.R`, the line that reads it:
@@ -165,10 +167,8 @@ analysis/
   ```
 
   (The main file sits in `analysis/` itself: `Path(__file__).resolve().parent`. With several
-  studies, `parents[1]` is the study's own folder, e.g. `analysis/study_1/pilot/`, so each study
-  gets its own copy of `0_shared/setup.py` next to its `4_scripts/`; in R, each study's copy of
-  `0_Setup.R` puts the study's path into its folder lines,
-  `here::here("study_1", "pilot", "1_raw_data")`.)
+  studies, `parents[1]` is the study's own folder, e.g. `analysis/study_1/pilot/`, which holds
+  the study's own `0_shared/setup.py`, as above.)
   `setup.py` finds `analysis/` the same way and reads `config_local.py`, if the project has one,
   by its path, never by `import`: `runpy.run_path(str(ANALYSIS / "config_local.py"))` when the
   file exists. A missing file means no laptop paths; an error in it stops the run. A script reads
@@ -212,6 +212,10 @@ analysis/
   row (`| Script | Does | Reads | Writes | Check |` and `|---|---|---|---|---|`); and
   `claude/output_spec.md`, a heading. A script's row in the map, and an output's row in the spec,
   are written and approved before its code; what the Check is: the `project-organizer` skill.
+  The skeleton's five scripts (step 3) get their five rows at setup, from their headers, with
+  the Check left `to set with the data` (none can be set before the data is known); the user
+  approves them with the rest of the setup, and each Check is set before its stage first runs
+  on the real data.
   `claude/analysis_plan_deviations.md` is created with the first deviation. The order of work
   before any analysis code (plan, script structure, output specification):
   `reference/academic_conventions.md`.
@@ -280,8 +284,9 @@ repository on github.com (no README), then `git remote add origin <url>`.
   are already there; fill in the project name and description. Several studies: the `run_*.R`
   lines instead (step 3). Then run it once: it must stop with "copy your data into
   1_raw_data/", or run through if the data is already in. The R skeleton needs only the `here`
-  package, which `renv::init()` finds in the copied scripts and records; the Python one needs
-  `uv add pandas matplotlib`.
+  package: `renv::init()` scans the scripts for the packages they load, so it should record
+  `here` on its own; if `renv.lock` lacks it, `renv::install("here")`, then `renv::snapshot()`.
+  The Python one needs `uv add pandas matplotlib`.
 - **Co-authors** in the same code: read `reference/collaboration.md` before the first commit.
 - **The paper:** wherever the user writes it. If it is on Overleaf, `reference/overleaf_conventions.md`
   says how outputs get there. **LaTeX in this repository:** `paper/main.tex` reads the tables and

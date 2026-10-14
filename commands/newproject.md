@@ -47,8 +47,10 @@ adapted to the answers) and wait for the user's OK.
   `reference/templates/r/` plus `reference/template_main_file.R` as
   `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`, for Python `reference/templates/python/`
   (both, if the answer to question 3 was both). Copy, do not write the scripts anew; fill in
-  only the main file's project name and description. Run the main file once and report what it
-  said (with no data yet: "copy your data into 1_raw_data/").
+  only the main file's project name and description. Once the package environment exists
+  (reference step 8), run the main file once and report what it said (with no data yet:
+  "copy your data into 1_raw_data/"). For `academic-research`, the five scripts get their rows in
+  `claude/pipeline_map.md` (reference step 4).
 - **The user copies the raw data in** (Explorer or Finder), and keeps the original where it was.
   Claude does not move or copy data into `1_raw_data/` on its own: the lock refuses Claude's own
   tools, and Claude never routes around it with a script.
