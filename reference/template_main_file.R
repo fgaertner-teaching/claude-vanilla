@@ -30,10 +30,11 @@
 #    match ours:
 #      renv::restore()
 #
-# 4. If a file called config_local.R exists in analysis/, it contains
-#    machine-specific settings (e.g. your local Dropbox path). Each collaborator
-#    maintains their own copy — it is never committed to git. If this is a fresh
-#    clone, ask your co-author for a template or check COAUTHOR_GUIDE.md.
+# 4. Write analysis/config_local.R with this laptop's paths: where the raw data's
+#    untouched original is (CLAUDE.md § Where things are says which folder),
+#    and a synced paper folder if there is one. Each laptop keeps its own copy;
+#    git leaves it out. Copy the raw data into 1_raw_data/; the scripts read
+#    that copy. With co-authors, COAUTHOR_GUIDE.md has a template.
 #
 # 5. Run this file top-to-bottom. That's it!
 #

@@ -1,5 +1,5 @@
 ---
-description: Set up a new research project (folder-location check, CLAUDE.md, claude/ tracking files, folder structure, .gitignore, raw-data lock, git) or bring an existing project up to these conventions.
+description: Set up a new research project (folder-location check, CLAUDE.md, claude/ tracking files, folder structure, config_local, .gitignore, raw-data lock, git, the index of projects) or bring an existing project up to these conventions.
 ---
 
 Set up this project with the user by walking through `~/.claude/reference/new_project.md`.
@@ -25,7 +25,9 @@ Say which mode you see and let the user confirm before changing anything.
 4. **Studies:** one study, or several (or a pilot plus a main wave).
 5. **Generated data:** does the project create its own data (experiment, simulation, scraping)?
    If yes, it also gets `programming/`.
-6. **Raw data:** where it comes from, and where the untouched original stays.
+6. **Raw data:** where it comes from, and where the untouched original stays. The project works
+   on a copy in `analysis/1_raw_data/`; the original's path goes into `config_local`, and
+   `CLAUDE.md` names the place in words.
 7. **GitHub:** a private remote now, or later?
 8. **Co-authors** working in the same code? If yes, read `~/.claude/reference/collaboration.md`
    before the first commit.
@@ -40,7 +42,9 @@ adapted to the answers) and wait for the user's OK.
 
 - Follow the reference's steps in order; report each in one line as it is done.
 - **The user copies the raw data in** (Explorer or Finder), and keeps the original where it was.
-  Claude does not move or copy data into `1_raw_data/` on its own.
+  Claude does not move or copy data into `1_raw_data/` on its own (the lock refuses it anyway).
+- **`config_local`** gets the original's path on this laptop (reference step 3), and `0_Setup`
+  reads it.
 - **Existing projects:** never move, rename or delete a file without asking. Moving breaks every
   path that points to it.
 - **Test the raw-data lock** as the reference describes, and report the result.
@@ -49,9 +53,10 @@ adapted to the answers) and wait for the user's OK.
 
 1. Run `git status` and read the list: no data, PDFs or secrets. State the commit message, then
    make one commit with the whole setup. Push if a remote exists.
-2. Tell the user in a few lines what was created, what was checked (folder location, lock test,
+2. **The index:** ask, then add the project to `~/.claude/projects.md` (reference step 9).
+3. Tell the user in a few lines what was created, what was checked (folder location, lock test,
    staged files), and the next step from `claude/next_steps.md`.
-3. **The new-session test** (the reference's step 9): ask the user to start a new session in the
+4. **The new-session test** (the reference's step 9): ask the user to start a new session in the
    project and ask it what the project is, where the raw data is, and what comes next. Fix
    `CLAUDE.md` where an answer is wrong or vague.
-4. Offer `/rename <project-name>` so the session can be found again.
+5. Offer `/rename <project-name>` so the session can be found again.

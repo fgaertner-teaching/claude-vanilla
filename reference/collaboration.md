@@ -25,8 +25,8 @@ to change code that a co-author owns.
 
 ```r
 # config_local.R: this machine only, never committed
-shared_data_path   <- "G:/My Drive/<project>"                            # to re-copy raw data
-overleaf_sync_path <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"  # only with an Overleaf paper
+raw_data_original_path <- "G:/My Drive/<project>"                        # the original, to re-copy from
+overleaf_sync_path     <- "C:/Users/<name>/Dropbox/Apps/Overleaf/<project>"  # only with an Overleaf paper
 ```
 
 (`overleaf_sync_path` is what the copy helper in `reference/overleaf_conventions.md` reads.

@@ -21,7 +21,7 @@ analyse). The empty skeleton of a new project is created by `/newproject`
 ```
 analysis/
   0_shared/0_Setup.R        libraries, paths, helpers every stage uses      (in git)
-  1_raw_data/               the data as received, never changed             (not in git)
+  1_raw_data/               a copy of the data as received, never changed   (not in git)
   2_interim_data_steps/     steps on the way: merged, reshaped, half-clean  (not in git)
   3_clean_data/             the analysis-ready data the results read        (not in git)
   4_scripts/                every script, numbered by stage                 (in git)
@@ -124,14 +124,19 @@ move, while nesting a lone study adds a folder layer to every path for nothing.
 One table, one row per script:
 
 ```markdown
-| Script | Reads | Writes | Does |
-|---|---|---|---|
-| 2_1_Clean_Data.R | 1_raw_data/survey.csv | 3_clean_data/survey_clean.rds | drops speeders, builds indices |
+| Script | Does | Reads | Writes | Check |
+|---|---|---|---|---|
+| 2_1_Clean_Data.R | drops speeders, builds indices | 1_raw_data/survey.csv | 3_clean_data/survey_clean.rds | 1,840 respondents, no missing index |
 ```
 
 Read it before working on the pipeline instead of opening scripts one by one, and update it in
 the same change that adds, removes or renames a script. *Why:* one file orients a fresh session
 in seconds; a stale map is worse than none, because it is trusted.
+
+**The Check is decided before the script runs:** the result it must give (a row count, a date
+range, a number of coefficients), from the data's documentation or the plan, never from a first
+run. The script tests it in code (`stopifnot()` in R, `assert` in Python), so a run stops when a
+check fails. *Why:* a check written after the run only confirms what the run produced.
 
 ## Outputs and the paper
 

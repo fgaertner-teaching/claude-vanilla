@@ -6,9 +6,11 @@ conventions. `/newproject` walks through this file.
 raw-data lock.
 
 **Done looks like:** the project folder sits outside any cloud-synced folder; it has a
-`CLAUDE.md`, `claude/next_steps.md`, `claude/OPEN_ISSUES.md`, the folder structure, a
-`.gitignore`, a `.claude/settings.json` that locks the raw data, a package environment, and a git
-repository on `main` whose first commit contains no data.
+`CLAUDE.md`, `claude/next_steps.md`, `claude/OPEN_ISSUES.md`, a pipeline map with a Check
+column, the folder structure, a `config_local` file with this laptop's paths that git leaves out,
+a `.gitignore`, a `.claude/settings.json` that locks the raw data, a package environment, and a
+git repository on `main` whose first commit contains no data; and `~/.claude/projects.md` has
+the project's entry.
 
 **Order:** the steps below, in sequence. The `.gitignore` must exist before the first `git add`,
 or data enters the history, which is hard to clean.
@@ -50,8 +52,10 @@ more; details go in files it points to.
 
 ## Where things are
 - Pipeline: `analysis/`; run everything with `analysis/Data_Analysis_Main_File_OPEN_ME_FIRST.R`
-- Raw data: `analysis/1_raw_data/`, read-only (locked in `.claude/settings.json`).
-  The untouched original lives at: <provider, shared drive, ...>
+- Raw data: `analysis/1_raw_data/` holds the copy the scripts read, read-only (locked in
+  `.claude/settings.json`). The untouched original: <where, in words a co-author can follow,
+  e.g. "the team's Nextcloud folder esg_survey">; its path on this laptop is in
+  `analysis/config_local.R`.
 - Paper: <where it lives: a LaTeX folder here, an Overleaf project, a Word file; or "none yet">
 
 ## What to read, and when
@@ -71,6 +75,9 @@ more; details go in files it points to.
 - <R or Python; packages via renv / uv>
 - <what Claude must always respect, e.g. "SEs clustered by firm", "the paper is in German">
 ```
+
+**No laptop path in this file.** It is in git, and a path such as `D:\Nextcloud\esg_survey`
+differs on every laptop: the path goes into `config_local` (step 3), the words go here.
 
 `project-type` is an open list (`academic-research`, `software`, `teaching`, `exploration`, or a
 new value). `academic-research` means the analysis pipeline below and the `empirical-analysis`
@@ -92,8 +99,8 @@ Single study (the default):
 
 ```
 analysis/
-  0_shared/0_Setup.R           libraries, paths, shared helper functions
-  1_raw_data/                  the data as received
+  0_shared/0_Setup.R           libraries, paths, shared helper functions; reads config_local.R
+  1_raw_data/                  a copy of the data as received; the original stays where it is
   2_interim_data_steps/
   3_clean_data/
   4_scripts/                   1_1_Load_Data.R, 2_1_Clean_Data.R, 3_2_Results_Main_Analysis.R ...
@@ -101,8 +108,18 @@ analysis/
   6_plots/appendix/
   7_r_objects/                 Python: 7_objects/
   Data_Analysis_Main_File_OPEN_ME_FIRST.R   from reference/template_main_file.R (Python: .py)
+  config_local.R               this laptop's paths; git leaves it out (Python: config_local.py)
   .here                        empty file; makes here::here() point at analysis/ (commit it)
 ```
+
+- **`config_local.R`** holds what differs on every laptop: the path of the raw data's untouched
+  original, and of a synced paper folder if there is one, e.g.
+  `raw_data_original_path <- "D:/Nextcloud/esg_survey"`. The `.gitignore` template leaves out
+  `config_local.*`. `0_Setup.R` reads it only if it exists:
+  `if (file.exists("config_local.R")) source("config_local.R")`; Python: a `try` around
+  `from config_local import raw_data_original_path`. The scripts read the copy in `1_raw_data/`
+  by a path inside the project, the same on every laptop; a co-author writes their own
+  `config_local` from `CLAUDE.md` § Where things are.
 
 - Folder names are `lower_snake_case`: nothing to quote or mistype in code.
 - `programming/` holds the code that generates data, one subfolder per experiment or simulation;
@@ -136,7 +153,9 @@ analysis/
   written when a decision is made, not at setup.
 - **For `academic-research`:** `claude/analysis_plan.md` (question, hypotheses, planned models;
   the `analysis-plan` skill helps), and header-only stubs of `claude/pipeline_map.md` and
-  `claude/output_spec.md`, filled as scripts and outputs appear (`project-organizer` skill).
+  `claude/output_spec.md`, filled as scripts and outputs appear (`project-organizer` skill). The
+  map's columns are Script | Does | Reads | Writes | Check; the Check is the result a script
+  must give, decided before it runs, and the script tests it in code.
   `claude/analysis_plan_deviations.md` is created with the first deviation. The order of work
   before any analysis code (plan, script structure, output specification):
   `reference/academic_conventions.md`.
@@ -225,6 +244,22 @@ git push -u origin main                            # only if a remote exists
 pattern; a pattern starting with `!` means the file is NOT ignored. Then tell the user what was
 checked: the folder location, the lock test, the staged file list.
 
+**The index of projects.** `~/.claude/projects.md` says where each project is, so a session
+started in another folder finds it; the kit's `CLAUDE.md` says when to read it. The file is
+outside the project folder, so ask first; then add the entry, and create the file with its
+heading if it is missing:
+
+```markdown
+# Where my projects are
+
+## <project name>
+- repository: <the project folder's full path>
+```
+
+A project copied out of an old place, such as a cloud folder, also gets
+`- old copy, do not use: <path>`. The index holds the repositories only: where the data and the
+paper are stays in the project's `CLAUDE.md` and `config_local`.
+
 **The new-session test.** Ask the user to start a new session in the project folder and ask it
 three things: what the project is, where the raw data is, and what comes next. The answers must
 come from `CLAUDE.md` and `claude/next_steps.md`. An answer that is wrong or vague means a line
@@ -244,6 +279,9 @@ Report what you find first; then fix one group at a time, with the user's agreem
   not do it unasked. Personal data already pushed: say so plainly; removing it from the history
   needs a rewrite and a force-push, a separate decision for the user.
 - **Raw-data lock** (step 6), and check that no script writes into the raw-data folder.
+- **Paths:** a laptop path written into a script or into `CLAUDE.md` moves into `config_local`
+  (step 3); `CLAUDE.md` keeps the words.
+- **The index entry** (step 9), with the old place marked "old copy, do not use".
 - **Folder names:** propose renames to this layout; never move or rename unasked, because every
   path in the scripts and the paper breaks. Record the old-to-new mapping in a decision file.
 - **The main file** must run top to bottom in a fresh session; if it does not, that goes into
