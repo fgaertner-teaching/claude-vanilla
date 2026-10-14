@@ -100,6 +100,11 @@ Conventions for files, data, git, project tracking and code. Every project, ever
   ~/.ssh/id_ed25519 -N ""` directly: if a key exists, it stops and says so, and only the paste
   is left. Open the public half with `notepad ~/.ssh/id_ed25519.pub` (on a Mac `open -e`),
   never with `cat`.
+- **My launcher holds my API key.** `~/.local/bin/claude-jlu.bat` (Mac: `claude-jlu.command`) is
+  closed to your reads, and the key is also in the environment variables `ANTHROPIC_AUTH_TOKEN`
+  and `ANTHROPIC_API_KEY`. Never print them, never list the environment in full, and never put
+  a key into a file or a commit. *Why:* whatever you read or print goes to the model provider
+  with the conversation, and a key there can be spent by anyone who sees it.
 
 ## Code (you write it, I check what it produces)
 

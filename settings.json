@@ -52,6 +52,8 @@
       "Read(**/.env)",
       "Read(**/.env.*)",
       "Read(~/.ssh/**)",
+      "Read(~/.local/bin/claude-jlu.bat)",
+      "Read(~/.local/bin/claude-jlu.command)",
       "Edit(.env)",
       "Edit(.env.*)",
       "Edit(**/.env)",
