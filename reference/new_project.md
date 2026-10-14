@@ -331,8 +331,9 @@ Report what you find first; then fix one group at a time, with the user's agreem
 - **Commit first, then move things.** Before any file moves, the project as it is gets a commit,
   so every later move can be undone. In a cloud folder, this happens in the new local folder
   (step 1): a repository is cloned there, which keeps its history, and what was uncommitted is
-  copied in after it; a folder that is not a repository gets its code and text copied in, not
-  the data or generated files, and `git init -b main`. In every case the template `.gitignore`
+  copied in after it; a folder that is not a repository gets its code and text copied in as they
+  lie, the same folders and names (the new layout comes after the commit), not the data or
+  generated files, and `git init -b main`. In every case the template `.gitignore`
   (step 5) comes before the commit, then both lists of step 9, because
   the old layout's data folders need not match the template's data lines; then commit what
   belongs in git ("Before restructuring"). Every move after that is a commit of its own.
