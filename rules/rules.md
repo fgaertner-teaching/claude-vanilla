@@ -54,8 +54,10 @@ Conventions for files, data, git, project tracking and code. Every project, ever
   coming weeks moves there, so `OPEN_ISSUES.md` stays short. An item too big for a few lines
   gets its own file, and the list keeps one line pointing at it.
 - **Decisions get a short discussion file** in `claude/` (`decision_<topic>.md`): the question,
-  the options, what we chose and why, and what we rejected. *Why:* a year later the reason is
-  what you need, and nobody remembers it.
+  the options, what we chose and why, and what we rejected. **When I settle a question that took
+  weighing (a sample restriction, an estimator, a design choice), offer right away to write that
+  file; do not wait for the end of the session.** *Why:* a year later the reason is what you
+  need, and nobody remembers it.
 - **A review of the project's own work** (the `auditor` skill) goes to `claude/audit_<scope>.md`;
   read one when its findings are being worked on.
 - **Keep them current as we go,** not reconstructed at the end of the session.
