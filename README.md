@@ -19,6 +19,7 @@ Last updated: 2026-10-14. Written for Windows first (for a Mac, see § On a Mac)
 | `skills/` | Analysis, analysis plans, LaTeX papers, writing, code, review, a journal's author guidelines |
 | `agents/` | A literature scout, a verifier, and a referee for a finished analysis |
 | `reference/` | Background files the skills and commands point to |
+| `reference/kit_guide.md` | What every file in the kit does, in plain words, and how the parts work together |
 | OpenAlex (MCP server) | The open literature database as a tool: Claude searches papers, citations and authors. Connected by the install, not a file here |
 
 ## Before you start

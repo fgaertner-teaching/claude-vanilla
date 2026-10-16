@@ -1,7 +1,7 @@
 # What is in this setup
 
 **Load when:** looking for the right skill, command or agent; adding, renaming or removing one
-(update this file in the same step); unsure which file owns a convention.
+(update this file and `kit_guide.md` in the same step); unsure which file owns a convention.
 **Skip when:** you already know which file to use.
 
 ## Skills (`skills/<name>/SKILL.md`, loaded by their description)
@@ -42,6 +42,7 @@
 
 | What | File |
 |---|---|
+| What each file does, in plain words | `reference/kit_guide.md` |
 | How Claude talks, plans, checks, handles sessions | `CLAUDE.md` |
 | Files and data, project tracking, git, code, quality | `rules/rules.md` |
 | Who you are, your language and field | `about-me.md` |
